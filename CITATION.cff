@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the software archive and the associated manuscript."
+title: "Geometry-Encoded Hidden Orientational Memory"
+type: software
+authors:
+  - family-names: Baulin
+    given-names: Vladimir A.
+affiliation: Synthetix Institute
+repository-code: "https://github.com/vbaulin/geometry-encoded-orientational-memory"
+license: MIT
+version: 0.1.0
+date-released: 2026-08-01

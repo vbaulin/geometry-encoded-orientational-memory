@@ -1,0 +1,345 @@
+#!/usr/bin/env python3
+"""Audit the frozen quantitative claims in the capillary-rotor PRL package.
+
+The 70 numerical checks use only publication-scale artifacts. Provenance and
+language gates are reported separately because a numerical match cannot prove
+that every raw file needed to reproduce a derived figure has been archived.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+from pathlib import Path
+from typing import Any, Iterable, Sequence
+
+import numpy as np
+
+from review_rotating_colloids_capillary_sparse_attention import (
+    audit_regime_taxonomy,
+    audit_spatial_range,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "discoveries/theory_experiment_interface/rotating_colloids_hyperion"
+GPU = DATA / "rotating_colloids_capillary_pair_prl_gpu"
+OUT = DATA / "rotating_colloids_capillary_pair_prl_claim_audit"
+MAIN_TEX = ROOT / "tex/rotating_colloids/rotating_colloids_prl_capillary.tex"
+FIGURES = ROOT / "tex/rotating_colloids/capillary_prl_figures"
+
+DENSE = GPU / "dense_map_n20/capillary_pair_scan.jsonl"
+REGIMES = FIGURES / "capillary_regime_report.json"
+CONTROLS = GPU / "matched_controls_n32/capillary_pair_scan.jsonl"
+INTERNAL = DATA / "rotating_colloids_capillary_pair_prl_internal/capillary_internal_correlations.json"
+SPIN = DATA / "rotating_colloids_spin_glass_prl_gpu/analysis/spin_glass_finite_size_report.json"
+ACTIVATED = FIGURES / "activated_memory_figure_report.json"
+SIZE_PATHS = {
+    n * n: GPU / f"finite_size_n{n}/capillary_pair_scan.jsonl"
+    for n in (12, 16, 24, 32, 48)
+}
+DYNAMICS_PATHS = [
+    GPU / f"dynamics_seed_{seed}/capillary_pair_protocols.json"
+    for seed in (17, 29, 43)
+]
+
+
+def read_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def read_jsonl(path: Path) -> list[dict[str, Any]]:
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def sample_mean_std(values: Iterable[float]) -> tuple[float, float]:
+    array = np.asarray(list(values), dtype=float)
+    if array.size < 2:
+        return float(array.mean()), 0.0
+    return float(array.mean()), float(array.std(ddof=1))
+
+
+def add_close(
+    checks: list[dict[str, Any]],
+    label: str,
+    actual: float,
+    expected: float,
+    tolerance: float,
+) -> None:
+    error = abs(float(actual) - float(expected))
+    checks.append(
+        {
+            "claim": label,
+            "actual": float(actual),
+            "expected": float(expected),
+            "absolute_error": error,
+            "tolerance": float(tolerance),
+            "passed": bool(error <= tolerance),
+        }
+    )
+
+
+def add_exact(checks: list[dict[str, Any]], label: str, actual: Any, expected: Any) -> None:
+    checks.append(
+        {
+            "claim": label,
+            "actual": actual,
+            "expected": expected,
+            "passed": bool(actual == expected),
+        }
+    )
+
+
+def first_sample_below(time: Sequence[float], values: Sequence[float], threshold: float) -> float:
+    t = np.asarray(time, dtype=float)
+    y = np.asarray(values, dtype=float)
+    indices = np.flatnonzero(y <= threshold)
+    if not indices.size:
+        return float("nan")
+    return float(t[indices[0]])
+
+
+def metric(row: dict[str, Any], name: str) -> float:
+    if name == "replica_overlap_magnitude":
+        return float(row["replica_overlap"]["magnitude_mean"])
+    return float(row[name])
+
+
+def power_exponent(grouped: dict[int, list[dict[str, Any]]], name: str) -> float:
+    node_counts = np.asarray(sorted(grouped), dtype=float)
+    means = np.asarray(
+        [np.mean([metric(row, name) for row in grouped[int(count)]]) for count in node_counts],
+        dtype=float,
+    )
+    return float(np.polyfit(np.log(node_counts), np.log(np.maximum(np.abs(means), 1e-12)), 1)[0])
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output-dir", default=str(OUT))
+    args = parser.parse_args()
+    output_dir = Path(args.output_dir)
+    checks: list[dict[str, Any]] = []
+
+    # 1-20: finite-size regime taxonomy and its sensitivity to sampled graphs.
+    dense_rows = read_jsonl(DENSE)
+    regime_report = read_json(REGIMES)
+    taxonomy = audit_regime_taxonomy(dense_rows, bootstraps=0, rng=np.random.default_rng(20260731))
+    hidden = next(item for item in regime_report["regimes"] if item["name"] == "hidden mixed memory")
+    add_exact(checks, "dense-map raw rows", len(dense_rows), 1323)
+    add_exact(checks, "dense-map parameter cells", regime_report["parameter_cells"], 441)
+    add_exact(checks, "dense-map graph realizations per cell", regime_report["graph_counts"], [3])
+    add_exact(checks, "observable-space cluster count", regime_report["cluster_count"], 4)
+    add_close(checks, "k=4 silhouette", regime_report["silhouette_scores"]["4"], 0.45132861086701526, 1e-10)
+    add_close(checks, "k=5 silhouette", regime_report["silhouette_scores"]["5"], 0.44383614032389285, 1e-10)
+    add_close(checks, "k=4 minus k=5 silhouette", taxonomy["k4_minus_k5_silhouette"], 0.00749247054312241, 1e-10)
+    add_exact(checks, "k=4 maximizes tested silhouette", taxonomy["best_k"], 4)
+    add_close(checks, "minimum initialization ARI", regime_report["initialization_ARI_min"], 1.0, 1e-12)
+    add_exact(checks, "exact ordered graph-bootstrap replicates", taxonomy["bootstrap_replicates"], 27)
+    add_exact(checks, "graph bootstraps selecting k=4", taxonomy["bootstrap_best_k_counts"].get("4", 0), 27)
+    add_close(checks, "mean graph-bootstrap k=4 ARI", taxonomy["bootstrap_k4_ARI"]["mean"], 0.9719545926398437, 1e-10)
+    leave_one_min = min(item["k4_ARI_against_full"] for item in taxonomy["leave_one_graph_seed_out"].values())
+    add_close(checks, "minimum leave-one-graph k=4 ARI", leave_one_min, 0.9549815240499724, 1e-10)
+    add_close(
+        checks,
+        "qEA-window feature correlation",
+        taxonomy["feature_correlation"]["q_EA_mean"]["window_autocorrelation"],
+        0.9864454839124128,
+        1e-10,
+    )
+    add_exact(checks, "hidden mixed-memory cell count", hidden["cell_count"], 169)
+    for name, expected in (
+        ("S_mean", 0.11167048986572914),
+        ("C2_mean", 0.6377075320675238),
+        ("G2_mean", 0.4139681178113454),
+        ("q_EA_mean", 0.6277204179214186),
+        ("window_autocorrelation", 0.5192665961508657),
+    ):
+        add_close(checks, f"hidden-regime centroid {name}", hidden["centroid"][name], expected, 1e-10)
+
+    # 21-33: selected state and matched controls at N=1024.
+    controls = read_jsonl(CONTROLS)
+    physical = [row for row in controls if row["control"] == "physical"]
+    regular = [row for row in controls if row["control"] == "regular"]
+    shuffled = [row for row in controls if row["control"] == "shuffled_frames"]
+    g0_rows = [row for row in read_jsonl(SIZE_PATHS[1024]) if math.isclose(float(row["g_capillary"]), 0.0)]
+    add_exact(checks, "selected-state graph realizations", len(physical), 5)
+    for name, expected_mean, expected_std in (
+        ("S_mean", 0.06651090671126134, 0.0037994814386568053),
+        ("C2_mean", 0.6274020148540538, 0.008832466433874473),
+        ("G2_mean", 0.44687331852602463, 0.010988593643146045),
+        ("q_EA_mean", 0.6581022977828981, 0.006612176975813657),
+    ):
+        mean, std = sample_mean_std(row[name] for row in physical)
+        add_close(checks, f"selected {name} mean", mean, expected_mean, 1e-10)
+        add_close(checks, f"selected {name} graph SD", std, expected_std, 1e-10)
+    add_close(checks, "g=0 G2 mean", np.mean([row["G2_mean"] for row in g0_rows]), 9.76097570651146e-06, 1e-12)
+    add_close(checks, "g=0 qEA mean", np.mean([row["q_EA_mean"] for row in g0_rows]), 0.022473914389653748, 1e-12)
+    add_close(checks, "regular-lattice S mean", np.mean([row["S_mean"] for row in regular]), 0.9446932259554665, 1e-12)
+    add_close(checks, "shuffled-frame qEA mean", np.mean([row["q_EA_mean"] for row in shuffled]), 0.7481652575234572, 1e-12)
+
+    # 34-45: five-size scaling at J=4, g=5.
+    grouped: dict[int, list[dict[str, Any]]] = {}
+    for node_count, path in SIZE_PATHS.items():
+        grouped[node_count] = [
+            row
+            for row in read_jsonl(path)
+            if row.get("control", "physical") == "physical" and math.isclose(float(row["g_capillary"]), 5.0)
+        ]
+    add_exact(checks, "finite-size node counts", sorted(grouped), [144, 256, 576, 1024, 2304])
+    for node_count, expected in (
+        (144, 0.15081520399241163),
+        (256, 0.12484551011225595),
+        (576, 0.08833536698042886),
+        (1024, 0.06653026091137756),
+        (2304, 0.039573839721890665),
+    ):
+        add_close(checks, f"N={node_count} global S", np.mean([row["S_mean"] for row in grouped[node_count]]), expected, 1e-12)
+    for name, expected in (
+        ("S_mean", -0.47872714735269567),
+        ("replica_overlap_magnitude", -0.46563918288493533),
+        ("q_EA_mean", 0.011185205858108928),
+        ("C2_mean", -0.003849330803576246),
+        ("G2_mean", 0.0022603009973430218),
+    ):
+        add_close(checks, f"finite-size exponent {name}", power_exponent(grouped, name), expected, 1e-12)
+    add_close(checks, "N=2304 qEA", np.mean([row["q_EA_mean"] for row in grouped[2304]]), 0.6464701948066554, 1e-12)
+
+    # 46-57: long-time inheritance, write-release, controls, and waiting-time dependence.
+    dynamics = [read_json(path) for path in DYNAMICS_PATHS]
+    add_exact(checks, "long-dynamics graph realizations", len(dynamics), 3)
+    split_end = [float(run["split_replica"]["overlap_mean"][-1]) for run in dynamics]
+    mean, std = sample_mean_std(split_end)
+    add_close(checks, "split endpoint mean", mean, 0.461863513540163, 1e-12)
+    add_close(checks, "split endpoint graph SD", std, 0.010285602535420461, 1e-12)
+    split_cross = [
+        first_sample_below(run["no_capillary_split_replica"]["time"], run["no_capillary_split_replica"]["overlap_mean"], 0.2)
+        for run in dynamics
+    ]
+    mean, std = sample_mean_std(split_cross)
+    add_close(checks, "g=0 split first-sample crossing mean", mean, 2.6666666666666665, 1e-12)
+    add_close(checks, "g=0 split first-sample crossing SD", std, 0.2886751345948129, 1e-12)
+    write_end = [float(run["write_release"]["release_overlap"][-1]) for run in dynamics]
+    mean, std = sample_mean_std(write_end)
+    add_close(checks, "write-release endpoint mean", mean, 0.4405082199085002, 1e-12)
+    add_close(checks, "write-release endpoint graph SD", std, 0.020567678837819712, 1e-12)
+    write_cross = []
+    for run in dynamics:
+        block = run["no_capillary_write_release"]
+        release_time = np.asarray(block["release_time"], dtype=float)
+        write_cross.append(first_sample_below(release_time - release_time[0], block["release_overlap"], 0.2))
+    mean, std = sample_mean_std(write_cross)
+    add_close(checks, "g=0 write first-sample crossing mean", mean, 4.333333333333333, 1e-12)
+    add_close(checks, "g=0 write first-sample crossing SD", std, 0.28867513459481287, 1e-12)
+    for index, expected in enumerate((0.675956353756127, 0.6949997695954956, 0.7012603658741137)):
+        values = []
+        for run in dynamics:
+            curve = run["aging"]["curves"][index]
+            values.append(float(np.interp(30.0, curve["lag_time"], curve["correlation"])))
+        add_close(checks, f"waiting-time curve {index + 1} at lag 30", np.mean(values), expected, 1e-12)
+
+    # 58-62: real-space range of the local correlations.
+    spatial = audit_spatial_range(INTERNAL)
+    aggregate = read_json(INTERNAL)["aggregate"]
+    add_exact(checks, "spatial-correlation graph realizations", spatial["graph_count"], 3)
+    add_exact(checks, "spatial samples per graph", aggregate["sample_count_per_graph"], [960, 960, 960])
+    add_close(checks, "first-shell connected C2", spatial["first_shell_relative_connected"], 0.5569559272775115, 1e-12)
+    add_close(checks, "first-shell bond-frame G2", spatial["first_shell_bond_frame"], 0.5045874679449952, 1e-12)
+    add_close(checks, "operational correlation range r/a", spatial["estimated_correlation_range_r_over_a"], math.sqrt(3.0), 1e-12)
+
+    # 63-66: independent equilibrium-replica discriminant.
+    spin = read_json(SPIN)
+    add_exact(checks, "spin-glass scan rows", spin["rows"], 200)
+    add_exact(checks, "spin-glass node counts", spin["node_counts"], [144, 256, 576, 1024, 2304])
+    add_exact(checks, "spin-glass disorder realizations per point", spin["disorder_realizations_per_point"], 5)
+    add_exact(checks, "spin-glass finding", spin["finding"], "no_equilibrium_spin_glass_crossing_on_scanned_ray")
+
+    # 67-70: coupling-dependent finite-window integrated overlap.
+    activated = read_json(ACTIVATED)
+    add_exact(checks, "activated-memory summary rows", activated["rows"], 40)
+    add_exact(checks, "activated-memory graphs per coupling", sorted(set(activated["graphs_per_lambda"].values())), [5])
+    lambda_index = activated["lambdas"].index(0.9)
+    values = activated["integral_times"]
+    split_ratio = values["physical_split_summary"]["mean"][lambda_index] / values["no_capillary_split_summary"]["mean"][lambda_index]
+    write_ratio = values["physical_release_summary"]["mean"][lambda_index] / values["no_capillary_release_summary"]["mean"][lambda_index]
+    add_close(checks, "lambda=0.9 split integrated-overlap ratio", split_ratio, 52.086062184868574, 1e-10)
+    add_close(checks, "lambda=0.9 write integrated-overlap ratio", write_ratio, 53.877162532310045, 1e-10)
+
+    if len(checks) != 70:
+        raise RuntimeError(f"audit contract must contain exactly 70 checks, found {len(checks)}")
+
+    activated_raw = sorted(DATA.glob("rotating_colloids_activated_memory_prl_gpu/**/activated_memory_scan.jsonl"))
+    required = [DENSE, REGIMES, CONTROLS, INTERNAL, SPIN, ACTIVATED, *SIZE_PATHS.values(), *DYNAMICS_PATHS]
+    text = MAIN_TEX.read_text(encoding="utf-8")
+    language_gates = {
+        "no_permanent_memory_claim": "permanent memory" not in text.lower(),
+        "no_equilibrium_glass_claim": "we establish an equilibrium glass" not in text.lower(),
+        "constructed_graph_not_called_emergent": "grey neighbour network is an emergent cage" not in text.lower(),
+        "finite_window_metric_not_called_lifetime": "integral retention time" not in text.lower(),
+    }
+    provenance = {
+        "required_local_artifacts_present": all(path.exists() for path in required),
+        "missing_required_local_artifacts": [str(path) for path in required if not path.exists()],
+        "activated_memory_raw_jsonl_present": bool(activated_raw),
+        "activated_memory_raw_jsonl": [str(path) for path in activated_raw],
+        "language_gates": language_gates,
+        "all_language_gates_passed": all(language_gates.values()),
+    }
+
+    passed = sum(bool(item["passed"]) for item in checks)
+    report = {
+        "audit_contract": "capillary_prl_publication_scale_v2",
+        "quantitative_checks": checks,
+        "checks": checks,
+        "quantitative_checks_passed": passed,
+        "quantitative_checks_total": len(checks),
+        "all_checks_passed": passed == len(checks),
+        "provenance": provenance,
+    }
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "capillary_pair_prl_claim_audit.json").write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    lines = [
+        "# Capillary-pair PRL claim audit",
+        "",
+        f"- Quantitative checks passed: `{passed}/{len(checks)}`",
+        f"- All quantitative checks passed: `{report['all_checks_passed']}`",
+        f"- Required local artifacts present: `{provenance['required_local_artifacts_present']}`",
+        f"- Activated-memory raw JSONL present locally: `{provenance['activated_memory_raw_jsonl_present']}`",
+        f"- Language gates passed: `{provenance['all_language_gates_passed']}`",
+        "",
+        "The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, and coupling-dependent finite-window integrated overlap.",
+        "",
+        "## Failed quantitative checks",
+        "",
+    ]
+    failed = [item for item in checks if not item["passed"]]
+    lines.extend([f"- `{item['claim']}`" for item in failed] or ["- None."])
+    lines.extend(
+        [
+            "",
+            "## Provenance gates",
+            "",
+            "The raw activated-memory JSONL is generated on the GPU cluster and must be included in the Zenodo deposit. Its derived 40-row figure report is audited numerically here, but the deposit is not complete until the raw rows are present and reproduce that report.",
+        ]
+    )
+    (output_dir / "capillary_pair_prl_claim_audit.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(
+        json.dumps(
+            {
+                "output_dir": str(output_dir),
+                "quantitative_checks": f"{passed}/{len(checks)}",
+                "all_checks_passed": report["all_checks_passed"],
+                "activated_raw_present": provenance["activated_memory_raw_jsonl_present"],
+                "language_gates_passed": provenance["all_language_gates_passed"],
+            },
+            sort_keys=True,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

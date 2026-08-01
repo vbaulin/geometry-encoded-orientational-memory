@@ -1,0 +1,1147 @@
+{
+  "all_checks_passed": true,
+  "audit_contract": "capillary_prl_publication_scale_v2",
+  "checks": [
+    {
+      "actual": 1323,
+      "claim": "dense-map raw rows",
+      "expected": 1323,
+      "passed": true
+    },
+    {
+      "actual": 441,
+      "claim": "dense-map parameter cells",
+      "expected": 441,
+      "passed": true
+    },
+    {
+      "actual": [
+        3
+      ],
+      "claim": "dense-map graph realizations per cell",
+      "expected": [
+        3
+      ],
+      "passed": true
+    },
+    {
+      "actual": 4,
+      "claim": "observable-space cluster count",
+      "expected": 4,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.45132861086701526,
+      "claim": "k=4 silhouette",
+      "expected": 0.45132861086701526,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.44383614032389285,
+      "claim": "k=5 silhouette",
+      "expected": 0.44383614032389285,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 8.673617379884035e-19,
+      "actual": 0.007492470543122409,
+      "claim": "k=4 minus k=5 silhouette",
+      "expected": 0.00749247054312241,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "actual": 4,
+      "claim": "k=4 maximizes tested silhouette",
+      "expected": 4,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.0,
+      "claim": "minimum initialization ARI",
+      "expected": 1.0,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 27,
+      "claim": "exact ordered graph-bootstrap replicates",
+      "expected": 27,
+      "passed": true
+    },
+    {
+      "actual": 27,
+      "claim": "graph bootstraps selecting k=4",
+      "expected": 27,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.9719545926398437,
+      "claim": "mean graph-bootstrap k=4 ARI",
+      "expected": 0.9719545926398437,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.9549815240499724,
+      "claim": "minimum leave-one-graph k=4 ARI",
+      "expected": 0.9549815240499724,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.9864454839124128,
+      "claim": "qEA-window feature correlation",
+      "expected": 0.9864454839124128,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "actual": 169,
+      "claim": "hidden mixed-memory cell count",
+      "expected": 169,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.11167048986572914,
+      "claim": "hidden-regime centroid S_mean",
+      "expected": 0.11167048986572914,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6377075320675238,
+      "claim": "hidden-regime centroid C2_mean",
+      "expected": 0.6377075320675238,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.4139681178113454,
+      "claim": "hidden-regime centroid G2_mean",
+      "expected": 0.4139681178113454,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6277204179214186,
+      "claim": "hidden-regime centroid q_EA_mean",
+      "expected": 0.6277204179214186,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5192665961508657,
+      "claim": "hidden-regime centroid window_autocorrelation",
+      "expected": 0.5192665961508657,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "actual": 5,
+      "claim": "selected-state graph realizations",
+      "expected": 5,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.06651090671126134,
+      "claim": "selected S_mean mean",
+      "expected": 0.06651090671126134,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0037994814386568053,
+      "claim": "selected S_mean graph SD",
+      "expected": 0.0037994814386568053,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6274020148540538,
+      "claim": "selected C2_mean mean",
+      "expected": 0.6274020148540538,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.008832466433874473,
+      "claim": "selected C2_mean graph SD",
+      "expected": 0.008832466433874473,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.44687331852602463,
+      "claim": "selected G2_mean mean",
+      "expected": 0.44687331852602463,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.010988593643146045,
+      "claim": "selected G2_mean graph SD",
+      "expected": 0.010988593643146045,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6581022977828981,
+      "claim": "selected q_EA_mean mean",
+      "expected": 0.6581022977828981,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.006612176975813657,
+      "claim": "selected q_EA_mean graph SD",
+      "expected": 0.006612176975813657,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 9.76097570651146e-06,
+      "claim": "g=0 G2 mean",
+      "expected": 9.76097570651146e-06,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.022473914389653748,
+      "claim": "g=0 qEA mean",
+      "expected": 0.022473914389653748,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.9446932259554665,
+      "claim": "regular-lattice S mean",
+      "expected": 0.9446932259554665,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.7481652575234572,
+      "claim": "shuffled-frame qEA mean",
+      "expected": 0.7481652575234572,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": [
+        144,
+        256,
+        576,
+        1024,
+        2304
+      ],
+      "claim": "finite-size node counts",
+      "expected": [
+        144,
+        256,
+        576,
+        1024,
+        2304
+      ],
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.15081520399241163,
+      "claim": "N=144 global S",
+      "expected": 0.15081520399241163,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.12484551011225595,
+      "claim": "N=256 global S",
+      "expected": 0.12484551011225595,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.08833536698042886,
+      "claim": "N=576 global S",
+      "expected": 0.08833536698042886,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.06653026091137756,
+      "claim": "N=1024 global S",
+      "expected": 0.06653026091137756,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.039573839721890665,
+      "claim": "N=2304 global S",
+      "expected": 0.039573839721890665,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": -0.47872714735269567,
+      "claim": "finite-size exponent S_mean",
+      "expected": -0.47872714735269567,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": -0.46563918288493533,
+      "claim": "finite-size exponent replica_overlap_magnitude",
+      "expected": -0.46563918288493533,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.011185205858108928,
+      "claim": "finite-size exponent q_EA_mean",
+      "expected": 0.011185205858108928,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": -0.003849330803576246,
+      "claim": "finite-size exponent C2_mean",
+      "expected": -0.003849330803576246,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0022603009973430218,
+      "claim": "finite-size exponent G2_mean",
+      "expected": 0.0022603009973430218,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6464701948066554,
+      "claim": "N=2304 qEA",
+      "expected": 0.6464701948066554,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 3,
+      "claim": "long-dynamics graph realizations",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.461863513540163,
+      "claim": "split endpoint mean",
+      "expected": 0.461863513540163,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.010285602535420461,
+      "claim": "split endpoint graph SD",
+      "expected": 0.010285602535420461,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 2.6666666666666665,
+      "claim": "g=0 split first-sample crossing mean",
+      "expected": 2.6666666666666665,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.2886751345948129,
+      "claim": "g=0 split first-sample crossing SD",
+      "expected": 0.2886751345948129,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.4405082199085002,
+      "claim": "write-release endpoint mean",
+      "expected": 0.4405082199085002,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.020567678837819712,
+      "claim": "write-release endpoint graph SD",
+      "expected": 0.020567678837819712,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 4.333333333333333,
+      "claim": "g=0 write first-sample crossing mean",
+      "expected": 4.333333333333333,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.28867513459481287,
+      "claim": "g=0 write first-sample crossing SD",
+      "expected": 0.28867513459481287,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.675956353756127,
+      "claim": "waiting-time curve 1 at lag 30",
+      "expected": 0.675956353756127,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6949997695954956,
+      "claim": "waiting-time curve 2 at lag 30",
+      "expected": 0.6949997695954956,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.7012603658741137,
+      "claim": "waiting-time curve 3 at lag 30",
+      "expected": 0.7012603658741137,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 3,
+      "claim": "spatial-correlation graph realizations",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "actual": [
+        960,
+        960,
+        960
+      ],
+      "claim": "spatial samples per graph",
+      "expected": [
+        960,
+        960,
+        960
+      ],
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5569559272775115,
+      "claim": "first-shell connected C2",
+      "expected": 0.5569559272775115,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5045874679449952,
+      "claim": "first-shell bond-frame G2",
+      "expected": 0.5045874679449952,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.7320508075688772,
+      "claim": "operational correlation range r/a",
+      "expected": 1.7320508075688772,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 200,
+      "claim": "spin-glass scan rows",
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "actual": [
+        144,
+        256,
+        576,
+        1024,
+        2304
+      ],
+      "claim": "spin-glass node counts",
+      "expected": [
+        144,
+        256,
+        576,
+        1024,
+        2304
+      ],
+      "passed": true
+    },
+    {
+      "actual": 5,
+      "claim": "spin-glass disorder realizations per point",
+      "expected": 5,
+      "passed": true
+    },
+    {
+      "actual": "no_equilibrium_spin_glass_crossing_on_scanned_ray",
+      "claim": "spin-glass finding",
+      "expected": "no_equilibrium_spin_glass_crossing_on_scanned_ray",
+      "passed": true
+    },
+    {
+      "actual": 40,
+      "claim": "activated-memory summary rows",
+      "expected": 40,
+      "passed": true
+    },
+    {
+      "actual": [
+        5
+      ],
+      "claim": "activated-memory graphs per coupling",
+      "expected": [
+        5
+      ],
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 52.086062184868574,
+      "claim": "lambda=0.9 split integrated-overlap ratio",
+      "expected": 52.086062184868574,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 53.877162532310045,
+      "claim": "lambda=0.9 write integrated-overlap ratio",
+      "expected": 53.877162532310045,
+      "passed": true,
+      "tolerance": 1e-10
+    }
+  ],
+  "provenance": {
+    "activated_memory_raw_jsonl": [],
+    "activated_memory_raw_jsonl_present": false,
+    "all_language_gates_passed": true,
+    "language_gates": {
+      "constructed_graph_not_called_emergent": true,
+      "finite_window_metric_not_called_lifetime": true,
+      "no_equilibrium_glass_claim": true,
+      "no_permanent_memory_claim": true
+    },
+    "missing_required_local_artifacts": [],
+    "required_local_artifacts_present": true
+  },
+  "quantitative_checks": [
+    {
+      "actual": 1323,
+      "claim": "dense-map raw rows",
+      "expected": 1323,
+      "passed": true
+    },
+    {
+      "actual": 441,
+      "claim": "dense-map parameter cells",
+      "expected": 441,
+      "passed": true
+    },
+    {
+      "actual": [
+        3
+      ],
+      "claim": "dense-map graph realizations per cell",
+      "expected": [
+        3
+      ],
+      "passed": true
+    },
+    {
+      "actual": 4,
+      "claim": "observable-space cluster count",
+      "expected": 4,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.45132861086701526,
+      "claim": "k=4 silhouette",
+      "expected": 0.45132861086701526,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.44383614032389285,
+      "claim": "k=5 silhouette",
+      "expected": 0.44383614032389285,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 8.673617379884035e-19,
+      "actual": 0.007492470543122409,
+      "claim": "k=4 minus k=5 silhouette",
+      "expected": 0.00749247054312241,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "actual": 4,
+      "claim": "k=4 maximizes tested silhouette",
+      "expected": 4,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.0,
+      "claim": "minimum initialization ARI",
+      "expected": 1.0,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 27,
+      "claim": "exact ordered graph-bootstrap replicates",
+      "expected": 27,
+      "passed": true
+    },
+    {
+      "actual": 27,
+      "claim": "graph bootstraps selecting k=4",
+      "expected": 27,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.9719545926398437,
+      "claim": "mean graph-bootstrap k=4 ARI",
+      "expected": 0.9719545926398437,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.9549815240499724,
+      "claim": "minimum leave-one-graph k=4 ARI",
+      "expected": 0.9549815240499724,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.9864454839124128,
+      "claim": "qEA-window feature correlation",
+      "expected": 0.9864454839124128,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "actual": 169,
+      "claim": "hidden mixed-memory cell count",
+      "expected": 169,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.11167048986572914,
+      "claim": "hidden-regime centroid S_mean",
+      "expected": 0.11167048986572914,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6377075320675238,
+      "claim": "hidden-regime centroid C2_mean",
+      "expected": 0.6377075320675238,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.4139681178113454,
+      "claim": "hidden-regime centroid G2_mean",
+      "expected": 0.4139681178113454,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6277204179214186,
+      "claim": "hidden-regime centroid q_EA_mean",
+      "expected": 0.6277204179214186,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5192665961508657,
+      "claim": "hidden-regime centroid window_autocorrelation",
+      "expected": 0.5192665961508657,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "actual": 5,
+      "claim": "selected-state graph realizations",
+      "expected": 5,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.06651090671126134,
+      "claim": "selected S_mean mean",
+      "expected": 0.06651090671126134,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0037994814386568053,
+      "claim": "selected S_mean graph SD",
+      "expected": 0.0037994814386568053,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6274020148540538,
+      "claim": "selected C2_mean mean",
+      "expected": 0.6274020148540538,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.008832466433874473,
+      "claim": "selected C2_mean graph SD",
+      "expected": 0.008832466433874473,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.44687331852602463,
+      "claim": "selected G2_mean mean",
+      "expected": 0.44687331852602463,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.010988593643146045,
+      "claim": "selected G2_mean graph SD",
+      "expected": 0.010988593643146045,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6581022977828981,
+      "claim": "selected q_EA_mean mean",
+      "expected": 0.6581022977828981,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.006612176975813657,
+      "claim": "selected q_EA_mean graph SD",
+      "expected": 0.006612176975813657,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 9.76097570651146e-06,
+      "claim": "g=0 G2 mean",
+      "expected": 9.76097570651146e-06,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.022473914389653748,
+      "claim": "g=0 qEA mean",
+      "expected": 0.022473914389653748,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.9446932259554665,
+      "claim": "regular-lattice S mean",
+      "expected": 0.9446932259554665,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.7481652575234572,
+      "claim": "shuffled-frame qEA mean",
+      "expected": 0.7481652575234572,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": [
+        144,
+        256,
+        576,
+        1024,
+        2304
+      ],
+      "claim": "finite-size node counts",
+      "expected": [
+        144,
+        256,
+        576,
+        1024,
+        2304
+      ],
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.15081520399241163,
+      "claim": "N=144 global S",
+      "expected": 0.15081520399241163,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.12484551011225595,
+      "claim": "N=256 global S",
+      "expected": 0.12484551011225595,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.08833536698042886,
+      "claim": "N=576 global S",
+      "expected": 0.08833536698042886,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.06653026091137756,
+      "claim": "N=1024 global S",
+      "expected": 0.06653026091137756,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.039573839721890665,
+      "claim": "N=2304 global S",
+      "expected": 0.039573839721890665,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": -0.47872714735269567,
+      "claim": "finite-size exponent S_mean",
+      "expected": -0.47872714735269567,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": -0.46563918288493533,
+      "claim": "finite-size exponent replica_overlap_magnitude",
+      "expected": -0.46563918288493533,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.011185205858108928,
+      "claim": "finite-size exponent q_EA_mean",
+      "expected": 0.011185205858108928,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": -0.003849330803576246,
+      "claim": "finite-size exponent C2_mean",
+      "expected": -0.003849330803576246,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0022603009973430218,
+      "claim": "finite-size exponent G2_mean",
+      "expected": 0.0022603009973430218,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6464701948066554,
+      "claim": "N=2304 qEA",
+      "expected": 0.6464701948066554,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 3,
+      "claim": "long-dynamics graph realizations",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.461863513540163,
+      "claim": "split endpoint mean",
+      "expected": 0.461863513540163,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.010285602535420461,
+      "claim": "split endpoint graph SD",
+      "expected": 0.010285602535420461,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 2.6666666666666665,
+      "claim": "g=0 split first-sample crossing mean",
+      "expected": 2.6666666666666665,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.2886751345948129,
+      "claim": "g=0 split first-sample crossing SD",
+      "expected": 0.2886751345948129,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.4405082199085002,
+      "claim": "write-release endpoint mean",
+      "expected": 0.4405082199085002,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.020567678837819712,
+      "claim": "write-release endpoint graph SD",
+      "expected": 0.020567678837819712,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 4.333333333333333,
+      "claim": "g=0 write first-sample crossing mean",
+      "expected": 4.333333333333333,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.28867513459481287,
+      "claim": "g=0 write first-sample crossing SD",
+      "expected": 0.28867513459481287,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.675956353756127,
+      "claim": "waiting-time curve 1 at lag 30",
+      "expected": 0.675956353756127,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6949997695954956,
+      "claim": "waiting-time curve 2 at lag 30",
+      "expected": 0.6949997695954956,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.7012603658741137,
+      "claim": "waiting-time curve 3 at lag 30",
+      "expected": 0.7012603658741137,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 3,
+      "claim": "spatial-correlation graph realizations",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "actual": [
+        960,
+        960,
+        960
+      ],
+      "claim": "spatial samples per graph",
+      "expected": [
+        960,
+        960,
+        960
+      ],
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5569559272775115,
+      "claim": "first-shell connected C2",
+      "expected": 0.5569559272775115,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5045874679449952,
+      "claim": "first-shell bond-frame G2",
+      "expected": 0.5045874679449952,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.7320508075688772,
+      "claim": "operational correlation range r/a",
+      "expected": 1.7320508075688772,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 200,
+      "claim": "spin-glass scan rows",
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "actual": [
+        144,
+        256,
+        576,
+        1024,
+        2304
+      ],
+      "claim": "spin-glass node counts",
+      "expected": [
+        144,
+        256,
+        576,
+        1024,
+        2304
+      ],
+      "passed": true
+    },
+    {
+      "actual": 5,
+      "claim": "spin-glass disorder realizations per point",
+      "expected": 5,
+      "passed": true
+    },
+    {
+      "actual": "no_equilibrium_spin_glass_crossing_on_scanned_ray",
+      "claim": "spin-glass finding",
+      "expected": "no_equilibrium_spin_glass_crossing_on_scanned_ray",
+      "passed": true
+    },
+    {
+      "actual": 40,
+      "claim": "activated-memory summary rows",
+      "expected": 40,
+      "passed": true
+    },
+    {
+      "actual": [
+        5
+      ],
+      "claim": "activated-memory graphs per coupling",
+      "expected": [
+        5
+      ],
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 52.086062184868574,
+      "claim": "lambda=0.9 split integrated-overlap ratio",
+      "expected": 52.086062184868574,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 53.877162532310045,
+      "claim": "lambda=0.9 write integrated-overlap ratio",
+      "expected": 53.877162532310045,
+      "passed": true,
+      "tolerance": 1e-10
+    }
+  ],
+  "quantitative_checks_passed": 70,
+  "quantitative_checks_total": 70
+}

@@ -1,0 +1,13 @@
+.DS_Store
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+.venv/
+discoveries/
+release/

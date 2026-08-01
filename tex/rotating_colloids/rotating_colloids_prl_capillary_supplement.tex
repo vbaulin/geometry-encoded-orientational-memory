@@ -1,0 +1,790 @@
+\documentclass[aps,prl,onecolumn,superscriptaddress,nofootinbib]{revtex4-2}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage[colorlinks=true,citecolor=blue,linkcolor=blue,urlcolor=blue]{hyperref}
+
+\begin{document}
+\renewcommand{\thefigure}{S\arabic{figure}}
+
+\title{Supplemental Material for Geometry-Encoded Hidden Orientational Memory}
+
+\author{Vladimir A. Baulin}
+\affiliation{Synthetix Institute, Amsterdam, The Netherlands}
+\email{info@synthetix.institute}
+
+\maketitle
+
+\section{Capillary origin of the bond-frame interaction}
+
+At fixed particle geometry and interfacial contact, the interface height
+\(u(\bm r)\) obeys the linearized Young--Laplace equation at scales below the
+capillary length,
+\begin{equation}
+ \gamma\nabla^2 u=0.
+ \label{eq:supp-young-laplace}
+\end{equation}
+For an isolated ellipsoid in this regime, the far-field solution is a harmonic
+multipole expansion.
+Averaging over force- and torque-free modes leaves the leading orientational mode
+\begin{equation}
+u_i(r,\phi)=\Delta u_{\max}\left(\frac{R}{r}\right)^2\cos2(\phi-\theta_i).
+\end{equation}
+with \((r,\phi)\) measured from the particle centre and \(\theta_i\) the
+apolar axis.  This profile is the static equilibrium shape required to satisfy
+anisotropic contact-angle constraints for an ellipsoidal contact line.
+
+For two particles at separation \(r_{ij}\), with \(\phi_{ij}=\arg(\bm r_j-\bm r_i)\) and
+\(\varphi_i=\theta_i-\phi_{ij}\), \(\varphi_j=\theta_j-\phi_{ij}\), interface additivity in
+this far-field limit gives \(u=u_i+u_j\).  The capillary interaction is the cross
+term in the
+interface area cost,
+\begin{equation}
+ U_{ij}^{\rm cap}\approx
+ -\gamma\int \nabla u_i\cdot\nabla u_j\,dA
+ =-3\pi\gamma(\Delta u_{\max})^2
+ \left(\frac{R}{r_{ij}}\right)^4
+ \cos\left[2(\varphi_i+\varphi_j)\right],
+ \label{eq:supp-capillary-relative}
+\end{equation}
+where \(\varphi_i,\varphi_j\) are the axes relative to the centre-to-centre
+direction.  This is the second term in the
+model's pair energy and can be written
+\begin{equation}
+U_{ij}^{\rm cap}\equiv -A_4(r_{ij})\cos2(\theta_i+\theta_j-2\phi_{ij}),
+\qquad
+A_4(r_{ij})=3\pi\gamma(\Delta u_{\max})^2\left(\frac{R}{r_{ij}}\right)^4.
+\end{equation}
+For \(A_4>0\), each isolated bond is minimized by
+\(\theta_i+\theta_j=2\phi_{ij}+m\pi\), where \(m\) is an integer.
+Different bond angles on a disordered loop generally impose mutually
+incompatible minima, so the many-particle ground state is a compromise among
+bond-frame constraints rather than a uniform director.
+Substitution of the two relative angles gives
+\begin{equation}
+ \cos(2\varphi_i+2\varphi_j)
+ =\cos2(\theta_i+\theta_j-2\phi_{ij}),
+ \label{eq:supp-capillary-map}
+\end{equation}
+which is the second pair harmonic in the Letter.  This identity was tested
+numerically to machine precision in
+\texttt{tests/test\_rotating\_colloids\_capillary\_pair.py}.  Equation
+\eqref{eq:supp-capillary-relative} is a far-field expression.  Near contact,
+the interface shape and ellipsoidal geometry generate additional angular
+harmonics.  The pairwise approximation is nevertheless accurate for a range
+of experimentally studied configurations, and empirical pair potentials can
+replace the quadrupolar expression when pair-calibration data are available
+\cite{luo2019}.
+
+The first term of the model,
+\(-J_{ij}\cos2(\theta_i-\theta_j)\), is the leading apolar relative-angle
+harmonic.  It represents short-range steric, near-field capillary, or other
+shape-dependent alignment.  Keeping the two harmonics separate allows the
+competition between relative alignment and bond-frame alignment to be
+measured.  No one-body term of the form
+\(-h_i\cos2(\theta_i-\alpha_i)\) is present after the temporary writing
+field is removed.
+
+\section{Caged positional graph}
+
+The graph construction starts from an \(n\times n\) triangular monolayer with
+nearest-neighbour spacing \(a=1\) and periodic boundaries.  Even values of
+\(n\) close the staggered rows in a rectangular periodic cell.  Each centre
+receives an independent Gaussian displacement with component standard
+deviation \(0.16a\).  Edges connect all pairs within \(2.6a\).  Pair
+displacements and bond angles are computed with the minimum-image
+convention.  Rare pairs with \(r_{ij}<0.55a\) are rejected to prevent a
+divergent \(r^{-4}\) weight.
+
+For each graph, \(r_0\) is the median nearest-neighbour distance.  The
+capillary and short-range weights are
+\begin{align}
+ w^+_{ij}&=\min\left[6,\left(\frac{r_0}{r_{ij}}\right)^4\right],
+ \label{eq:supp-cap-weight}\\
+ w^-_{ij}&=
+ \begin{cases}
+ \exp[-\max(r_{ij}/r_0-1,0)/0.2],&r_{ij}\leq1.35r_0,\\
+ 0,&r_{ij}>1.35r_0.
+ \end{cases}
+ \label{eq:supp-short-weight}
+\end{align}
+The cap at 6 is a numerical guard against a rare near-overlap; it is inactive
+for the three selected \(N=144\) graphs.  For graph seed 17, the graph has
+1654 edges, mean degree 22.97, capillary weighted degree 3.24, and
+short-range weighted degree 1.56.  Its bare fourth bond-angle harmonic is
+\(\left|\langle e^{4i\phi_{ij}}\rangle_E\right|=0.0040\).  The measured
+\(G_2=0.451\) therefore arises from correlations between rotor angles and
+bond frames, not from a pre-existing angular bias of the graph.
+
+\section{Rotational dynamics}
+
+All energies are in \(k_{\rm B}T\) and times in \(D_r^{-1}\).  The It\^{o}
+equation integrated in the simulation is
+\begin{equation}
+ d\theta_i=
+ -\partial_{\theta_i}\left(\frac{U}{k_{\rm B}T}\right)d(D_rt)
+ +\sqrt{2\,d(D_rt)}\,dW_i,
+ \label{eq:supp-langevin}
+\end{equation}
+where the \(dW_i\) are independent Wiener increments.  Euler--Maruyama
+integration uses \(D_r\Delta t=0.0025\).  Angles are reduced modulo \(\pi\)
+because the rotors are apolar.  For the selected-point controls, each graph
+has 12 thermal replicas, 5000 burn-in steps, and 10000 sampled steps, with
+observables recorded every 80 steps.  The parameter-map pilot has six
+replicas per cell.  The long-time protocols use 12 replicas and extend to
+\(D_rt=100\).
+
+\section{Order and memory observables}
+
+The observables \(S,C_2,G_2\), and \(q_{\rm EA}\) are defined in the Letter.
+Three additional quantities are used.
+
+The overlap of independent replicas at a common final time is
+\begin{equation}
+ Q_{ab}=\frac{1}{N}\sum_i e^{2i(\theta_i^{(a)}-\theta_i^{(b)})}.
+ \label{eq:supp-replica}
+\end{equation}
+We plot \(|Q_{ab}|\).  Even independent random angles have a finite
+Rayleigh floor
+\(\langle|Q_{ab}|\rangle\simeq\sqrt{\pi}/(2\sqrt{N})\); this floor is shown
+explicitly in Fig.~S1(c).
+
+For split replicas, two copies start from the same equilibrated configuration
+and then receive independent thermal noise.  Their real overlap is
+\begin{equation}
+ Q_{\rm split}(t)=\frac{1}{N}\sum_i
+ \cos2[\theta_i^{(a)}(t)-\theta_i^{(b)}(t)].
+ \label{eq:supp-split}
+\end{equation}
+This protocol measures loss of basin identity without relying on a
+time-averaged local mean.
+
+The two-time autocorrelation following a random-state quench is
+\begin{equation}
+ C_{\rm age}(t_w+\Delta t,t_w)=
+ \frac{1}{N}\sum_i
+ \left\langle\cos2[\theta_i(t_w+\Delta t)-\theta_i(t_w)]\right\rangle.
+ \label{eq:supp-aging}
+\end{equation}
+Waiting-time dependence at a fixed lag is an aging diagnostic.  It does not,
+by itself, establish a thermodynamic glass transition.
+
+\section{Finite-size state diagram and spatial correlations}
+
+The state diagram in the Letter contains 441 coupling cells on a
+\(21\times21\) grid.  Every cell is averaged over three independently
+disordered \(N=400\) positional graphs.  For each graph, 32 thermal replicas
+were equilibrated for 20,000 steps and sampled for 60,000 steps at
+\(D_r\Delta t=0.0025\), with observables recorded every 100 steps.  The three
+graph rows are averaged before classification.  Each resulting cell is
+represented by
+\begin{equation}
+ \bm x=(S,C_2,G_2,q_{\rm EA},C_{\rm window}).
+\end{equation}
+The five coordinates are standardized across cells and clustered without
+including \(J\) or \(g\).  K-means solutions with \(2\leq k\leq6\) give
+silhouette scores \(0.384,0.417,0.451,0.444,\) and \(0.407\),
+respectively; \(k=4\) is therefore selected.  Repeating the fit with 20
+random initializations gives adjusted Rand index 1.0 relative to the
+reported assignment.  Graph sensitivity was tested by exact enumeration of
+all 27 ordered bootstrap resamples of the three graph rows.  Every resample
+selected \(k=4\); the mean adjusted Rand index relative to the full
+assignment was 0.972, with range 0.919--1.000.  Leaving out one graph at a
+time gave adjusted Rand index at least 0.955.  The taxonomy is therefore
+stable to the sampled positional graphs.  Its precise dimensional
+decomposition remains observable-dependent: the silhouette difference
+between \(k=4\) and \(k=5\) is 0.0075,
+\(\operatorname{corr}(q_{\rm EA},C_{\rm window})=0.986\), and removing
+\(C_2\) selects \(k=2\).  We consequently use the clusters to locate a
+reproducible memory-bearing population, not to assign a thermodynamic phase
+count.  Regime names are assigned only after fitting, from
+the observable centroids.  The confidence plotted in the Letter is
+\begin{equation}
+ m=\frac{d_2-d_1}{d_2},
+\end{equation}
+where \(d_1\) and \(d_2\) are the distances to the nearest and
+second-nearest standardized centroids.  Small \(m\) marks cells for which
+the finite-size taxonomy is unresolved.  Neither K-means boundaries nor
+their names constitute thermodynamic phase boundaries.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{capillary_prl_figures/capillary_regime_state_space.pdf}
+\caption{\label{fig:supp-state-space}
+Observable-space projections of the four data-resolved dynamical regimes.
+(a) Projection in the \((S,G_2)\) plane.  (b) Projection in the
+\((C_2,G_2)\) plane.  (c) Projection in the \((q_{\rm EA},S)\) plane.
+Axes are dimensionless order parameters measured from trajectory averages.
+Convex envelopes show the extent of each population; they are descriptive
+finite-size regions rather than phase boundaries.}
+\end{figure}
+
+For the supplementary continuous diagnostic we also use
+\(\mathcal H=(1-S)\min(C_2^+,G_2^+,q_{\rm EA})\), where
+\(X^+=\max(X,0)\).  Its \(\mathcal H=0.30\) sector is shown only to compare
+the cluster-based result with the earlier threshold representation.
+
+For the real-space analysis, three independent \(N=256\) positional graphs
+were simulated at \(J=4\) and \(g=5\), with eight thermal replicas, 8000
+burn-in steps, and 12000 sampled steps.  Orientations were recorded every
+100 steps, giving 960 configurations per graph.  For every particle pair,
+we measured
+\begin{align}
+ C_2(r)&=\left\langle\cos2(\theta_i-\theta_j)\right\rangle_{r_{ij}\in r},
+ \\
+ G_2(r)&=\left\langle
+ \cos2(\theta_i+\theta_j-2\phi_{ij})\right\rangle_{r_{ij}\in r}.
+\end{align}
+The connected curve in Fig.~\ref{fig:supp-internal}(b) subtracts the sampled
+\(\langle S^2\rangle=0.0144\) from \(C_2(r)\).  No parametric decay law is
+fitted.  We define the operational correlation range as the first bin after
+the first-shell maximum whose magnitude lies below three times the
+large-\(r\) tail noise.  Both angular channels meet this criterion by
+\(r/a=1.73\).  The analysis is generated by
+\texttt{scripts/analyze\_rotating\_colloids\_capillary\_internal.py}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{capillary_prl_figures/fig4_capillary_internal_structure.pdf}
+\caption{\label{fig:supp-internal}
+Internal diagnostics underlying the observable-space phase classification.
+(a) At fixed \(J=4k_{\rm B}T\), capillary coupling raises \(G_2\) and
+\(q_{\rm EA}\), suppresses \(S\), and leaves finite \(C_2\).  Each bar pair
+gives a dimensionless observable for one coupling point.
+(b) Connected relative-angle and bond-frame correlations averaged over
+three \(N=256\) positional graphs; bands are graph-to-graph standard
+deviations.  The correlations are restricted to the first few coordination
+shells.  (c) The 1323 graph-cell observations spanning 441 coupling cells in
+the \((S,q_{\rm EA})\) projection; the star marks the dynamical test point.}
+\end{figure}
+
+\section{Write-release-read protocol}
+
+A target configuration is first obtained from an independently equilibrated
+copy of the autonomous pair model.  Independent replicas are then exposed
+temporarily to the conjugate field
+\begin{equation}
+ U_{\rm write}/k_{\rm B}T=-h\sum_i
+ \cos2(\theta_i-\theta_i^{\rm target}),
+ \qquad h=1.5.
+ \label{eq:supp-write}
+\end{equation}
+The field is removed completely before the release trajectory.  Readout uses
+\begin{equation}
+ Q_{\rm target}(t)=\frac{1}{N}\sum_i
+ \cos2[\theta_i(t)-\theta_i^{\rm target}].
+ \label{eq:supp-target}
+\end{equation}
+At \(N=144,J=4,g=5\), the overlap at removal is 0.801 at the first sampled
+release point and remains 0.457 after \(D_rt=99.8\).  The corresponding
+split-replica overlap is 0.529.  The field therefore selects a pre-existing
+long-lived basin; it is not a permanent substrate term.  Repeating the same
+write protocol with \(g=0\) gives an initial release overlap of
+\(0.807\pm0.005\), but it falls below 0.2 by
+\(D_r(t-t_{\rm off})=4.3\pm0.3\) after release and reaches
+\(0.006\pm0.004\) at \(D_rt=625\).
+
+\section{Matched controls}
+
+\begin{table}[ht]
+\centering
+\caption{Selected-point observables.  Means and standard deviations are over
+five quenched positional graphs.  All rows use \(N=1024\) and \(J=4\).
+The regular and shuffled controls retain \(g=5\).}
+\label{tab:supp-controls}
+\begin{ruledtabular}
+\begin{tabular}{lccccc}
+control & \(S\) & \(C_2\) & \(G_2\) & \(q_{\rm EA}\) &
+window correlation\\
+\hline
+disordered capillary &
+\(0.0665\pm0.0038\)&\(0.627\pm0.009\)&\(0.447\pm0.011\)&
+\(0.658\pm0.007\)&\(0.543\pm0.007\)\\
+same graph, \(g=0\) &
+\(0.131\pm0.010\)&\(0.813\pm0.003\)&\(0.0000\pm0.0002\)&
+\(0.0225\pm0.0023\)&\(0.0012\pm0.0076\)\\
+regular lattice &
+\(0.945\pm0.0001\)&\(0.944\pm0.0000\)&\(0.0054\pm0.0000\)&
+\(0.818\pm0.005\)&\(0.711\pm0.048\)\\
+shuffled bond frames &
+\(0.0555\pm0.0055\)&\(0.596\pm0.013\)&\(0.532\pm0.008\)&
+\(0.748\pm0.008\)&\(0.669\pm0.013\)\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+The regular lattice demonstrates that high persistence alone does not imply
+hidden memory: it has a unique macroscopic director and \(S\simeq0.96\).
+The \(g=0\) graph demonstrates that disorder plus first-shell alignment does
+not account for the observed persistence.  Shuffling \(\phi_{ij}\) among
+fixed edges preserves the one-edge angle and weight distributions but
+destroys their geometric embedding.  Its stronger persistence is consistent
+with increased random-bond frustration.  It is a useful upper-frustration
+control, not an experimental capillary graph.
+
+\section{Finite-size behavior}
+
+\begin{table}[ht]
+\centering
+\caption{Finite-size results at \(J=4,g=5\).  Values are means over five
+quenched graphs.}
+\label{tab:supp-size}
+\begin{ruledtabular}
+\begin{tabular}{rccccc}
+\(N\)&\(S\)&\(C_2\)&\(G_2\)&\(q_{\rm EA}\)&\(|Q_{ab}|\)\\
+\hline
+144&0.151&0.628&0.445&0.629&0.180\\
+256&0.125&0.640&0.442&0.643&0.136\\
+576&0.088&0.635&0.443&0.674&0.095\\
+1024&0.066&0.627&0.447&0.658&0.075\\
+2304&0.040&0.626&0.446&0.647&0.048\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+Power-law fits over the five sizes give
+\(S\propto N^{-0.479}\) and
+\(\langle|Q_{ab}|\rangle\propto N^{-0.466}\).  Graph-level bootstrap
+resampling gives 95\% intervals
+\([-0.510,-0.451]\) and \([-0.477,-0.454]\), respectively.  In contrast,
+the exponent of \(q_{\rm EA}\) is 0.011 with interval
+\([-0.005,0.039]\); the intervals for \(C_2\) and \(G_2\) likewise contain
+zero.  Global order and independent-replica overlap therefore approach their
+random finite-size floors, while local correlations and finite-window
+persistence remain of order unity.  The largest calculation contains
+\(N=2304\) rotors, with five positional-disorder realizations at every size.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{capillary_prl_figures/figS1_capillary_controls_scaling.pdf}
+\caption{\label{fig:supp-controls}
+Matched controls and finite-size tests at \(J=4\) and \(g=5\).
+(a) The physical disordered capillary graphs combine low global order with
+large finite-window memory.  Here the horizontal axis is the coupling scan
+index and the vertical axis is each measured observable.  Removing \(g\)
+removes the memory, whereas the regular lattice selects a global nematic.
+Shuffled bond frames are a strong-frustration control that no longer has a
+capillary embedding.
+(b) \(S\) decreases from \(N=144\) to 2304 while \(C_2\), \(G_2\), and
+\(q_{\rm EA}\) remain stable.  Error bars are standard deviations over five
+quenched positional graphs.  (c) Independent replicas select different
+states; their overlap approaches the random \(N^{-1/2}\) finite-size floor.}
+\end{figure}
+
+\section{Equilibrium spin-glass discriminant}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{capillary_prl_figures/fig4_capillary_spin_glass_discriminant.pdf}
+\caption{\label{fig:supp-spin-glass}
+Finite-size discriminant between dynamical memory and equilibrium glass
+order.  Each point averages five quenched graphs.  (a) The finite-window
+single-trajectory statistic \(q_{\rm EA}\) grows along
+\((J,g)=\lambda(4,5)k_{\rm B}T\), where \(\lambda\) is the horizontal axis.
+(b) The dimensionless overlap correlation length \(\xi_L/L\) is shown as a
+function of size and has no common crossing.
+(c) Independently equilibrated replicas obey
+\(\langle|Q_{ab}|\rangle\propto N^{-1/2}\); lines are log--log fits.
+(d) The overlap susceptibility \(\chi_Q=N\langle|Q_{ab}|^2\rangle\)
+saturates.}
+\end{figure*}
+
+To distinguish finite-window persistence from equilibrium replica ordering,
+we performed a separate 200-point scan along
+\begin{equation}
+ (J,g)=\lambda(4,5)k_{\rm B}T,
+ \qquad
+ \lambda\in\{0.30,0.45,0.60,0.75,0.90,1.05,1.20,1.40\}.
+ \label{eq:supp-ray}
+\end{equation}
+The scan used \(N=144,256,576,1024,2304\), five independent quenched graphs
+at every point, and 48 independently initialized thermal replicas per graph.
+Each replica was equilibrated for 50,000 steps and sampled for 100,000 steps.
+
+For each replica pair define the local complex overlap
+\(q_i^{ab}=\exp[2i(\theta_i^a-\theta_i^b)]\) and
+\(Q_{ab}=N^{-1}\sum_iq_i^{ab}\).  The zero-wave-vector overlap
+susceptibility is
+\begin{equation}
+ \chi_Q=N\langle|Q_{ab}|^2\rangle.
+ \label{eq:supp-chiq}
+\end{equation}
+Writing \(\chi_Q(\bm k)=N\langle|N^{-1}\sum_iq_i^{ab}
+e^{i\bm k\cdot\bm r_i}|^2\rangle\), the directional second-moment lengths are
+\begin{equation}
+ \xi_\mu=\frac{1}{2\sin(k_{\min,\mu}/2)}
+ \left[\frac{\chi_Q(0)}{\chi_Q(k_{\min,\mu})}-1\right]^{1/2},
+ \qquad \mu=x,y,
+ \label{eq:supp-xi}
+\end{equation}
+and we report \(\xi_L=(\xi_x\xi_y)^{1/2}\) divided by the geometric-mean box
+length.  A finite-temperature glass transition would normally produce a
+size-independent crossing of \(\xi_L/L\), together with nonvanishing
+inter-replica overlap or a growing \(\chi_Q\).
+
+No such signature is present.  At \(\lambda=0.30,0.75,1.40\), log--log fits
+give
+\begin{equation}
+ \langle|Q_{ab}|\rangle\propto
+ N^{-0.490},\quad N^{-0.472},\quad N^{-0.485},
+ \label{eq:supp-overlap-exponents}
+\end{equation}
+respectively.  The corresponding largest-size susceptibilities are 1.74,
+7.10, and 7.78; they remain finite as \(N\) grows.  The \(\xi_L/L\) curves
+decrease with size and do not share a crossing over the scanned interval.
+Thus the large finite-window \(q_{\rm EA}\) measures slow trajectory memory,
+not an equilibrium Edwards--Anderson order parameter.  The distinction is
+important: the write--release and split-replica protocols demonstrate
+retention, while independent replicas demonstrate the absence of a common
+frozen state.
+
+\section{Programmable mosaic easy-axis realization}
+
+The autonomous model in the Letter stores its local reference frames in the
+centre-to-centre bonds.  We also simulated a programmable construction in
+which a surface pattern supplies prescribed easy axes \(\alpha_i\).  In this
+section only, the dimensionless angular potential is
+\begin{equation}
+ \Phi_{\rm gr}=-j\sum_{(ij)}w_{ij}\cos2(\theta_i-\theta_j)
+ -h\sum_i\cos2(\theta_i-\alpha_i),
+ \label{eq:supp-groove-potential}
+\end{equation}
+and the dynamics obey
+\begin{equation}
+ \partial_\tau P=\sum_i\partial_{\theta_i}
+ \left(\partial_{\theta_i}P+P\partial_{\theta_i}\Phi_{\rm gr}\right),
+ \qquad \tau=D_rt.
+ \label{eq:supp-groove-smol}
+\end{equation}
+Here \(j\) and \(h\) are deterministic angular-relaxation rates normalized by
+rotational diffusion.  The first term transmits orientation
+between neighbours; the second registers each rotor to the local patterned
+axis.  Its direct readout is
+\begin{equation}
+ G_2^{\alpha}=N^{-1}\sum_i\cos2(\theta_i-\alpha_i).
+ \label{eq:supp-groove-registration}
+\end{equation}
+
+The archived construction is deliberately segmented.  The static scan uses
+a \(32\times32\) array divided into sixteen \(8\times8\) patches; the dynamic
+protocol uses a \(16\times16\) array with four patches.  Patch axes advance by
+\(\pi/4\), so their laboratory-frame nematic contributions cancel.  Within a
+patch the interaction graph is dense, whereas adjacent patches are joined by
+two links of weight 0.18.  The results therefore test a patterned
+easy-axis device with weak interpatch coupling, not a homogeneous grooved
+monolayer.
+
+The static \(29\times29\) scan contains 841 parameter cells and 48 thermal
+replicas per cell.  The operational conditions
+\(S\leq0.35\), \(C_2\geq0.70\), \(G_2^{\alpha}\geq0.70\), and
+\(q_{\rm EA}\geq0.50\) select 824 cells in one connected grid component.  A
+stricter cut, \(S\leq0.05\), \(C_2,G_2^{\alpha}\geq0.80\), and
+\(q_{\rm EA}\geq0.70\), retains 688 cells.  These counts describe correlated
+grid cells, not independent samples or a thermodynamic phase.  They establish
+that low global order and strong pattern registration occupy an extended
+parameter region of this finite device model.
+
+Static persistence is not an independent memory test here.  Across the
+mosaic scan, \(q_{\rm EA}\) and \((G_2^{\alpha})^2\) have correlation
+0.999987 and root-mean-square difference 0.00178.  This near identity is
+expected when each stationary angular distribution is symmetric around its
+prescribed axis.  It shows that the field-on statistic records the imposed
+pattern.  Removal and rewriting protocols are needed to measure retention.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{grooved_prl_figures/fig2_static_state_space.png}
+\caption{\label{fig:supp-groove-static}
+Static response of the programmable mosaic model.  (a) Global nematic order
+versus registration to the prescribed local axes.  (b) Neighbour coherence
+versus field-on persistence.  Curves are smoothed display densities and open
+symbols are construction centroids; the simulated points themselves are not
+displaced.  (c) The orientational correlation changes sign near the
+eight-particle patch width, confirming that the registered pattern follows
+the imposed mosaic rather than one common director.  The uniform,
+long-range, and triangular scans have different graph sizes and parameter
+ranges and are shown as descriptive controls, not as matched statistical
+ensembles.}
+\end{figure}
+
+The dynamical protocols use 16 replicas.  At \(h=0.2\), raising \(j\) from 0
+to 3 increases \(G_2^{\alpha}\) from 0.0965 to 0.8242, while \(S=0.128\).
+Neighbour coupling therefore amplifies a weak local cue by a factor of 8.55
+without selecting one macroscopic director.  A stronger field, \(h=0.6\), is
+then used to write pattern \(A\).  After complete removal of that field, the
+overlap with the written configuration has half-lives
+\begin{equation}
+ \tau_{1/2}=0.177,\ 3.816,\ 5.247
+ \quad\text{for}\quad j=0,\ 2,\ 3,
+ \label{eq:supp-groove-release}
+\end{equation}
+corresponding to 22-fold and 30-fold retention enhancements for the two
+interacting cases.  The overlap eventually vanishes, and the high-\(j\)
+systems develop a conventional director at long times after the patterned
+field is absent.  The stored state is therefore volatile.
+
+For rewriting, pattern \(A\) is replaced at \(\tau=0\) by an incompatible
+pattern \(B\), with
+\(N^{-1}\sum_i\cos2(\alpha_i^A-\alpha_i^B)=-1\).  The time at which the old
+overlap falls below 0.5 increases from 0.156 at \(j=0\) to 0.590 and 0.730 at
+\(j=2\) and 3.  At long times the system registers to \(B\).  Coupling thus
+controls both retention after removal and resistance to replacement.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{grooved_prl_figures/fig3_hidden_memory_evidence.png}
+\caption{\label{fig:supp-groove-dynamics}
+Dynamic tests of the programmable mosaic.  (a) Survival functions of the
+descriptive static score for the four archived constructions.  (b)
+Field-supported angular self-correlation at \(h=0.2\); dotted lines show the
+corresponding finite-window values.  (c) Overlap with pattern \(A\) after the
+writing field is set to zero.  Open symbols mark half-lives and the dotted
+line is the free-rotor result.  (d) Overlap with \(A\) after switching to an
+incompatible pattern \(B\); symbols mark rewrite half-times.  Curves in
+(b--d) average 16 replicas and bands show one standard deviation.}
+\end{figure}
+
+Permanent microgrooves can test the static registration and amplification in
+Fig.~\ref{fig:supp-groove-static}.  Field removal and pattern replacement
+require a switchable implementation, such as a photoresponsive anisotropic
+layer or a projected polarization pattern.  Digital-micromirror
+photoalignment has produced arbitrary two-dimensional easy-axis fields
+\cite{wu2012}, and polarization-resolved optical measurements can recover
+individual nanorod orientations \cite{chang2010}.  For a colloidal test, the
+single-particle distribution \(p(\theta-\alpha)\) first determines \(h\), and
+a two-particle measurement within one patch determines \(j\).  A surface
+matching the simulation must also reduce orientational coupling across patch
+boundaries, for example by increasing the interpatch spacing.  This extra
+fabrication requirement is why the programmable construction is presented as
+a Supplemental realization rather than the primary autonomous claim.
+
+\section{Separate weak-link mosaic control}
+
+An earlier groove-free mosaic construction rotated locally square domains and joined
+them with a fixed number of weak crosslinks.  It produced nearly simultaneous
+large \(C_2\) and \(G_2\), but only 0.6228\% of its total coupling weight
+crossed domain boundaries.  In the strong-locking limit its domain directors
+reduce exactly to an Ising Hamiltonian
+\begin{equation}
+ H_{\rm eff}/J=-\sum_{bc}K_{bc}s_bs_c,\qquad s_b=\pm1.
+\end{equation}
+Exact enumeration found 16--78 single-domain-flip-stable states across 20
+graph jitters, confirming a multibasin mechanism.  The same calculation also
+showed that the ground-state unsatisfied weight was only 0.75\% of the total
+crosslink weight.  The mosaic model is therefore retained as a mechanism
+test, not as evidence for the physical capillary regime.  The Letter instead
+uses a caged disordered monolayer with no imposed orientational domains.
+
+\section{Experimental parameter estimate}
+
+The required separation between positional and rotational motion has an
+experimental precedent.  Charged silica rods have been observed in a state
+with strongly caged translational coordinates and nearly free rotations
+\cite{besseling2026}; DNA-based sliding contacts provide a second method for
+constructing thermally driven colloidal pivots \cite{melio2026}.  Neither
+experiment implements the capillary memory interaction, but both establish
+that a persistent positional scaffold can coexist with Brownian angular
+motion.
+
+To close the static-torque assumption, we additionally require the interfacial
+deformation to remain quasistatic over the rotational time scale.
+For a meniscus mode of lateral extent \(\ell\), a conservative viscous estimate is
+\[
+ \tau_{\rm int} \sim \frac{\eta_{\rm eff}\,\ell}{\gamma},
+\qquad
+ \tau_{\rm int}D_r \ll 1,
+\]
+with \(\eta_{\rm eff}\) the effective (sum) interfacial viscosity and \(\gamma\) the
+interfacial tension.  With \(\eta_{\rm eff}=1\)--\(5\,\mathrm{mPa\,s}\),
+\(\gamma=10\,\mathrm{mN\,m^{-1}}\), and \(\ell\sim 2R=4\)--\(20\,\mu\mathrm m\),
+this gives \(\tau_{\rm int}\sim10^{-7}\)--\(10^{-5}\,\mathrm s\), so the condition is
+safely met when \(D_r^{-1}\) is at least \(10^{-2}\,\mathrm s\) and is typically
+much longer in the reported caged interfacial protocol.
+The same check is implemented by
+\texttt{scripts/estimate\_capillary\_timescale.py}.
+
+For the interfacial realization, the pair torque should be measured before a
+dense layer is assembled.  Two ellipsoids held at separation \(r\) give
+\begin{equation}
+ \frac{U_{\rm eff}(\theta_i,\theta_j\mid r)}{k_{\rm B}T}
+ =-\ln p(\theta_i,\theta_j\mid r)+\mathrm{const.}
+ \label{eq:supp-pair-calibration}
+\end{equation}
+from their stationary angular histogram.  Projecting
+Eq.~\eqref{eq:supp-pair-calibration} onto
+\(\cos2(\theta_i-\theta_j)\) and
+\(\cos2(\theta_i+\theta_j-2\phi_{ij})\) determines the two coefficients in
+the model.  Repeating the measurement at several separations tests the
+\(r^{-4}\) capillary amplitude independently of collective memory.
+
+Solving Eq.~(1) of the Letter for the meniscus amplitude gives
+\begin{equation}
+ \Delta u_{\max}=
+ \left[
+ \frac{A_4}{3\pi\gamma}
+ \left(\frac{r}{R}\right)^4
+ \right]^{1/2}.
+ \label{eq:supp-meniscus}
+\end{equation}
+At room temperature, take \(\gamma=10\,\mathrm{mN\,m^{-1}}\) and \(r/R=3\).
+The corresponding energy--amplitude pairs are
+\begin{equation}
+ \left(\frac{A_4}{k_{\rm B}T},\frac{\Delta u_{\max}}{\mathrm{nm}}\right)
+ =(1,1.88),\ (3,3.26),\ (5,4.20).
+\end{equation}
+Smooth
+micron-scale ellipsoids often generate much larger deformations and
+interactions far above \(k_{\rm B}T\) \cite{loudet2005}.  Surface
+nanostructure can reduce the attraction by an order of magnitude and allow
+electrostatic repulsion to maintain finite particle separations
+\cite{trevenen2023}.  However, strongly porous ellipsoids lose the
+quadrupolar meniscus.  A suitable experiment should therefore tune roughness,
+wetting, charge, salt concentration, and surface coverage jointly, and verify
+the pair torque before attempting the many-particle memory protocol.
+
+\section{Curvature writing and wave gating}
+
+A deformation of the host interface couples directly to the
+particle-induced quadrupole.  In the small-slope far field, the orienting
+energy can be written
+\begin{equation}
+ U_i^{\rm curv}=-\pi\gamma H_pR_p^2\Delta c(\bm r_i,t)
+ \cos2(\theta_i-\alpha_i),
+ \label{eq:supp-curvature-write}
+\end{equation}
+where \(\Delta c\) is the local deviatoric curvature, \(\alpha_i\) is its
+principal axis, \(H_p\) is the particle-induced quadrupole amplitude, and
+\(R_p\) is its lateral scale.  This coupling has been measured through
+curvature-driven orientation and migration of interfacial rods
+\cite{cavallaro2011}.  It provides a native write protocol: apply a shaped
+curvature field, allow the angular state to relax, flatten the interface, and
+measure \(Q_{\rm target}\) only after Eq.~\eqref{eq:supp-curvature-write}
+has vanished.
+
+For \(\gamma=10\,\mathrm{mN\,m^{-1}}\), \(H_p=5\,\mathrm{nm}\), and
+\(R_p=1\,\mu\mathrm m\), a \(k_{\rm B}T\) orienting scale requires
+\(\Delta c\simeq26\,\mathrm{m^{-1}}\).  If the imposed interface profile is
+\(h=A\cos kx\), this curvature corresponds to
+\(A\simeq6.6\,\mathrm{nm}\) at wavelength \(100\,\mu\mathrm m\), or
+\(A\simeq0.66\,\mu\mathrm m\) at \(1\,\mathrm{mm}\).  These values are
+order-of-magnitude targets because the numerical prefactor depends on the
+wetting geometry and curvature convention.
+
+A spatially uniform oscillation does not choose \(\alpha_i\), but it can
+modulate the pair barriers.  With
+\(\Delta u(t)=\Delta u_0[1+\epsilon\cos\omega t]\) and
+\(g\propto\gamma(\Delta u)^2\),
+\begin{equation}
+ \frac{g(t)}{g_0}\simeq
+ 1+2\epsilon\cos\omega t+
+ \frac{\epsilon^2}{2}\left(1+\cos2\omega t\right).
+ \label{eq:supp-wave-gate}
+\end{equation}
+Equation~\eqref{eq:supp-wave-gate} predicts an interaction gate: weak forcing
+anneals local angular basins, whereas a trough that crosses the onset seen in
+Fig.~4 of the Letter accelerates erasure.  Low-frequency capillary waves
+have annealed air--water colloidal monolayers \cite{caso2025}, and stronger
+ultrasonic forcing produces dynamic capillary interactions together with
+hydrodynamic rearrangement \cite{huerre2018}.  A memory experiment must
+therefore record both \(\theta_i(t)\) and \(\bm r_i(t)\).  The useful
+separation of scales is
+\(\tau_{\rm int}\ll\omega^{-1}\sim D_r^{-1}\ll\tau_{\rm cage}\): the
+interface follows the drive, orientations respond within a cycle, and the
+constraint graph remains fixed.
+
+The many-particle experiment then has a direct rejection sequence.  First,
+verify \(\tau_{\rm cage}D_r\gg1\) from position and orientation trajectories.
+Second, measure \(S,C_2,G_2\) without a writing field.  Third, split repeated
+preparations by applying independent thermal histories, or write a target
+with a temporary polarized optical field and read only after removal.  The
+claim is rejected if low \(S\) is accompanied by vanishing \(G_2\), if the
+field-free overlap is indistinguishable from the low-quadrupole control, or
+if retention disappears when the observation window is extended.
+
+\section{Discovery and validation sequence}
+
+The calculations were organized so that the same statistic did not both
+define and validate the result.  The exploratory stage was the 441-cell
+observable-space map.  Coupling coordinates and physical names were excluded
+from clustering.  The selected point \((J,g)=(4,5)k_{\rm B}T\) was then fixed
+before the larger-size controls and long trajectories were analysed.  The
+confirmatory stages were: five-graph selected-point replication, removal of
+the capillary channel, regular and shuffled-frame controls, split-replica and
+write--release dynamics, and the independent 200-point finite-size overlap
+scan.  The programmable groove calculations use a different Hamiltonian and
+are not pooled with these tests; they show how the same readout logic can be
+implemented with an externally specified angular code.
+
+\section{Publication-scale run}
+
+The complete GPU validation is encoded in
+\texttt{scripts/run\_rotating\_colloids\_capillary\_pair\_prl\_gpu.sh}.
+It performs:
+\begin{enumerate}
+\item a \(21\times21\) state map at \(N=400\), with three quenched graphs
+and 32 thermal replicas per graph;
+\item selected-point and \(g=0\) controls for
+ \(N=144,256,576,1024,2304\) across five quenched graphs;
+\item regular and shuffled-frame matched controls at \(N=1024\); and
+\item overlap, aging, and write-release-read trajectories to
+ \(D_rt=625\) for three \(N=1024\) graphs.
+\end{enumerate}
+The simulation point files are append-only JSONL records.  Restarting the
+same command resumes completed cells.
+
+The independent finite-size glass test is encoded in
+\texttt{scripts/run\_rotating\_colloids\_spin\_glass\_prl\_4gpu.sh}; its
+analysis is generated by
+\texttt{scripts/analyze\_rotating\_colloids\_spin\_glass\_prl.py}.
+
+The programmable easy-axis protocols are encoded in
+\path{scripts/rotating_colloids_groove_protocols.py}; the two figures are
+generated from the archived JSON and JSONL records by
+\path{scripts/plot_rotating_colloids_groove_evidence.py}.
+
+\begin{thebibliography}{10}
+
+\bibitem{luo2019}
+A. M. Luo, J. Vermant, P. Ilg, Z. Zhang, and L. M. C. Sagis,
+J. Colloid Interface Sci. \textbf{534}, 205 (2019).
+
+\bibitem{wu2012}
+H. Wu \textit{et al.},
+Opt. Express \textbf{20}, 16684 (2012).
+
+\bibitem{chang2010}
+W.-S. Chang, J. W. Ha, L. S. Slaughter, and S. Link,
+Proc. Natl. Acad. Sci. USA \textbf{107}, 2781 (2010).
+
+\bibitem{besseling2026}
+T. H. Besseling \textit{et al.},
+Nat. Commun. \textbf{17}, 2410 (2026).
+
+\bibitem{melio2026}
+J. Melio, M. van Hecke, S. E. Henkes, \textit{et al.},
+Nature \textbf{651}, 632 (2026).
+
+\bibitem{loudet2005}
+J.-C. Loudet, A. M. Alsayed, J. Zhang, and A. G. Yodh,
+Phys. Rev. Lett. \textbf{94}, 018301 (2005).
+
+\bibitem{trevenen2023}
+S. Trevenen \textit{et al.},
+ACS Nano \textbf{17}, 11892 (2023).
+
+\bibitem{cavallaro2011}
+M. Cavallaro, Jr., L. Botto, E. P. Lewandowski, M. Wang, and K. J. Stebe,
+Proc. Natl. Acad. Sci. USA \textbf{108}, 20923 (2011).
+
+\bibitem{caso2025}
+M. J. Caso \textit{et al.},
+Langmuir \textbf{41}, 3033 (2025).
+
+\bibitem{huerre2018}
+A. Huerre, M. De Corato, and V. Garbin,
+Nat. Commun. \textbf{9}, 3620 (2018).
+
+\end{thebibliography}
+
+\end{document}
