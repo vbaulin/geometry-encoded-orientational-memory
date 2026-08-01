@@ -728,10 +728,26 @@ and 32 thermal replicas per graph;
  \(N=144,256,576,1024,2304\) across five quenched graphs;
 \item regular and shuffled-frame matched controls at \(N=1024\); and
 \item overlap, aging, and write-release-read trajectories to
- \(D_rt=625\) for three \(N=1024\) graphs.
+ \(D_rt=625\) for three \(N=1024\) graphs; and
+\item an eight-coupling retention scan at \(N=576\), with five quenched
+graphs and 32 thermal replicas per graph, used for Fig.~4 of the Letter.
 \end{enumerate}
 The simulation point files are append-only JSONL records.  Restarting the
 same command resumes completed cells.
+
+The final scan is encoded in
+\texttt{scripts/run\_rotating\_colloids\_activated\_memory\_prl\_4gpu.sh}.
+Each graph is equilibrated for 50,000 steps and observed for 250,000 steps at
+\(D_r\Delta t=0.0025\). Its source record is
+\texttt{activated\_memory\_scan.jsonl}. Figure~4(b) reports
+\begin{equation}
+ \mathcal A_Q(T_{\rm obs})=
+ \frac{\int_0^{T_{\rm obs}}\max[Q(t),0]dt}{|Q(0)|},
+ \label{eq:supp-integrated-overlap}
+\end{equation}
+a finite-window positive integrated overlap. This quantity compares retained
+overlap over the common observation window; it is not an intrinsic
+relaxation lifetime and assumes no exponential decay law.
 
 The independent finite-size glass test is encoded in
 \texttt{scripts/run\_rotating\_colloids\_spin\_glass\_prl\_4gpu.sh}; its
