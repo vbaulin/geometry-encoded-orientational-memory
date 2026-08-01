@@ -15,6 +15,7 @@ DIRECTORIES = {
     "raw/capillary_pair_publication_runs": DATA_ROOT / "rotating_colloids_capillary_pair_prl_gpu",
     "raw/capillary_internal_correlations": DATA_ROOT / "rotating_colloids_capillary_pair_prl_internal",
     "raw/equilibrium_replica_discriminant": DATA_ROOT / "rotating_colloids_spin_glass_prl_gpu",
+    "raw/activated_memory": DATA_ROOT / "rotating_colloids_activated_memory_prl_gpu",
     "raw/grooved/uniform_scan_n16": DATA_ROOT / "rotating_colloids_grooved_uniform_scan_n16",
     "raw/grooved/uniform_memory_zoom_n16": DATA_ROOT / "rotating_colloids_grooved_uniform_memory_zoom_n16",
     "raw/grooved/uniform_finite_size": DATA_ROOT / "rotating_colloids_grooved_uniform_finite_size",
@@ -26,9 +27,6 @@ DIRECTORIES = {
     "derived/quantitative_claim_audit": DATA_ROOT / "rotating_colloids_capillary_pair_prl_claim_audit",
 }
 FILES = {
-    "raw/activated_memory/activated_memory_scan.jsonl": (
-        DATA_ROOT / "rotating_colloids_activated_memory_prl_gpu/activated_memory_scan.jsonl"
-    ),
     "derived/figures/capillary_regime_report.json": (
         Path("tex/rotating_colloids/capillary_prl_figures/capillary_regime_report.json")
     ),

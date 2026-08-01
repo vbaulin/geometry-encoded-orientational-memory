@@ -4,7 +4,7 @@
 Large simulation records belong in the Zenodo deposit. The companion GitHub
 repository contains code, manuscript sources, and small derived reports only.
 The builder refuses to declare a complete deposit when the cluster-generated
-activated-memory JSONL is absent.
+activated-memory JSONL shard set is absent.
 """
 
 from __future__ import annotations
@@ -72,14 +72,19 @@ def copy_source(source: Path, destination: Path) -> None:
         shutil.copy2(source, destination)
 
 
-def activated_jsonl(source: Path | None) -> Path | None:
-    if source is None:
-        candidates = sorted(DATA_ROOT.glob("rotating_colloids_activated_memory_prl_gpu/**/activated_memory_scan.jsonl"))
-        return candidates[0] if len(candidates) == 1 else None
-    if source.is_file():
-        return source if source.name == "activated_memory_scan.jsonl" else None
-    candidates = sorted(source.glob("**/activated_memory_scan.jsonl"))
-    return candidates[0] if len(candidates) == 1 else None
+def activated_source(root: Path, source: Path | None) -> tuple[Path | None, list[Path]]:
+    candidate = source
+    if candidate is None:
+        candidate = root / DATA_ROOT / "rotating_colloids_activated_memory_prl_gpu"
+    elif not candidate.is_absolute():
+        candidate = (Path.cwd() / candidate).resolve()
+    if candidate.is_file():
+        files = [candidate] if candidate.name == "activated_memory_scan.jsonl" else []
+        return (candidate if files else None), files
+    if candidate.is_dir():
+        files = sorted(candidate.glob("**/activated_memory_scan.jsonl"))
+        return (candidate if files else None), files
+    return None, []
 
 
 def build_readme(complete: bool, missing: list[str]) -> str:
@@ -100,7 +105,7 @@ https://github.com/vbaulin/{REPOSITORY_NAME}.
 - `raw/capillary_pair_publication_runs/`: 441-cell state map, matched controls,
   five-size scaling, and three long-dynamics realizations.
 - `raw/activated_memory/`: eight-coupling, five-graph retention scan used for
-  Fig. 4. The required source file is `activated_memory_scan.jsonl`.
+  Fig. 4. Each GPU shard contributes an `activated_memory_scan.jsonl` file.
 - `raw/equilibrium_replica_discriminant/`: independent-replica finite-size scan.
 - `raw/capillary_internal_correlations/`: real-space correlation analysis.
 - `raw/grooved/`: programmable easy-axis realization reported in the Supplement.
@@ -180,12 +185,12 @@ def main() -> None:
 
     root = args.root.resolve()
     output = args.output_dir if args.output_dir.is_absolute() else root / args.output_dir
-    source_activated = activated_jsonl(args.activated_input)
+    source_activated, activated_files = activated_source(root, args.activated_input)
 
     missing = [str(path) for path in DATASETS.values() if not (root / path).exists()]
     missing.extend(str(path) for path in DERIVED_FILES.values() if not (root / path).exists())
-    if source_activated is None:
-        missing.append("activated_memory_scan.jsonl (cluster-generated raw source for Fig. 4)")
+    if not activated_files:
+        missing.append("activated_memory_scan.jsonl shard(s) (cluster-generated raw source for Fig. 4)")
     if missing and not args.allow_incomplete:
         raise SystemExit("release is incomplete:\n" + "\n".join(f"- {item}" for item in missing))
 
@@ -209,9 +214,18 @@ def main() -> None:
         copy_source(source, output / destination)
         copied_sources.append({"source": str(relative_source), "destination": destination})
     if source_activated is not None:
-        destination = "raw/activated_memory/activated_memory_scan.jsonl"
-        copy_source(source_activated, output / destination)
-        copied_sources.append({"source": str(source_activated), "destination": destination})
+        destination = "raw/activated_memory"
+        if source_activated.is_dir():
+            copy_source(source_activated, output / destination)
+        else:
+            copy_source(source_activated, output / destination / source_activated.name)
+        copied_sources.append(
+            {
+                "source": str(source_activated),
+                "destination": destination,
+                "activated_memory_jsonl_shards": [str(path) for path in activated_files],
+            }
+        )
 
     complete = not missing
     (output / "README.md").write_text(build_readme(complete, missing), encoding="utf-8")

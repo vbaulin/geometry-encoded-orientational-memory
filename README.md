@@ -24,8 +24,8 @@ frozen numerical expectations.
 
 The audit separates numerical checks from provenance. A `70/70` numerical
 result does not make the release complete unless the raw
-`activated_memory_scan.jsonl` used for Fig. 4 is installed from the data
-deposit.
+`activated_memory_scan.jsonl` shards used for Fig. 4 are installed from the
+data deposit.
 
 ## Installation
 
@@ -105,7 +105,7 @@ Live installation.
 
 The Zenodo DOI is pending. `scripts/build_rotating_colloids_release.py`
 assembles the data folder, computes SHA-256 hashes, and refuses a complete
-build when the cluster-generated activated-memory JSONL is absent.
+build when the cluster-generated activated-memory JSONL shard set is absent.
 
 ## License
 
