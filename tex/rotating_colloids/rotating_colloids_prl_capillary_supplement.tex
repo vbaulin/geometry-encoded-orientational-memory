@@ -12,7 +12,7 @@
 
 \author{Vladimir A. Baulin}
 \affiliation{Synthetix Institute, Amsterdam, The Netherlands}
-\email{info@synthetix.institute}
+\email{vbaulin@synthetix.institute}
 
 \maketitle
 
@@ -109,13 +109,16 @@ capillary and short-range weights are
  \end{cases}
  \label{eq:supp-short-weight}
 \end{align}
-The cap at 6 is a numerical guard against a rare near-overlap; it is inactive
-for the three selected \(N=144\) graphs.  For graph seed 17, the graph has
-1654 edges, mean degree 22.97, capillary weighted degree 3.24, and
-short-range weighted degree 1.56.  Its bare fourth bond-angle harmonic is
-\(\left|\langle e^{4i\phi_{ij}}\rangle_E\right|=0.0040\).  The measured
-\(G_2=0.451\) therefore arises from correlations between rotor angles and
-bond frames, not from a pre-existing angular bias of the graph.
+The cap at 6 is a numerical guard against a rare near-overlap.  It is
+inactive for every graph used in this work: across the 25 publication graphs
+(\(N=144,256,576,1024,2304\) at seeds \(17,29,43,71,97\)) the largest
+capillary weight is 3.87.  For \(N=1024\) at graph seed 17, the graph has
+11741 edges, mean degree 22.93, capillary weighted degree 3.33, and
+short-range weighted degree 1.60.  Its bare fourth bond-angle harmonic is
+\(\left|\langle e^{4i\phi_{ij}}\rangle_E\right|=0.0011\), and the harmonic
+stays within \(0.0007\)--\(0.0150\) over all 25 graphs.  The measured
+\(G_2=0.447\pm0.011\) therefore arises from correlations between rotor angles
+and bond frames, not from a pre-existing angular bias of the graph.
 
 \section{Rotational dynamics}
 
@@ -129,11 +132,13 @@ equation integrated in the simulation is
 \end{equation}
 where the \(dW_i\) are independent Wiener increments.  Euler--Maruyama
 integration uses \(D_r\Delta t=0.0025\).  Angles are reduced modulo \(\pi\)
-because the rotors are apolar.  For the selected-point controls, each graph
-has 12 thermal replicas, 5000 burn-in steps, and 10000 sampled steps, with
-observables recorded every 80 steps.  The parameter-map pilot has six
-replicas per cell.  The long-time protocols use 12 replicas and extend to
-\(D_rt=100\).
+because the rotors are apolar.  The publication-scale state map uses 32
+thermal replicas per graph, 20,000 burn-in steps, and 60,000 sampled steps,
+with observables recorded every 100 steps.  The finite-size and matched
+controls use 48 replicas, 30,000 burn-in steps, and 100,000 sampled steps at
+the same recording interval.  The long-time protocols use 48 replicas, 24
+split-replica parents, and extend to \(D_rt=625\) with observables recorded
+every 200 steps.
 
 \section{Order and memory observables}
 
@@ -276,9 +281,12 @@ The field is removed completely before the release trajectory.  Readout uses
  \cos2[\theta_i(t)-\theta_i^{\rm target}].
  \label{eq:supp-target}
 \end{equation}
-At \(N=144,J=4,g=5\), the overlap at removal is 0.801 at the first sampled
-release point and remains 0.457 after \(D_rt=99.8\).  The corresponding
-split-replica overlap is 0.529.  The field therefore selects a pre-existing
+At \(N=1024,J=4,g=5\), averaged over three quenched graphs, the overlap
+reaches \(0.863\pm0.009\) while the field is applied and remains
+\(0.441\pm0.021\) after a field-free interval of \(D_rt=625\).  The residual
+global order is then \(S=0.065\pm0.008\) and the bond-frame order is
+\(G_2=0.451\pm0.012\).  The corresponding split-replica overlap is
+\(0.462\pm0.010\).  The field therefore selects a pre-existing
 long-lived basin; it is not a permanent substrate term.  Repeating the same
 write protocol with \(g=0\) gives an initial release overlap of
 \(0.807\pm0.005\), but it falls below 0.2 by
@@ -728,16 +736,19 @@ and 32 thermal replicas per graph;
  \(N=144,256,576,1024,2304\) across five quenched graphs;
 \item regular and shuffled-frame matched controls at \(N=1024\); and
 \item overlap, aging, and write-release-read trajectories to
- \(D_rt=625\) for three \(N=1024\) graphs; and
-\item an eight-coupling retention scan at \(N=576\), with five quenched
-graphs and 32 thermal replicas per graph, used for Fig.~4 of the Letter.
+ \(D_rt=625\) for three \(N=1024\) graphs.
 \end{enumerate}
 The simulation point files are append-only JSONL records.  Restarting the
 same command resumes completed cells.
 
-The final scan is encoded in
-\texttt{scripts/run\_rotating\_colloids\_activated\_memory\_prl\_4gpu.sh}.
-Each graph is equilibrated for 50,000 steps and observed for 250,000 steps at
+The eight-coupling retention scan behind Fig.~4 of the Letter is a separate
+job, encoded in
+\texttt{scripts/run\_rotating\_colloids\_activated\_memory\_prl\_gpu.sh}.
+It uses \(N=576\) with five quenched graphs and 32 thermal replicas per
+graph.  Each graph is an independent shard, so the driver partitions the five
+graphs over whatever CUDA devices are visible; a single device runs them
+sequentially in one process.  Each graph is equilibrated for 50,000 steps and
+observed for 250,000 steps at
 \(D_r\Delta t=0.0025\). Its source record is
 \texttt{activated\_memory\_scan.jsonl}. Figure~4(b) reports
 \begin{equation}
@@ -750,8 +761,9 @@ overlap over the common observation window; it is not an intrinsic
 relaxation lifetime and assumes no exponential decay law.
 
 The independent finite-size glass test is encoded in
-\texttt{scripts/run\_rotating\_colloids\_spin\_glass\_prl\_4gpu.sh}; its
-analysis is generated by
+\texttt{scripts/run\_rotating\_colloids\_spin\_glass\_prl\_4gpu.sh}, with
+\texttt{scripts/run\_rotating\_colloids\_spin\_glass\_prl\_gpu.sh} as the
+single-device equivalent; its analysis is generated by
 \texttt{scripts/analyze\_rotating\_colloids\_spin\_glass\_prl.py}.
 
 The programmable easy-axis protocols are encoded in

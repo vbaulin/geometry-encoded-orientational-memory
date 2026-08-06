@@ -82,18 +82,42 @@ not an intrinsic relaxation lifetime:
 
 `A_Q = integral_0^Tobs max(Q(t), 0) dt / abs(Q(0))`.
 
+The Fig. 4 builder writes `activated_memory_figure_report.json` next to the
+figure, including the panel (a) retention surface and the panel (c)
+observation-window statistics. When a previous report is present it also
+writes `activated_memory_report_delta.json`. A nonzero `max_relative_change`
+there means the numbers quoted in the Letter and the frozen expectations in
+`scripts/audit_rotating_colloids_capillary_prl.py` have to be updated
+together. Keep a copy of the previous report before rebuilding.
+
 ## Publication-scale GPU runs
 
 The production shell drivers are:
 
 - `scripts/run_rotating_colloids_capillary_pair_prl_gpu.sh`
-- `scripts/run_rotating_colloids_activated_memory_prl_4gpu.sh`
+- `scripts/run_rotating_colloids_activated_memory_prl_gpu.sh`
 - `scripts/run_rotating_colloids_spin_glass_prl_4gpu.sh`
+  (`scripts/run_rotating_colloids_spin_glass_prl_gpu.sh` for one device)
 - `scripts/run_rotating_colloids_groove_protocols_gpu.sh`
 
 Each simulation output is append-only and resumes completed parameter points.
 The shell scripts document the exact replica counts, graph seeds, step counts,
 and CUDA rank partitioning.
+
+The activated-memory driver shards its five quenched graphs over whatever
+CUDA devices are visible, so the same command works on a single RTX 3090 and
+on a four-GPU node. Override the split with `GPUS=0,1`, restrict the graphs
+with `GRAPH_SEEDS`, and pass `SKIP_FIGURE=1` to run the scan alone:
+
+```bash
+nohup bash scripts/run_rotating_colloids_activated_memory_prl_gpu.sh \
+  > activated_memory_gpu.log 2>&1 < /dev/null &
+```
+
+## Manuscript length
+
+`scripts/count_prl_length.py tex/rotating_colloids/rotating_colloids_prl_capillary.tex`
+reports the APS word-equivalent count against the 3750-word PRL limit.
 
 ## Manuscript
 

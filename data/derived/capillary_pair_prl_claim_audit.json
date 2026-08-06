@@ -568,6 +568,14 @@
   "provenance": {
     "activated_memory_raw_jsonl": [],
     "activated_memory_raw_jsonl_present": false,
+    "activated_memory_reproduction": {
+      "raw_reproduces_derived_report": false,
+      "reason": "raw activated_memory_scan.jsonl shards are absent on this host"
+    },
+    "activated_memory_window_statistics": {
+      "reason": "report predates the panel (c) window statistics; rebuild Fig. 4 to record them",
+      "recorded_for_all_lambdas": false
+    },
     "all_language_gates_passed": true,
     "language_gates": {
       "constructed_graph_not_called_emergent": true,

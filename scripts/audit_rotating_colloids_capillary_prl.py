@@ -106,6 +106,60 @@ def metric(row: dict[str, Any], name: str) -> float:
     return float(row[name])
 
 
+def reproduce_activated_report(paths: list[Path], report: dict[str, Any]) -> dict[str, Any]:
+    """Recompute the derived Fig. 4 report directly from the raw JSONL shards.
+
+    A numerical match against the frozen derived report is not by itself
+    evidence that the deposit can regenerate the figure. This gate closes that
+    gap: it rebuilds the reported series from the raw rows and reports the
+    largest relative deviation.
+    """
+
+    rows = [row for path in paths for row in read_jsonl(path)]
+    groups: dict[float, list[dict[str, Any]]] = {}
+    for row in rows:
+        groups.setdefault(float(row["lambda"]), []).append(row)
+    lambdas = sorted(groups)
+    series = {
+        f"{protocol}_{key}": [
+            float(
+                np.mean(
+                    [float(row["protocols"][protocol][key]["positive_integral_time"]) for row in groups[lam]]
+                )
+            )
+            for lam in lambdas
+        ]
+        for protocol in ("physical", "no_capillary")
+        for key in ("split_summary", "release_summary")
+    }
+    worst = 0.0
+    mismatched: list[str] = []
+    for name, values in series.items():
+        expected = report["integral_times"].get(name, {}).get("mean")
+        if expected is None or len(expected) != len(values):
+            mismatched.append(name)
+            worst = float("inf")
+            continue
+        deviation = np.abs(np.asarray(values) - np.asarray(expected, dtype=float))
+        relative = deviation / np.maximum(np.abs(np.asarray(expected, dtype=float)), 1e-12)
+        worst = max(worst, float(relative.max()))
+    return {
+        "raw_rows": len(rows),
+        "raw_lambdas": lambdas,
+        "raw_graphs_per_lambda": {f"{lam:g}": len(groups[lam]) for lam in lambdas},
+        "row_count_matches_report": len(rows) == int(report["rows"]),
+        "lambdas_match_report": lambdas == [float(value) for value in report["lambdas"]],
+        "max_relative_deviation": worst,
+        "series_absent_from_report": mismatched,
+        "raw_reproduces_derived_report": (
+            not mismatched
+            and len(rows) == int(report["rows"])
+            and lambdas == [float(value) for value in report["lambdas"]]
+            and worst <= 1e-9
+        ),
+    }
+
+
 def power_exponent(grouped: dict[int, list[dict[str, Any]]], name: str) -> float:
     node_counts = np.asarray(sorted(grouped), dtype=float)
     means = np.asarray(
@@ -286,6 +340,27 @@ def main() -> None:
         "language_gates": language_gates,
         "all_language_gates_passed": all(language_gates.values()),
     }
+    if activated_raw:
+        provenance["activated_memory_reproduction"] = reproduce_activated_report(activated_raw, activated)
+    else:
+        provenance["activated_memory_reproduction"] = {
+            "raw_reproduces_derived_report": False,
+            "reason": "raw activated_memory_scan.jsonl shards are absent on this host",
+        }
+    # Fig. 4(c) is quoted in the Letter but was not recorded by earlier report
+    # versions. Check it whenever the extended report is available.
+    windows = activated.get("window_statistics", {}).get("longest_window")
+    if windows:
+        provenance["activated_memory_window_statistics"] = {
+            "longest_window": windows,
+            "recorded_for_all_lambdas": sorted(float(key) for key in windows)
+            == [float(value) for value in activated["lambdas"]],
+        }
+    else:
+        provenance["activated_memory_window_statistics"] = {
+            "recorded_for_all_lambdas": False,
+            "reason": "report predates the panel (c) window statistics; rebuild Fig. 4 to record them",
+        }
 
     passed = sum(bool(item["passed"]) for item in checks)
     report = {
@@ -309,6 +384,10 @@ def main() -> None:
         f"- All quantitative checks passed: `{report['all_checks_passed']}`",
         f"- Required local artifacts present: `{provenance['required_local_artifacts_present']}`",
         f"- Activated-memory raw JSONL present locally: `{provenance['activated_memory_raw_jsonl_present']}`",
+        f"- Raw activated-memory shards reproduce the derived report: "
+        f"`{provenance['activated_memory_reproduction']['raw_reproduces_derived_report']}`",
+        f"- Fig. 4(c) window statistics recorded: "
+        f"`{provenance['activated_memory_window_statistics']['recorded_for_all_lambdas']}`",
         f"- Language gates passed: `{provenance['all_language_gates_passed']}`",
         "",
         "The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, and coupling-dependent finite-window integrated overlap.",
@@ -334,6 +413,9 @@ def main() -> None:
                 "quantitative_checks": f"{passed}/{len(checks)}",
                 "all_checks_passed": report["all_checks_passed"],
                 "activated_raw_present": provenance["activated_memory_raw_jsonl_present"],
+                "activated_raw_reproduces_report": provenance["activated_memory_reproduction"][
+                    "raw_reproduces_derived_report"
+                ],
                 "language_gates_passed": provenance["all_language_gates_passed"],
             },
             sort_keys=True,

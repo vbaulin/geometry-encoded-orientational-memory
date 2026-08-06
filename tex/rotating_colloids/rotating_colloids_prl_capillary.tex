@@ -143,8 +143,10 @@ trajectory; it does not impose local orienting axes. The angular energy is
 Here \(J\) is a first-shell alignment energy and
 \(g=A_4(r_0)\) is the capillary energy at the median nearest-neighbour
 spacing \(r_0\). We use
-\(w^+_{ij}=(r_0/r_{ij})^4\) up to \(2.6a\), where \(a\) is the undistorted
-cage spacing, so \(gw^+_{ij}=A_4(r_{ij})\) within the capillary cutoff. The
+\(w^+_{ij}=\min[6,(r_0/r_{ij})^4]\) up to \(2.6a\), where \(a\) is the
+undistorted cage spacing, so \(gw^+_{ij}=A_4(r_{ij})\) within the capillary
+cutoff; the cap guards against rare near-overlaps and is inactive in every
+simulated graph. The
 short-range weight is
 \(w^-_{ij}=\exp[-\max(r_{ij}/r_0-1,0)/0.2]\) for
 \(r_{ij}\leq1.35r_0\) and zero otherwise. Particle centres begin on a
@@ -333,7 +335,7 @@ the host interface.
 
 \begin{figure*}[t]
  \includegraphics[width=\textwidth]{capillary_prl_figures/fig4_activated_memory_results.pdf}
-\caption{\label{fig:internal}
+\caption{\label{fig:activated}
  Coupling-dependent orientational retention along
  \((J,g)=\lambda(4,5)k_{\rm B}T\). Each value averages five quenched
  \(N=576\) graphs. The control parameter is \(\lambda\); all times below are
@@ -349,7 +351,7 @@ the host interface.
  retained after that window.}
 \end{figure*}
 
-Figure~\ref{fig:internal} resolves how retained overlap changes with
+Figure~\ref{fig:activated} resolves how retained overlap changes with
 coupling. We scanned eight
 values of \(\lambda\), with five independently disordered graphs at each
 point. The split-replica finite-window integrated overlap rises from
@@ -374,7 +376,7 @@ the global director decreases from \(S=0.151\) to 0.040, with
 \(C_2\simeq0.63\), \(G_2\simeq0.45\), and finite-window
 \(q_{\rm EA}\simeq0.65\) remain of order unity; the fitted exponent of
 \(q_{\rm EA}\) is 0.011. The overlap susceptibility saturates and
-\(\xi_L/L\) has no common crossing (Supplemental Figs.~S1 and S4).
+\(\xi_L/L\) has no common crossing (Supplemental Figs.~S3 and S4).
 Independent preparations therefore select different angular compromises,
 whereas descendants of one preparation inherit the same local basin. This
 history-conditioned overlap is the memory variable.
