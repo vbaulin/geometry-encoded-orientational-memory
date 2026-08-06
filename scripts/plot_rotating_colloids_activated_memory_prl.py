@@ -21,6 +21,10 @@ _mpl_cache = os.path.join(tempfile.gettempdir(), "hyperion_matplotlib_cache")
 os.makedirs(_mpl_cache, exist_ok=True)
 os.environ.setdefault("MPLCONFIGDIR", _mpl_cache)
 
+os.environ.setdefault("MPLBACKEND", "Agg")
+import matplotlib
+matplotlib.use("Agg", force=True)
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np

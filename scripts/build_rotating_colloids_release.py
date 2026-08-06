@@ -51,7 +51,6 @@ DERIVED_FILES = {
     ),
 }
 
-
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
