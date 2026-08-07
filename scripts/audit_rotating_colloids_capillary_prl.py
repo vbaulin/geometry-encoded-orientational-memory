@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit the frozen quantitative claims in the capillary-rotor PRL package.
 
-The 70 numerical checks use only publication-scale artifacts. Provenance and
+The 82 numerical checks use only publication-scale artifacts. Provenance and
 language gates are reported separately because a numerical match cannot prove
 that every raw file needed to reproduce a derived figure has been archived.
 """
@@ -34,6 +34,7 @@ REGIMES = FIGURES / "capillary_regime_report.json"
 CONTROLS = GPU / "matched_controls_n32/capillary_pair_scan.jsonl"
 INTERNAL = DATA / "rotating_colloids_capillary_pair_prl_internal/capillary_internal_correlations.json"
 SPIN = DATA / "rotating_colloids_spin_glass_prl_gpu/analysis/spin_glass_finite_size_report.json"
+SPIN_SCAN = DATA / "rotating_colloids_spin_glass_prl_gpu"
 ACTIVATED = FIGURES / "activated_memory_figure_report.json"
 SIZE_PATHS = {
     n * n: GPU / f"finite_size_n{n}/capillary_pair_scan.jsonl"
@@ -104,6 +105,55 @@ def metric(row: dict[str, Any], name: str) -> float:
     if name == "replica_overlap_magnitude":
         return float(row["replica_overlap"]["magnitude_mean"])
     return float(row[name])
+
+
+def retained_bits(resultant: float) -> float:
+    """Lower bound on information retained per rotor, in bits.
+
+    Only the mean resultant R = <cos 2 dtheta> is archived. The maximum-entropy
+    density on the circle of the doubled angle at fixed R is von Mises with
+    concentration kappa solving I1/I0 = R. Maximizing the entropy minimizes the
+    information, so this is a bound rather than an estimate.
+    """
+
+    from scipy.optimize import brentq
+    from scipy.special import i0, i1
+
+    if resultant <= 1e-12:
+        return 0.0
+    kappa = brentq(lambda k: i1(k) / i0(k) - resultant, 1e-12, 700.0)
+    return float((kappa * (i1(kappa) / i0(kappa)) - math.log(i0(kappa))) / math.log(2.0))
+
+
+def paired_aging_increment(dynamics: list[dict[str, Any]], lag: float) -> list[float]:
+    """Per-graph change in the two-time correlation between the extreme t_w."""
+
+    increments = []
+    for run in dynamics:
+        curves = run["aging"]["curves"]
+        early = float(np.interp(lag, curves[0]["lag_time"], curves[0]["correlation"]))
+        late = float(np.interp(lag, curves[-1]["lag_time"], curves[-1]["correlation"]))
+        increments.append(late - early)
+    return increments
+
+
+def overlap_correlation_lengths(root: Path) -> dict[str, float]:
+    """Graph-averaged and single-graph extremes of xi_L over the spin-glass ray."""
+
+    rows: list[dict[str, Any]] = []
+    for path in sorted(root.glob("*/spin_glass_scan.jsonl")):
+        rows.extend(read_jsonl(path))
+    cells: dict[tuple[float, int], list[float]] = {}
+    for row in rows:
+        key = (float(row["lambda"]), int(row["node_count"]))
+        cells.setdefault(key, []).append(float(row["overlap"]["xi_L"]))
+    averaged = [float(np.mean(values)) for values in cells.values()]
+    return {
+        "cells": len(cells),
+        "graph_averaged_max": max(averaged),
+        "graph_averaged_min": min(averaged),
+        "single_graph_max": max(float(row["overlap"]["xi_L"]) for row in rows),
+    }
 
 
 def reproduce_activated_report(paths: list[Path], report: dict[str, Any]) -> dict[str, Any]:
@@ -320,8 +370,38 @@ def main() -> None:
     add_close(checks, "lambda=0.9 split integrated-overlap ratio", split_ratio, 52.086062184868574, 1e-10)
     add_close(checks, "lambda=0.9 write integrated-overlap ratio", write_ratio, 53.877162532310045, 1e-10)
 
-    if len(checks) != 70:
-        raise RuntimeError(f"audit contract must contain exactly 70 checks, found {len(checks)}")
+    # 71-73: waiting-time increment resolved graph by graph.
+    increments = paired_aging_increment(dynamics, 30.0)
+    mean, std = sample_mean_std(increments)
+    add_close(checks, "paired aging increment mean", mean, 0.02530401211798668, 1e-12)
+    add_close(checks, "paired aging increment graph SD", std, 0.0018613104549769866, 1e-12)
+    add_exact(checks, "graphs with positive aging increment", sum(1 for item in increments if item > 0), 3)
+
+    # 74-77: information retained per rotor, bounded from the measured overlaps.
+    for label, values, expected in (
+        ("write field applied", [float(run["write_release"]["write_overlap"][-1]) for run in dynamics], 1.4811116497946106),
+        ("written state released", [float(run["write_release"]["release_overlap"][-1]) for run in dynamics], 0.29580233998316197),
+        ("split replicas", split_end, 0.32661562528973526),
+        ("g=0 written state", [float(run["no_capillary_write_release"]["release_overlap"][-1]) for run in dynamics], 6.572039757639629e-05),
+    ):
+        bits = [retained_bits(max(value, 0.0)) for value in values]
+        add_close(checks, f"retained bits per rotor, {label}", float(np.mean(bits)), expected, 1e-10)
+
+    # 78: unnormalized overlap correlation length on the scanned ray.
+    lengths = overlap_correlation_lengths(SPIN_SCAN)
+    add_close(checks, "max graph-averaged overlap length xi_L", lengths["graph_averaged_max"], 1.4893358730245692, 1e-10)
+
+    # 79-82: the g=0 control is more ordered, not less, on the same graphs.
+    for name, expected_mean, expected_std in (
+        ("S_mean", 0.1311428920457058, 0.010123705266531027),
+        ("C2_mean", 0.8128899338103832, 0.002853034994366132),
+    ):
+        mean, std = sample_mean_std(row[name] for row in g0_rows)
+        add_close(checks, f"g=0 {name}", mean, expected_mean, 1e-12)
+        add_close(checks, f"g=0 {name} graph SD", std, expected_std, 1e-12)
+
+    if len(checks) != 82:
+        raise RuntimeError(f"audit contract must contain exactly 82 checks, found {len(checks)}")
 
     activated_raw = sorted(DATA.glob("rotating_colloids_activated_memory_prl_gpu/**/activated_memory_scan.jsonl"))
     required = [DENSE, REGIMES, CONTROLS, INTERNAL, SPIN, ACTIVATED, *SIZE_PATHS.values(), *DYNAMICS_PATHS]

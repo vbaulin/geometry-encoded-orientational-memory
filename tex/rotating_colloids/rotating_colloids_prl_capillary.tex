@@ -280,7 +280,11 @@ realizations at \(N=1024\) give
 \end{align}
 Matched controls distinguish the ingredients. On the same disordered graph
 with \(g=0\), \(G_2=0.0000\pm0.0002\) and
-\(q_{\rm EA}=0.0225\pm0.0023\). On an undistorted regular graph at the
+\(q_{\rm EA}=0.0225\pm0.0023\); that control also has \emph{larger}
+\(S=0.131\pm0.010\) and \(C_2=0.813\pm0.003\) than the capillary system.
+The bond-frame term therefore does not add order. It frustrates the
+alignment it competes with, suppressing both the common director and the
+neighbour correlation while creating the persistence. On an undistorted regular graph at the
 same \(J\) and \(g\), the system selects a conventional global director,
 with \(S=0.945\). Randomly permuting the bond angles while preserving the
 weight distribution increases \(q_{\rm EA}\) from 0.658 to 0.748, as expected
@@ -316,8 +320,11 @@ correlation. Split replicas remain near \(Q_{\rm split}=0.5\) over the
 long trajectory and end at \(0.462\pm0.010\),
 whereas the \(g=0\) control falls below \(0.2\) by \(D_rt=2.7\pm0.3\) and approaches
 zero. Following a quench, the two-time correlation at lag
-\(D_r\Delta t=30\) increases from \(0.676\pm0.006\) for \(D_rt_w=62.5\), to \(0.695\pm0.004\)
-for \(D_rt_w=187.5\), and \(0.701\pm0.008\) for \(D_rt_w=375\). This waiting-time
+\(D_r\Delta t=30\) increases from \(0.676\) for \(D_rt_w=62.5\) to \(0.701\)
+for \(D_rt_w=375\). Because the graph-to-graph scatter is a common offset,
+the increment is resolved graph by graph: it is
+\(+0.0253\pm0.0019\) and positive for every realization, against a
+between-graph spread of 0.006 in the correlation itself. This waiting-time
 dependence is consistent with finite-size aging. In the write-release-read protocol, a
 temporary local conjugate field produces a target overlap of \(0.863\pm0.009\); after
 the field is removed, the overlap remains \(0.441\pm0.021\) at \(D_rt=625\), while
@@ -384,7 +391,9 @@ history-conditioned overlap is the memory variable.
 The spatial and temporal ranges separate sharply. A real-space analysis in
 Supplemental Fig.~S2 gives first-shell connected \(C_2(r)=0.557\) and
 bond-frame \(G_2(r)=0.505\); both reach the operational noise scale by
-\(r/a\simeq1.73\). The same state retains
+\(r/a\simeq1.73\). The overlap correlation length obtained independently
+from the second moment of \(\chi_Q(\bm k)\) agrees: averaged over graphs it
+never exceeds \(1.49a\) at any size or coupling on the scanned ray. The same state retains
 \(Q_{\rm split}=0.462\) at \(D_rt=625\). Spatial orientational correlations
 therefore disappear within approximately two particle spacings, yet systems
 descended from the same prepared state remain correlated for hundreds of
@@ -482,8 +491,15 @@ microscopy provides the direct readout through angular overlap. Rewriting by
 a temporary field and local mechanical readout are experimental tests rather
 than results of the autonomous pair simulations. Capillary microstructure is
 known to control the mechanics of particle layers \cite{luo2019,rahman2026},
-which makes local modulus a candidate secondary readout. Device endurance,
-spatial addressability, and storage capacity remain to be measured.
+which makes local modulus a candidate secondary readout. The retained
+overlap sets a capacity. Treating the residual angular error as the
+maximum-entropy distribution at the measured
+\(\langle\cos2\Delta\theta\rangle\) gives a lower bound of
+\(0.296\pm0.029\) bits per rotor after \(D_rt=625\), so a single
+\(N=1024\) layer still holds \(303\pm30\) bits, one fifth of the
+\(1.481\pm0.051\) bits per rotor present while the field is applied. The
+matched \(g=0\) control retains \(7\times10^{-5}\) bits per rotor. Device
+endurance and spatial addressability remain to be measured.
 
 The Supplemental Material gives a second, experimentally programmable
 construction. A mosaic of shallow grooves or patterned easy axes prescribes

@@ -206,7 +206,10 @@ def main() -> None:
     fig.savefig(stem.with_suffix(".png"), bbox_inches="tight", facecolor="white", dpi=400)
     plt.close(fig)
 
-    reference_times = [value for value in SURFACE_REFERENCE_TIMES if value <= tmax + 1e-9]
+    # Always record the observed endpoint: Q_split(T_obs) is the window-independent
+    # companion to the bounded statistic in panel (b).
+    reference_times = [value for value in SURFACE_REFERENCE_TIMES if value < tmax - 1e-9]
+    reference_times.append(float(tmax))
     surface = {
         f"{lam:g}": np.interp(reference_times, time_grid, retention[index]).tolist()
         for index, lam in enumerate(lambdas)

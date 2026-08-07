@@ -175,6 +175,72 @@ The two-time autocorrelation following a random-state quench is
 Waiting-time dependence at a fixed lag is an aging diagnostic.  It does not,
 by itself, establish a thermodynamic glass transition.
 
+Each quenched graph carries its own offset in \(C_{\rm age}\), so the
+waiting-time effect is resolved by the paired increment
+\begin{equation}
+ \Delta C_{\rm age}=
+ C_{\rm age}(t_w^{\rm late}+\Delta t,t_w^{\rm late})-
+ C_{\rm age}(t_w^{\rm early}+\Delta t,t_w^{\rm early}),
+ \label{eq:supp-paired-aging}
+\end{equation}
+evaluated graph by graph before averaging.  At \(D_r\Delta t=30\),
+\(D_rt_w^{\rm early}=62.5\) and \(D_rt_w^{\rm late}=375\), the three graphs
+give \(+0.0262,+0.0232,+0.0266\), so
+\(\Delta C_{\rm age}=+0.0253\pm0.0019\).  The unpaired between-graph standard
+deviation of \(C_{\rm age}\) itself is 0.006, three times the increment, which
+is why the paired form is reported in the Letter.
+
+\section{Retained information}
+
+The write--release--read and split-replica overlaps measure a mean resultant
+of the doubled angle, \(R=\langle\cos2\Delta\theta\rangle\), where
+\(\Delta\theta\) is the per-particle angular error against the reference
+state.  Because only \(R\) is measured, we bound the retained information by
+the maximum-entropy distribution consistent with it.  On the circle of the
+doubled angle this is the von Mises density with concentration \(\kappa\)
+fixed by
+\begin{equation}
+ \frac{I_1(\kappa)}{I_0(\kappa)}=R,
+ \label{eq:supp-vonmises}
+\end{equation}
+where \(I_n\) is a modified Bessel function.  Its differential entropy is
+\(H=\ln[2\pi I_0(\kappa)]-\kappa I_1(\kappa)/I_0(\kappa)\), so the information
+retained per rotor relative to a uniform angle is
+\begin{equation}
+ \mathcal I=\ln 2\pi-H=
+ \kappa\frac{I_1(\kappa)}{I_0(\kappa)}-\ln I_0(\kappa)
+ \quad\text{nats.}
+ \label{eq:supp-capacity}
+\end{equation}
+Maximizing the entropy at fixed \(R\) minimizes \(\mathcal I\), so
+Eq.~\eqref{eq:supp-capacity} is a lower bound.  It also assumes the angular
+error is statistically identical across particles; the archived runs store the
+particle-averaged overlap only, so a particle-resolved release trajectory
+would replace this bound by a direct estimate.
+
+\begin{table}[ht]
+\centering
+\caption{Retained information at \(N=1024\), \(J=4\), \(g=5\).  Values are
+means over three quenched graphs, with standard deviations obtained by
+evaluating Eq.~\eqref{eq:supp-capacity} for each graph separately.}
+\label{tab:supp-capacity}
+\begin{ruledtabular}
+\begin{tabular}{lccc}
+state & \(R\) & bits per rotor & bits per layer\\
+\hline
+written, field applied & \(0.863\pm0.009\) & \(1.481\pm0.051\) & \(1517\pm52\)\\
+written, \(D_rt=625\) after removal & \(0.441\pm0.021\) & \(0.296\pm0.029\) & \(303\pm30\)\\
+split replicas, \(D_rt=625\) & \(0.462\pm0.010\) & \(0.327\pm0.016\) & \(334\pm16\)\\
+\(g=0\) written, \(D_rt=625\) & \(0.006\pm0.004\) & \(7\times10^{-5}\) & \(0.07\)\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+One fifth of the written information survives the field-free interval, while
+the matched \(g=0\) control retains none of it.  This is a capacity of the
+prepared state under the present protocol, not a device specification: it
+assumes a perfect particle-resolved readout and a single write.
+
 \section{Finite-size state diagram and spatial correlations}
 
 The state diagram in the Letter contains 441 coupling cells on a
@@ -325,7 +391,12 @@ shuffled bond frames &
 The regular lattice demonstrates that high persistence alone does not imply
 hidden memory: it has a unique macroscopic director and \(S\simeq0.96\).
 The \(g=0\) graph demonstrates that disorder plus first-shell alignment does
-not account for the observed persistence.  Shuffling \(\phi_{ij}\) among
+not account for the observed persistence.  Table~\ref{tab:supp-controls} also
+shows that the bond-frame term is not an additional ordering field: removing
+it \emph{raises} \(S\) from 0.0665 to 0.131 and \(C_2\) from 0.627 to 0.813
+on the same graphs.  The capillary coupling competes with the alignment
+harmonic, and the memory appears together with the suppression of both the
+common director and the neighbour correlation.  Shuffling \(\phi_{ij}\) among
 fixed edges preserves the one-edge angle and weight distributions but
 destroys their geometric embedding.  Its stronger persistence is consistent
 with increased random-bond frustration.  It is a useful upper-frustration
@@ -441,6 +512,12 @@ give
 respectively.  The corresponding largest-size susceptibilities are 1.74,
 7.10, and 7.78; they remain finite as \(N\) grows.  The \(\xi_L/L\) curves
 decrease with size and do not share a crossing over the scanned interval.
+The unnormalized length is itself short.  Over all 40 coupling--size cells,
+the graph-averaged \(\xi_L\) lies between \(0.15a\) and \(1.49a\), and no
+single graph exceeds \(2.78a\).  The overlap correlation length therefore
+agrees with the independent real-space estimate \(r/a\simeq1.73\) obtained
+from \(C_2(r)\) and \(G_2(r)\), although the two are measured from different
+observables on different runs.
 Thus the large finite-window \(q_{\rm EA}\) measures slow trajectory memory,
 not an equilibrium Edwards--Anderson order parameter.  The distinction is
 important: the write--release and split-replica protocols demonstrate

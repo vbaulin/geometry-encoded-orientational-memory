@@ -1,11 +1,11 @@
 # Capillary-pair PRL claim audit
 
-- Quantitative checks passed: `70/70`
+- Quantitative checks passed: `82/82`
 - All quantitative checks passed: `True`
 - Required local artifacts present: `True`
-- Activated-memory raw JSONL present locally: `False`
-- Raw activated-memory shards reproduce the derived report: `False`
-- Fig. 4(c) window statistics recorded: `False`
+- Activated-memory raw JSONL present locally: `True`
+- Raw activated-memory shards reproduce the derived report: `True`
+- Fig. 4(c) window statistics recorded: `True`
 - Language gates passed: `True`
 
 The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, and coupling-dependent finite-window integrated overlap.

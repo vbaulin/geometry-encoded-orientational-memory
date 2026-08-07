@@ -108,7 +108,7 @@ https://github.com/vbaulin/{REPOSITORY_NAME}.
 - `raw/equilibrium_replica_discriminant/`: independent-replica finite-size scan.
 - `raw/capillary_internal_correlations/`: real-space correlation analysis.
 - `raw/grooved/`: programmable easy-axis realization reported in the Supplement.
-- `derived/`: figure summaries and the exact 70-check numerical audit.
+- `derived/`: figure summaries and the exact 82-check numerical audit.
 - `manifest.json` and `SHA256SUMS`: file-level provenance and integrity checks.
 
 ## Missing required sources

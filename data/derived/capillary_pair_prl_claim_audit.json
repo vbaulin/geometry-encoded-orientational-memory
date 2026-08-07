@@ -563,18 +563,182 @@
       "expected": 53.877162532310045,
       "passed": true,
       "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.02530401211798668,
+      "claim": "paired aging increment mean",
+      "expected": 0.02530401211798668,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0018613104549769866,
+      "claim": "paired aging increment graph SD",
+      "expected": 0.0018613104549769866,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 3,
+      "claim": "graphs with positive aging increment",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.4811116497946106,
+      "claim": "retained bits per rotor, write field applied",
+      "expected": 1.4811116497946106,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.29580233998316197,
+      "claim": "retained bits per rotor, written state released",
+      "expected": 0.29580233998316197,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.32661562528973526,
+      "claim": "retained bits per rotor, split replicas",
+      "expected": 0.32661562528973526,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 6.572039757639629e-05,
+      "claim": "retained bits per rotor, g=0 written state",
+      "expected": 6.572039757639629e-05,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.4893358730245692,
+      "claim": "max graph-averaged overlap length xi_L",
+      "expected": 1.4893358730245692,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.1311428920457058,
+      "claim": "g=0 S_mean",
+      "expected": 0.1311428920457058,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.010123705266531027,
+      "claim": "g=0 S_mean graph SD",
+      "expected": 0.010123705266531027,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.8128899338103832,
+      "claim": "g=0 C2_mean",
+      "expected": 0.8128899338103832,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.002853034994366132,
+      "claim": "g=0 C2_mean graph SD",
+      "expected": 0.002853034994366132,
+      "passed": true,
+      "tolerance": 1e-12
     }
   ],
   "provenance": {
-    "activated_memory_raw_jsonl": [],
-    "activated_memory_raw_jsonl_present": false,
+    "activated_memory_raw_jsonl": [
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_17_97/activated_memory_scan.jsonl",
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_29/activated_memory_scan.jsonl",
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_43/activated_memory_scan.jsonl",
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_71/activated_memory_scan.jsonl"
+    ],
+    "activated_memory_raw_jsonl_present": true,
     "activated_memory_reproduction": {
-      "raw_reproduces_derived_report": false,
-      "reason": "raw activated_memory_scan.jsonl shards are absent on this host"
+      "lambdas_match_report": true,
+      "max_relative_deviation": 2.452390756658553e-16,
+      "raw_graphs_per_lambda": {
+        "0.3": 5,
+        "0.45": 5,
+        "0.6": 5,
+        "0.75": 5,
+        "0.9": 5,
+        "1.05": 5,
+        "1.2": 5,
+        "1.4": 5
+      },
+      "raw_lambdas": [
+        0.3,
+        0.45,
+        0.6,
+        0.75,
+        0.9,
+        1.05,
+        1.2,
+        1.4
+      ],
+      "raw_reproduces_derived_report": true,
+      "raw_rows": 40,
+      "row_count_matches_report": true,
+      "series_absent_from_report": []
     },
     "activated_memory_window_statistics": {
-      "reason": "report predates the panel (c) window statistics; rebuild Fig. 4 to record them",
-      "recorded_for_all_lambdas": false
+      "longest_window": {
+        "0.3": {
+          "q_EA_mean": 0.006598518117674512,
+          "q_EA_sem": 0.0001756447981157214,
+          "window": 624.5
+        },
+        "0.45": {
+          "q_EA_mean": 0.053103320305736244,
+          "q_EA_sem": 0.0023686868612739142,
+          "window": 624.5
+        },
+        "0.6": {
+          "q_EA_mean": 0.22371609202165638,
+          "q_EA_sem": 0.006988068452142999,
+          "window": 624.5
+        },
+        "0.75": {
+          "q_EA_mean": 0.42725785936129734,
+          "q_EA_sem": 0.010342948881219559,
+          "window": 624.5
+        },
+        "0.9": {
+          "q_EA_mean": 0.574857541000689,
+          "q_EA_sem": 0.00958615523836958,
+          "window": 624.5
+        },
+        "1.05": {
+          "q_EA_mean": 0.6674729849719183,
+          "q_EA_sem": 0.010226208390466222,
+          "window": 624.5
+        },
+        "1.2": {
+          "q_EA_mean": 0.7263795984368324,
+          "q_EA_sem": 0.008616077075649852,
+          "window": 624.5
+        },
+        "1.4": {
+          "q_EA_mean": 0.776188858997393,
+          "q_EA_sem": 0.007173486900601567,
+          "window": 624.5
+        }
+      },
+      "recorded_for_all_lambdas": true
     },
     "all_language_gates_passed": true,
     "language_gates": {
@@ -1148,8 +1312,102 @@
       "expected": 53.877162532310045,
       "passed": true,
       "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.02530401211798668,
+      "claim": "paired aging increment mean",
+      "expected": 0.02530401211798668,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0018613104549769866,
+      "claim": "paired aging increment graph SD",
+      "expected": 0.0018613104549769866,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 3,
+      "claim": "graphs with positive aging increment",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.4811116497946106,
+      "claim": "retained bits per rotor, write field applied",
+      "expected": 1.4811116497946106,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.29580233998316197,
+      "claim": "retained bits per rotor, written state released",
+      "expected": 0.29580233998316197,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.32661562528973526,
+      "claim": "retained bits per rotor, split replicas",
+      "expected": 0.32661562528973526,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 6.572039757639629e-05,
+      "claim": "retained bits per rotor, g=0 written state",
+      "expected": 6.572039757639629e-05,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.4893358730245692,
+      "claim": "max graph-averaged overlap length xi_L",
+      "expected": 1.4893358730245692,
+      "passed": true,
+      "tolerance": 1e-10
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.1311428920457058,
+      "claim": "g=0 S_mean",
+      "expected": 0.1311428920457058,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.010123705266531027,
+      "claim": "g=0 S_mean graph SD",
+      "expected": 0.010123705266531027,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.8128899338103832,
+      "claim": "g=0 C2_mean",
+      "expected": 0.8128899338103832,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.002853034994366132,
+      "claim": "g=0 C2_mean graph SD",
+      "expected": 0.002853034994366132,
+      "passed": true,
+      "tolerance": 1e-12
     }
   ],
-  "quantitative_checks_passed": 70,
-  "quantitative_checks_total": 70
+  "quantitative_checks_passed": 82,
+  "quantitative_checks_total": 82
 }

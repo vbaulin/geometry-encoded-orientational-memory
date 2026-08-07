@@ -19,10 +19,10 @@ regime, global nematic order and independently equilibrated replica overlap
 decrease approximately as `N^-1/2`, while local pair correlations and
 finite-window persistence remain finite. Split descendants of one prepared
 state retain overlap to the longest simulated time. These statements are
-checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 70
+checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 82
 frozen numerical expectations.
 
-The audit separates numerical checks from provenance. A `70/70` numerical
+The audit separates numerical checks from provenance. A `82/82` numerical
 result does not make the release complete unless the raw
 `activated_memory_scan.jsonl` shards used for Fig. 4 are installed from the
 data deposit.
@@ -60,7 +60,7 @@ MPLCONFIGDIR=/tmp/orientational-memory-mpl \
 python -B scripts/audit_rotating_colloids_capillary_prl.py
 ```
 
-Expected result: `70/70` quantitative checks, all language gates passed, and
+Expected result: `82/82` quantitative checks, all language gates passed, and
 the activated-memory raw provenance gate present after data installation.
 
 ## Rebuild figures
