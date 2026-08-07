@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""Compare retention protocols across positional-disorder amplitudes.
+
+The static disorder scan measures the finite-window persistence q_EA, not
+retention. This script reduces the split-replica and write-release-read
+protocols run at two or more disorder amplitudes to the endpoint overlaps and
+the information they imply, so that the collapse of the global director can be
+compared against what is actually retained.
+
+Note that `rotating_colloids_capillary_pair.py --skip-scan` builds its graph
+from the FIRST entry of --graph-seeds only. One output directory therefore
+holds one quenched graph; run it once per seed into separate directories to
+obtain graph-to-graph error bars.
+
+    python -B scripts/analyze_rotating_colloids_disorder_protocols.py \
+      --input-dir colloid --output-dir colloid/analysis
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+
+
+def retained_bits(resultant: float) -> float:
+    """Lower bound on information retained per rotor, in bits.
+
+    Maximum-entropy (von Mises) density on the circle of the doubled angle at
+    fixed mean resultant. Maximizing entropy minimizes information, so this is
+    a bound rather than an estimate.
+    """
+
+    from scipy.optimize import brentq
+    from scipy.special import i0, i1
+
+    if resultant <= 1e-12:
+        return 0.0
+    kappa = brentq(lambda k: i1(k) / i0(k) - resultant, 1e-12, 700.0)
+    return float((kappa * (i1(kappa) / i0(kappa)) - math.log(i0(kappa))) / math.log(2.0))
+
+
+def summarize(run: dict[str, Any]) -> dict[str, float]:
+    release_time = np.asarray(run["write_release"]["release_time"], dtype=float)
+    return {
+        "split_end": float(run["split_replica"]["overlap_mean"][-1]),
+        "split_time": float(run["split_replica"]["time"][-1]),
+        "write_on": float(run["write_release"]["write_overlap"][-1]),
+        "write_end": float(run["write_release"]["release_overlap"][-1]),
+        "release_span": float(release_time[-1] - release_time[0]),
+        "S_end": float(run["write_release"]["release_S"][-1]),
+        "G2_end": float(run["write_release"]["release_G2"][-1]),
+        "no_capillary_split_end": float(run["no_capillary_split_replica"]["overlap_mean"][-1]),
+        "no_capillary_write_end": float(run["no_capillary_write_release"]["release_overlap"][-1]),
+    }
+
+
+def mean_sd(values) -> tuple[float, float]:
+    array = np.asarray(list(values), dtype=float)
+    if array.size < 2:
+        return float(array.mean()), float("nan")
+    return float(array.mean()), float(array.std(ddof=1))
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input-dir", required=True, type=Path)
+    parser.add_argument("--output-dir", required=True, type=Path)
+    args = parser.parse_args()
+
+    paths = sorted(args.input_dir.glob("**/capillary_pair_protocols.json"))
+    if not paths:
+        raise SystemExit(
+            f"no capillary_pair_protocols.json under {args.input_dir}\n"
+            "Point --input-dir at the parent of the protocol run directories."
+        )
+
+    groups: dict[float, list[dict[str, Any]]] = {}
+    seeds: dict[float, list[int]] = {}
+    for path in paths:
+        run = json.loads(path.read_text(encoding="utf-8"))
+        graph = run["model"]["graph"]
+        amplitude = float(graph["disorder"])
+        groups.setdefault(amplitude, []).append(summarize(run))
+        seeds.setdefault(amplitude, []).append(int(graph["seed"]))
+
+    amplitudes = sorted(groups)
+    table = []
+    for amplitude in amplitudes:
+        block = groups[amplitude]
+        entry: dict[str, Any] = {
+            "disorder": amplitude,
+            "graphs": len(block),
+            "graph_seeds": sorted(seeds[amplitude]),
+        }
+        for field in (
+            "split_end", "write_on", "write_end", "S_end", "G2_end",
+            "no_capillary_split_end", "no_capillary_write_end",
+        ):
+            mean, sd = mean_sd(item[field] for item in block)
+            entry[field] = {"mean": mean, "graph_sd": sd}
+        bits = [retained_bits(max(item["write_end"], 0.0)) for item in block]
+        mean, sd = mean_sd(bits)
+        entry["retained_bits_per_rotor"] = {"mean": mean, "graph_sd": sd}
+        entry["observation_time"] = block[0]["split_time"]
+        table.append(entry)
+
+    single_graph = [entry["disorder"] for entry in table if entry["graphs"] < 2]
+
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    report = {
+        "amplitudes": amplitudes,
+        "table": table,
+        "single_graph_amplitudes": single_graph,
+        "graph_error_bars_available": not single_graph,
+    }
+    if len(table) >= 2:
+        low, high = table[0], table[-1]
+        report["endpoints"] = {
+            "low_disorder": low["disorder"],
+            "high_disorder": high["disorder"],
+            "S_ratio": low["S_end"]["mean"] / max(high["S_end"]["mean"], 1e-12),
+            "split_ratio": low["split_end"]["mean"] / max(high["split_end"]["mean"], 1e-12),
+            "write_ratio": low["write_end"]["mean"] / max(high["write_end"]["mean"], 1e-12),
+        }
+    (args.output_dir / "disorder_protocol_report.json").write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8"
+    )
+
+    header = (
+        f"{'sigma/a':>8} {'n':>2} {'S_end':>8} {'Q_split':>9} {'Q_write':>9} "
+        f"{'g0_split':>9} {'g0_write':>9} {'bits/rotor':>11}"
+    )
+    print(header)
+    print("-" * len(header))
+    for entry in table:
+        print(
+            f"{entry['disorder']:>8g} {entry['graphs']:>2} "
+            f"{entry['S_end']['mean']:>8.4f} {entry['split_end']['mean']:>9.4f} "
+            f"{entry['write_end']['mean']:>9.4f} "
+            f"{entry['no_capillary_split_end']['mean']:>9.4f} "
+            f"{entry['no_capillary_write_end']['mean']:>9.4f} "
+            f"{entry['retained_bits_per_rotor']['mean']:>11.4f}"
+        )
+    print()
+    if single_graph:
+        print(
+            "WARNING: one quenched graph only at sigma/a = "
+            + ", ".join(f"{value:g}" for value in single_graph)
+            + "; no graph-to-graph error bars. Rerun once per seed into separate "
+            "output directories."
+        )
+    print(json.dumps({
+        "output_dir": str(args.output_dir),
+        "observation_time_D_r_t": table[0]["observation_time"],
+        "endpoints": report.get("endpoints"),
+        "graph_error_bars_available": report["graph_error_bars_available"],
+    }, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()
