@@ -27,6 +27,7 @@ DATA = ROOT / "discoveries/theory_experiment_interface/rotating_colloids_hyperio
 GPU = DATA / "rotating_colloids_capillary_pair_prl_gpu"
 OUT = DATA / "rotating_colloids_capillary_pair_prl_claim_audit"
 MAIN_TEX = ROOT / "tex/rotating_colloids/rotating_colloids_prl_capillary.tex"
+SUPPLEMENT_TEX = ROOT / "tex/rotating_colloids/rotating_colloids_prl_capillary_supplement.tex"
 FIGURES = ROOT / "tex/rotating_colloids/capillary_prl_figures"
 
 DENSE = GPU / "dense_map_n20/capillary_pair_scan.jsonl"
@@ -105,6 +106,34 @@ def metric(row: dict[str, Any], name: str) -> float:
     if name == "replica_overlap_magnitude":
         return float(row["replica_overlap"]["magnitude_mean"])
     return float(row[name])
+
+
+def supplemental_figure_map(supplement: Path, letter_text: str) -> dict[str, Any]:
+    """Cross-check the Letter's hard-coded S-numbers against the Supplement.
+
+    The two documents compile separately, so the Letter refers to Supplemental
+    figures by literal number. Inserting a figure renumbers everything after
+    it without any LaTeX warning.
+    """
+
+    import re
+
+    labels = re.findall(r"\\label\{(fig:supp[^}]*)\}", supplement.read_text(encoding="utf-8"))
+    numbering = {f"S{index}": label for index, label in enumerate(labels, start=1)}
+    referenced = sorted({int(item) for item in re.findall(r"Figs?\.~S(\d+)", letter_text)})
+    referenced += [
+        int(item)
+        for item in re.findall(r"Figs\.~S\d+ and S(\d+)", letter_text)
+        if int(item) not in referenced
+    ]
+    out_of_range = [number for number in sorted(set(referenced)) if number > len(labels)]
+    return {
+        "supplemental_figure_count": len(labels),
+        "numbering": numbering,
+        "letter_references": sorted(set(referenced)),
+        "out_of_range_references": out_of_range,
+        "all_references_resolve": not out_of_range,
+    }
 
 
 def retained_bits(resultant: float) -> float:
@@ -419,6 +448,7 @@ def main() -> None:
         "activated_memory_raw_jsonl": [str(path) for path in activated_raw],
         "language_gates": language_gates,
         "all_language_gates_passed": all(language_gates.values()),
+        "supplemental_figure_references": supplemental_figure_map(SUPPLEMENT_TEX, text),
     }
     if activated_raw:
         provenance["activated_memory_reproduction"] = reproduce_activated_report(activated_raw, activated)

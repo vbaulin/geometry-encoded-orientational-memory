@@ -748,7 +748,29 @@
       "no_permanent_memory_claim": true
     },
     "missing_required_local_artifacts": [],
-    "required_local_artifacts_present": true
+    "required_local_artifacts_present": true,
+    "supplemental_figure_references": {
+      "all_references_resolve": true,
+      "letter_references": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "numbering": {
+        "S1": "fig:supp-state-space",
+        "S2": "fig:supp-internal",
+        "S3": "fig:supp-disorder",
+        "S4": "fig:supp-controls",
+        "S5": "fig:supp-spin-glass",
+        "S6": "fig:supp-groove-static",
+        "S7": "fig:supp-groove-dynamics"
+      },
+      "out_of_range_references": [],
+      "supplemental_figure_count": 7
+    }
   },
   "quantitative_checks": [
     {
