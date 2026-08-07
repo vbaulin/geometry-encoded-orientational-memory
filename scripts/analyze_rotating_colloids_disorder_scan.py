@@ -74,6 +74,11 @@ def main() -> None:
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--j-align", type=float, default=4.0)
     parser.add_argument("--g-capillary", type=float, default=5.0)
+    parser.add_argument(
+        "--node-count",
+        type=int,
+        help="Restrict to one rotor count. Required when the tree mixes sizes.",
+    )
     args = parser.parse_args()
 
     rows = [
@@ -86,6 +91,19 @@ def main() -> None:
     if not rows:
         raise SystemExit(f"no physical rows at J={args.j_align}, g={args.g_capillary}")
 
+    if args.node_count is not None:
+        rows = [row for row in rows if int(row["graph"]["node_count"]) == args.node_count]
+        if not rows:
+            raise SystemExit(f"no rows with node_count={args.node_count}")
+    sizes = sorted({int(row["graph"]["node_count"]) for row in rows})
+    if len(sizes) > 1:
+        # S and q_EA are size dependent, so pooling sizes into one disorder
+        # point would average incomparable quantities.
+        raise SystemExit(
+            f"input mixes rotor counts {sizes}; the scan must vary disorder at fixed size.\n"
+            f"Re-run with --node-count {sizes[0]} to select one."
+        )
+
     groups: dict[float, list[dict]] = defaultdict(list)
     for row in rows:
         groups[float(row["graph"]["disorder"])].append(row)
@@ -97,7 +115,9 @@ def main() -> None:
         entry: dict[str, object] = {
             "disorder": amplitude,
             "graphs": len(block),
-            "node_count": int(block[0]["node_count"]),
+            # Scan rows carry `n` at top level; the rotor count lives in the
+            # graph metadata block.
+            "node_count": int(block[0]["graph"]["node_count"]),
         }
         for name, _, _ in OBSERVABLES:
             mean, sd = mean_sd(row[name] for row in block)
