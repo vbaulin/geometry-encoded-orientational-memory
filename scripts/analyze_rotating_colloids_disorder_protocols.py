@@ -44,29 +44,46 @@ def retained_bits(resultant: float) -> float:
     return float((kappa * (i1(kappa) / i0(kappa)) - math.log(i0(kappa))) / math.log(2.0))
 
 
-def summarize(run: dict[str, Any]) -> dict[str, float]:
+def tail_mean(values, fraction: float) -> float:
+    """Average the last `fraction` of a slowly varying trajectory.
+
+    A single final sample of S or of the overlap is one configuration at one
+    time. Near the order-disorder crossover its scatter is dominated by
+    thermal fluctuation rather than by the quenched graph, which inflates the
+    apparent graph-to-graph spread.
+    """
+
+    array = np.asarray(values, dtype=float)
+    count = max(1, int(round(array.size * fraction)))
+    return float(array[-count:].mean())
+
+
+def summarize(run: dict[str, Any], fraction: float) -> dict[str, float]:
     release_time = np.asarray(run["write_release"]["release_time"], dtype=float)
     # Two replicas drawn from the same one-body angular distribution already
     # overlap by S^2 through the common director. The connected part is what
     # the director does not explain, and is the quantity the hidden-memory
     # claim rests on. release_S is recorded on the same release trajectory as
     # release_overlap, so the subtraction is matched for the written state.
-    final_S = float(run["write_release"]["release_S"][-1])
-    write_end = float(run["write_release"]["release_overlap"][-1])
-    split_end = float(run["split_replica"]["overlap_mean"][-1])
+    final_S = tail_mean(run["write_release"]["release_S"], fraction)
+    write_end = tail_mean(run["write_release"]["release_overlap"], fraction)
+    split_end = tail_mean(run["split_replica"]["overlap_mean"], fraction)
     return {
         "connected_write_end": write_end - final_S**2,
         # The split protocol does not record S; final_S is used as a proxy.
         "connected_split_end": split_end - final_S**2,
-        "split_end": float(run["split_replica"]["overlap_mean"][-1]),
+        "split_end": split_end,
         "split_time": float(run["split_replica"]["time"][-1]),
         "write_on": float(run["write_release"]["write_overlap"][-1]),
-        "write_end": float(run["write_release"]["release_overlap"][-1]),
+        "write_end": write_end,
         "release_span": float(release_time[-1] - release_time[0]),
-        "S_end": float(run["write_release"]["release_S"][-1]),
-        "G2_end": float(run["write_release"]["release_G2"][-1]),
-        "no_capillary_split_end": float(run["no_capillary_split_replica"]["overlap_mean"][-1]),
-        "no_capillary_write_end": float(run["no_capillary_write_release"]["release_overlap"][-1]),
+        "S_end": final_S,
+        "G2_end": tail_mean(run["write_release"]["release_G2"], fraction),
+        "no_capillary_split_end": tail_mean(run["no_capillary_split_replica"]["overlap_mean"], fraction),
+        "no_capillary_write_end": tail_mean(run["no_capillary_write_release"]["release_overlap"], fraction),
+        "final_sample_S": float(run["write_release"]["release_S"][-1]),
+        "final_sample_write": float(run["write_release"]["release_overlap"][-1]),
+        "final_sample_split": float(run["split_replica"]["overlap_mean"][-1]),
     }
 
 
@@ -81,6 +98,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
+    parser.add_argument(
+        "--tail-fraction",
+        type=float,
+        default=0.1,
+        help="Fraction of the trajectory tail to average. Use 0 for the final sample only.",
+    )
     args = parser.parse_args()
 
     paths = sorted(args.input_dir.glob("**/capillary_pair_protocols.json"))
@@ -97,7 +120,7 @@ def main() -> None:
         run = json.loads(path.read_text(encoding="utf-8"))
         graph = run["model"]["graph"]
         amplitude = float(graph["disorder"])
-        groups.setdefault(amplitude, []).append(summarize(run))
+        groups.setdefault(amplitude, []).append(summarize(run, args.tail_fraction))
         seeds.setdefault(amplitude, []).append(int(graph["seed"]))
         node_counts.setdefault(amplitude, []).append(int(graph["node_count"]))
 
@@ -113,6 +136,7 @@ def main() -> None:
         }
         for field in (
             "split_end", "write_on", "write_end", "S_end", "G2_end",
+            "final_sample_S", "final_sample_write", "final_sample_split",
             "connected_split_end", "connected_write_end",
             "no_capillary_split_end", "no_capillary_write_end",
         ):
@@ -132,6 +156,7 @@ def main() -> None:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     report = {
+        "tail_fraction": args.tail_fraction,
         "amplitudes": amplitudes,
         "table": table,
         "single_graph_amplitudes": single_graph,
@@ -201,6 +226,10 @@ def main() -> None:
     print(
         "Q-S^2 subtracts the overlap two replicas share through a common director; "
         "it is the hidden component."
+    )
+    print(
+        f"Values average the last {args.tail_fraction:.0%} of each trajectory; "
+        "a single final sample is one configuration at one time."
     )
     sizes = sorted({entry["node_count"] for entry in table})
     if len(sizes) > 1:
