@@ -159,23 +159,44 @@ def main() -> None:
         json.dumps(report, indent=2) + "\n", encoding="utf-8"
     )
 
+    def cell(entry: dict[str, Any], field: str) -> str:
+        block = entry[field]
+        if math.isnan(block["graph_sd"]):
+            return f"{block['mean']:.4f}"
+        return f"{block['mean']:.4f}+-{block['graph_sd']:.4f}"
+
     header = (
-        f"{'sigma/a':>8} {'n':>2} {'S_end':>8} {'Q_write':>9} {'Q-S^2':>9} "
-        f"{'Q_split':>9} {'Qs-S^2':>9} {'g0_write':>9} {'bits raw':>9} {'bits conn':>10}"
+        f"{'sigma/a':>8} {'n':>2} {'S_end':>16} {'Q_write':>16} {'Q-S^2':>16} "
+        f"{'Qs-S^2':>16} {'bits conn':>16}"
     )
     print(header)
     print("-" * len(header))
     for entry in table:
         print(
             f"{entry['disorder']:>8g} {entry['graphs']:>2} "
-            f"{entry['S_end']['mean']:>8.4f} {entry['write_end']['mean']:>9.4f} "
-            f"{entry['connected_write_end']['mean']:>9.4f} "
-            f"{entry['split_end']['mean']:>9.4f} "
-            f"{entry['connected_split_end']['mean']:>9.4f} "
-            f"{entry['no_capillary_write_end']['mean']:>9.4f} "
-            f"{entry['retained_bits_per_rotor']['mean']:>9.4f} "
-            f"{entry['connected_bits_per_rotor']['mean']:>10.4f}"
+            f"{cell(entry, 'S_end'):>16} {cell(entry, 'write_end'):>16} "
+            f"{cell(entry, 'connected_write_end'):>16} "
+            f"{cell(entry, 'connected_split_end'):>16} "
+            f"{cell(entry, 'connected_bits_per_rotor'):>16}"
         )
+    print()
+    # Differences are only worth reading against the graph-to-graph spread,
+    # which is largest near the order-disorder crossover.
+    if len(table) >= 2:
+        low, high = table[0], table[-1]
+        for field, label in (
+            ("connected_write_end", "connected written overlap"),
+            ("connected_bits_per_rotor", "connected bits per rotor"),
+        ):
+            difference = high[field]["mean"] - low[field]["mean"]
+            spread = max(
+                (value for value in (low[field]["graph_sd"], high[field]["graph_sd"]) if not math.isnan(value)),
+                default=float("nan"),
+            )
+            verdict = "" if math.isnan(spread) else (
+                "  RESOLVED" if abs(difference) > 2.0 * spread else "  NOT RESOLVED at 2 graph SD"
+            )
+            print(f"  {label}: {difference:+.4f} across the scanned range, largest graph SD {spread:.4f}{verdict}")
     print()
     print(
         "Q-S^2 subtracts the overlap two replicas share through a common director; "
