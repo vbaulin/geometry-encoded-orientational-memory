@@ -150,6 +150,16 @@ def main() -> None:
             mean, sd = mean_sd(bits)
             entry[label] = {"mean": mean, "graph_sd": sd}
         entry["observation_time"] = block[0]["split_time"]
+        # Keep the individual graphs. A wide spread can mean a broad unimodal
+        # distribution or a split between graphs that order and graphs that do
+        # not; only the individual values distinguish them.
+        order = np.argsort(seeds[amplitude])
+        entry["per_graph"] = {
+            "graph_seed": [seeds[amplitude][index] for index in order],
+            "S_end": [block[index]["S_end"] for index in order],
+            "write_end": [block[index]["write_end"] for index in order],
+            "connected_write_end": [block[index]["connected_write_end"] for index in order],
+        }
         table.append(entry)
 
     single_graph = [entry["disorder"] for entry in table if entry["graphs"] < 2]
@@ -231,6 +241,16 @@ def main() -> None:
         f"Values average the last {args.tail_fraction:.0%} of each trajectory; "
         "a single final sample is one configuration at one time."
     )
+    print()
+    print("Per graph (a wide spread may be one broad distribution or a split between states):")
+    print(f"  {'sigma/a':>8} {'seed':>6} {'S_end':>9} {'Q_write':>9} {'Q-S^2':>9}")
+    for entry in table:
+        block = entry["per_graph"]
+        for index, seed in enumerate(block["graph_seed"]):
+            print(
+                f"  {entry['disorder']:>8g} {seed:>6} {block['S_end'][index]:>9.4f} "
+                f"{block['write_end'][index]:>9.4f} {block['connected_write_end'][index]:>9.4f}"
+            )
     sizes = sorted({entry["node_count"] for entry in table})
     if len(sizes) > 1:
         print(f"WARNING: amplitudes span rotor counts {sizes}; S is size dependent, so the")
