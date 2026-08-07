@@ -46,7 +46,18 @@ def retained_bits(resultant: float) -> float:
 
 def summarize(run: dict[str, Any]) -> dict[str, float]:
     release_time = np.asarray(run["write_release"]["release_time"], dtype=float)
+    # Two replicas drawn from the same one-body angular distribution already
+    # overlap by S^2 through the common director. The connected part is what
+    # the director does not explain, and is the quantity the hidden-memory
+    # claim rests on. release_S is recorded on the same release trajectory as
+    # release_overlap, so the subtraction is matched for the written state.
+    final_S = float(run["write_release"]["release_S"][-1])
+    write_end = float(run["write_release"]["release_overlap"][-1])
+    split_end = float(run["split_replica"]["overlap_mean"][-1])
     return {
+        "connected_write_end": write_end - final_S**2,
+        # The split protocol does not record S; final_S is used as a proxy.
+        "connected_split_end": split_end - final_S**2,
         "split_end": float(run["split_replica"]["overlap_mean"][-1]),
         "split_time": float(run["split_replica"]["time"][-1]),
         "write_on": float(run["write_release"]["write_overlap"][-1]),
@@ -81,12 +92,14 @@ def main() -> None:
 
     groups: dict[float, list[dict[str, Any]]] = {}
     seeds: dict[float, list[int]] = {}
+    node_counts: dict[float, list[int]] = {}
     for path in paths:
         run = json.loads(path.read_text(encoding="utf-8"))
         graph = run["model"]["graph"]
         amplitude = float(graph["disorder"])
         groups.setdefault(amplitude, []).append(summarize(run))
         seeds.setdefault(amplitude, []).append(int(graph["seed"]))
+        node_counts.setdefault(amplitude, []).append(int(graph["node_count"]))
 
     amplitudes = sorted(groups)
     table = []
@@ -96,16 +109,22 @@ def main() -> None:
             "disorder": amplitude,
             "graphs": len(block),
             "graph_seeds": sorted(seeds[amplitude]),
+            "node_count": node_counts[amplitude][0],
         }
         for field in (
             "split_end", "write_on", "write_end", "S_end", "G2_end",
+            "connected_split_end", "connected_write_end",
             "no_capillary_split_end", "no_capillary_write_end",
         ):
             mean, sd = mean_sd(item[field] for item in block)
             entry[field] = {"mean": mean, "graph_sd": sd}
-        bits = [retained_bits(max(item["write_end"], 0.0)) for item in block]
-        mean, sd = mean_sd(bits)
-        entry["retained_bits_per_rotor"] = {"mean": mean, "graph_sd": sd}
+        for label, field in (
+            ("retained_bits_per_rotor", "write_end"),
+            ("connected_bits_per_rotor", "connected_write_end"),
+        ):
+            bits = [retained_bits(max(item[field], 0.0)) for item in block]
+            mean, sd = mean_sd(bits)
+            entry[label] = {"mean": mean, "graph_sd": sd}
         entry["observation_time"] = block[0]["split_time"]
         table.append(entry)
 
@@ -126,26 +145,46 @@ def main() -> None:
             "S_ratio": low["S_end"]["mean"] / max(high["S_end"]["mean"], 1e-12),
             "split_ratio": low["split_end"]["mean"] / max(high["split_end"]["mean"], 1e-12),
             "write_ratio": low["write_end"]["mean"] / max(high["write_end"]["mean"], 1e-12),
+            # The claim is about the director-free component, so this ratio is
+            # reported high-over-low: it should exceed one if disorder builds
+            # memory rather than merely destroying order.
+            "connected_write_gain": (
+                high["connected_write_end"]["mean"] / max(low["connected_write_end"]["mean"], 1e-12)
+            ),
+            "connected_bits_gain": (
+                high["connected_bits_per_rotor"]["mean"] / max(low["connected_bits_per_rotor"]["mean"], 1e-12)
+            ),
         }
     (args.output_dir / "disorder_protocol_report.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"
     )
 
     header = (
-        f"{'sigma/a':>8} {'n':>2} {'S_end':>8} {'Q_split':>9} {'Q_write':>9} "
-        f"{'g0_split':>9} {'g0_write':>9} {'bits/rotor':>11}"
+        f"{'sigma/a':>8} {'n':>2} {'S_end':>8} {'Q_write':>9} {'Q-S^2':>9} "
+        f"{'Q_split':>9} {'Qs-S^2':>9} {'g0_write':>9} {'bits raw':>9} {'bits conn':>10}"
     )
     print(header)
     print("-" * len(header))
     for entry in table:
         print(
             f"{entry['disorder']:>8g} {entry['graphs']:>2} "
-            f"{entry['S_end']['mean']:>8.4f} {entry['split_end']['mean']:>9.4f} "
-            f"{entry['write_end']['mean']:>9.4f} "
-            f"{entry['no_capillary_split_end']['mean']:>9.4f} "
+            f"{entry['S_end']['mean']:>8.4f} {entry['write_end']['mean']:>9.4f} "
+            f"{entry['connected_write_end']['mean']:>9.4f} "
+            f"{entry['split_end']['mean']:>9.4f} "
+            f"{entry['connected_split_end']['mean']:>9.4f} "
             f"{entry['no_capillary_write_end']['mean']:>9.4f} "
-            f"{entry['retained_bits_per_rotor']['mean']:>11.4f}"
+            f"{entry['retained_bits_per_rotor']['mean']:>9.4f} "
+            f"{entry['connected_bits_per_rotor']['mean']:>10.4f}"
         )
+    print()
+    print(
+        "Q-S^2 subtracts the overlap two replicas share through a common director; "
+        "it is the hidden component."
+    )
+    sizes = sorted({entry["node_count"] for entry in table})
+    if len(sizes) > 1:
+        print(f"WARNING: amplitudes span rotor counts {sizes}; S is size dependent, so the")
+        print("         amplitudes are not directly comparable. Rerun at one size.")
     print()
     if single_graph:
         print(
