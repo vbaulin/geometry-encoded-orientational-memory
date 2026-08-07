@@ -127,7 +127,23 @@ def main() -> None:
             entry[name] = {"mean": mean, "graph_sd": sd}
         table.append(entry)
 
+    # q_EA alone does not identify hidden memory: the undistorted lattice
+    # reaches q_EA = 0.818 with S = 0.945, which is a conventional director.
+    # The hidden-memory diagnostic is the joint condition defined in the
+    # Supplement, H = (1 - S) * min(C2+, G2+, q_EA).
+    for entry in table:
+        positives = [
+            max(entry["C2_mean"]["mean"], 0.0),
+            max(entry["G2_mean"]["mean"], 0.0),
+            max(entry["q_EA_mean"]["mean"], 0.0),
+        ]
+        entry["hidden_memory_score"] = {
+            "mean": (1.0 - entry["S_mean"]["mean"]) * min(positives),
+            "definition": "(1 - S) * min(C2+, G2+, q_EA)",
+        }
+
     peak = max(table, key=lambda item: item["q_EA_mean"]["mean"])
+    hidden_peak = max(table, key=lambda item: item["hidden_memory_score"]["mean"])
     minimum_order = min(table, key=lambda item: item["S_mean"]["mean"])
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -154,15 +170,17 @@ def main() -> None:
     ax.grid(alpha=0.15, lw=0.5)
 
     ax = axes[1]
-    harmonic = [item["bond_frame_fourth_harmonic"]["mean"] for item in table]
-    ax.plot(amplitudes, harmonic, color="#444444", marker="s", ms=3.2, lw=1.2)
-    ax.set(
-        xlabel=r"positional disorder $\sigma/a$",
-        ylabel=r"$|\langle e^{4i\phi_{ij}}\rangle_E|$",
-        title="residual bond-angle anisotropy",
-        yscale="log",
-    )
+    score = [item["hidden_memory_score"]["mean"] for item in table]
+    ax.plot(amplitudes, score, color="#7b3294", marker="o", ms=3.2, lw=1.2, label=r"$\mathcal{H}=(1-S)\min(C_2^+,G_2^+,q_{\rm EA})$")
+    ax.set(xlabel=r"positional disorder $\sigma/a$", ylabel=r"hidden-memory score $\mathcal{H}$", title="joint criterion")
     ax.grid(alpha=0.15, lw=0.5)
+    twin = ax.twinx()
+    harmonic = [item["bond_frame_fourth_harmonic"]["mean"] for item in table]
+    twin.plot(amplitudes, harmonic, color="#999999", marker="s", ms=3.0, lw=1.0, ls="--")
+    twin.set_ylabel(r"$|\langle e^{4i\phi_{ij}}\rangle_E|$", color="#777777")
+    twin.set_yscale("log")
+    twin.tick_params(axis="y", colors="#777777")
+    ax.legend(frameon=False, loc="lower center", fontsize=6.0)
 
     for label, ax in zip("ab", axes):
         ax.text(0.02, 0.97, label, transform=ax.transAxes, va="top", ha="left", fontweight="bold", fontsize=9.5)
@@ -179,19 +197,48 @@ def main() -> None:
         "disorder_amplitudes": amplitudes,
         "graphs_per_amplitude": {f"{value:g}": len(groups[value]) for value in amplitudes},
         "table": table,
-        "peak_persistence": {"disorder": peak["disorder"], "q_EA_mean": peak["q_EA_mean"]["mean"]},
+        "peak_persistence": {
+            "disorder": peak["disorder"],
+            "q_EA_mean": peak["q_EA_mean"]["mean"],
+            "note": "q_EA alone is not the hidden-memory criterion; see hidden_memory_peak.",
+        },
+        "hidden_memory_peak": {
+            "disorder": hidden_peak["disorder"],
+            "score": hidden_peak["hidden_memory_score"]["mean"],
+            "S_mean": hidden_peak["S_mean"]["mean"],
+            "q_EA_mean": hidden_peak["q_EA_mean"]["mean"],
+        },
         "minimum_global_order": {"disorder": minimum_order["disorder"], "S_mean": minimum_order["S_mean"]["mean"]},
         "interior_maximum": bool(
+            hidden_peak["disorder"] not in (amplitudes[0], amplitudes[-1])
+        ),
+        "persistence_interior_maximum": bool(
             peak["disorder"] not in (amplitudes[0], amplitudes[-1])
         ),
     }
     (args.output_dir / "disorder_scan_report.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"
     )
+
+    header = f"{'sigma/a':>8} {'S':>16} {'C2':>16} {'G2':>16} {'q_EA':>16} {'H':>7} {'|<e4iphi>|':>11}"
+    print(header)
+    print("-" * len(header))
+    for entry in table:
+        def cell(name: str) -> str:
+            return f"{entry[name]['mean']:.4f}+-{entry[name]['graph_sd']:.4f}"
+        print(
+            f"{entry['disorder']:>8g} {cell('S_mean'):>16} {cell('C2_mean'):>16} "
+            f"{cell('G2_mean'):>16} {cell('q_EA_mean'):>16} "
+            f"{entry['hidden_memory_score']['mean']:>7.4f} "
+            f"{entry['bond_frame_fourth_harmonic']['mean']:>11.5f}"
+        )
+    print()
     print(json.dumps({
         "output_dir": str(args.output_dir),
-        "amplitudes": amplitudes,
-        "peak_persistence_at": report["peak_persistence"],
+        "node_count": sizes[0],
+        "graphs_per_amplitude": report["graphs_per_amplitude"],
+        "hidden_memory_peak": report["hidden_memory_peak"],
+        "peak_persistence_at": {"disorder": peak["disorder"], "q_EA_mean": peak["q_EA_mean"]["mean"]},
         "interior_maximum": report["interior_maximum"],
     }, sort_keys=True))
 
