@@ -164,16 +164,28 @@ def main() -> None:
 
     single_graph = [entry["disorder"] for entry in table if entry["graphs"] < 2]
 
+    # An amplitude whose graphs land in qualitatively different released states
+    # has no meaningful mean. Flag it rather than averaging across the split.
+    for entry in table:
+        values = sorted(entry["per_graph"]["S_end"])
+        span = values[-1] - values[0]
+        gaps = [values[index + 1] - values[index] for index in range(len(values) - 1)]
+        largest_gap = max(gaps) if gaps else 0.0
+        entry["released_state_split"] = bool(span > 0.25 and largest_gap > 0.5 * span)
+    split_amplitudes = [entry["disorder"] for entry in table if entry["released_state_split"]]
+    comparable = [entry for entry in table if not entry["released_state_split"]]
+
     args.output_dir.mkdir(parents=True, exist_ok=True)
     report = {
         "tail_fraction": args.tail_fraction,
         "amplitudes": amplitudes,
         "table": table,
         "single_graph_amplitudes": single_graph,
+        "released_state_split_amplitudes": split_amplitudes,
         "graph_error_bars_available": not single_graph,
     }
-    if len(table) >= 2:
-        low, high = table[0], table[-1]
+    if len(comparable) >= 2:
+        low, high = comparable[0], comparable[-1]
         report["endpoints"] = {
             "low_disorder": low["disorder"],
             "high_disorder": high["disorder"],
@@ -217,8 +229,15 @@ def main() -> None:
     print()
     # Differences are only worth reading against the graph-to-graph spread,
     # which is largest near the order-disorder crossover.
-    if len(table) >= 2:
-        low, high = table[0], table[-1]
+    if split_amplitudes:
+        print(
+            "  sigma/a = "
+            + ", ".join(f"{value:g}" for value in split_amplitudes)
+            + ": the graphs land in qualitatively different released states, so the"
+        )
+        print("  mean is not a description of any of them; excluded from the comparison below.")
+    if len(comparable) >= 2:
+        low, high = comparable[0], comparable[-1]
         for field, label in (
             ("connected_write_end", "connected written overlap"),
             ("connected_bits_per_rotor", "connected bits per rotor"),
