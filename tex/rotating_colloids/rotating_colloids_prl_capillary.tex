@@ -16,28 +16,32 @@
 \date{}
 
 \begin{abstract}
-Memory in disordered soft matter typically relies on structural
-rearrangements, external pinning, or cyclic driving through hysteresis. Here
-we show that elongated colloids whose centres are caged at a liquid interface
-but whose orientations remain Brownian can instead retain preparation history
-through pair interactions. Short-range alignment coupled to a quadrupolar
-capillary term produces incompatible local torques on a disordered neighbour
-graph. Brownian-rotor simulations reveal a hidden-memory regime in which local
-pair and bond-frame correlations remain strong while global nematic order is
-weak. Replicas descended from the same prepared state remain correlated for
-hundreds of rotational-diffusion times, and an angular state selected by a
-transient field remains readable after the field is removed. Finite-size
-scaling and independent-replica tests show no equilibrium spin-glass crossing
-in the explored regime, identifying a finite-range dynamical memory rather
-than equilibrium glass order. The mechanism predicts particle-resolved
-orientational memory in caged interfacial ellipsoids despite weak macroscopic
-birefringence.
+Memory in disordered soft matter usually requires structural rearrangement or
+a persistent external template. We show that elongated colloids caged at a
+liquid interface, but free to rotate, instead record preparation history in
+their orientations alone. A quadrupolar capillary term registers each pair
+against its bond direction, and on a disordered graph these constraints
+cannot all be satisfied. Brownian-rotor simulations find strong local pair
+and bond-frame order with weak global nematic order: replicas descended from
+one prepared state stay correlated for hundreds of rotational-diffusion
+times, and a transiently written angular state remains readable after the
+field is removed, while finite-size and independent-replica tests exclude an
+equilibrium spin-glass crossing. The state holds at least 0.3 bits per
+particle, is maximized at intermediate positional disorder rather than in the
+most disordered limit, and couples to interfacial undulations that write,
+gate, and erase it without a patterned substrate.
 \end{abstract}
 
 \maketitle
 
-Material memory is central to data storage, adaptive mechanics, and
-reconfigurable matter. In disordered soft materials, the microscopic record
+A material that adapts to its own history must first be able to record one.
+The difficulty is that most known records in soft matter are written into
+structure: the material must rearrange, or an external template must persist,
+and both are hard to revise once the material is in service. A record carried
+instead by an internal degree of freedom that remains free to move would let
+the same material be written, gated, and erased in place, which is the
+functional requirement behind adaptive and reconfigurable matter. In
+disordered soft materials, the microscopic record
 may reside in hysteretic elements activated by cyclic loading, irreversible
 particle rearrangements, metastable defects, external alignment fields, or
 persistent orientational order \cite{keim2019}. A suspension repeatedly
@@ -485,29 +489,35 @@ temporary particle-resolved torques; dynamic holographic tweezers have
 demonstrated orientational control of complex colloids \cite{lapointe2011}.
 Readout begins only after the applied field has been removed.
 
-The interface itself provides a second, mechanically native control. A
-transient host-interface deviatoric curvature \(\Delta c(\bm r,t)\) couples
-to a particle quadrupole as
+The water surface is not a passive substrate for this memory. The same
+quadrupolar deformation that stores the state also couples the state to
+undulations of the host interface, which gives the layer a mechanically
+native control channel that no solid-supported realization has. Three
+couplings follow, and they act on different terms of the model. First, a
+transient deviatoric curvature \(\Delta c(\bm r,t)\) supplies a one-body
+torque,
 \[
  U_i^{\rm curv}=-\pi\gamma H_pR_p^2\Delta c(\bm r_i,t)
  \cos2(\theta_i-\alpha_i),
 \]
-where \(H_p\) and \(R_p\) are the amplitude and lateral scale of the
-particle-induced quadrupole, and \(\alpha_i\) is the local principal-curvature
-axis. Shaped interfaces have already been used to orient and steer
-interfacial rods \cite{cavallaro2011}. This established coupling motivates a
-direct writing test: a curvature pulse could prepare an angular pattern, and
-flattening the interface would remove the one-body torque before the retention
-measurement. A nearly uniform capillary wave provides a separate proposed
-gate. If the wave modulates the particle-sourced meniscus amplitude, then
-\(g\propto\gamma(\Delta u)^2\), and an amplitude
-\(\Delta u(t)=\Delta u_0[1+\epsilon\cos\omega t]\) modulates the interaction
-barriers at both \(\omega\) and \(2\omega\), providing a gate for annealing
-or erasure rather than a spatial code. Capillary-wave annealing of
-air--water colloidal monolayers and ultrasound-driven dynamic capillary
-rearrangements have both been observed \cite{caso2025,huerre2018}. Tracking
-\(\bm r_i(t)\) together with \(\theta_i(t)\) distinguishes angular barrier
-modulation from wave-induced motion of the positional graph.
+with \(H_p\) and \(R_p\) the amplitude and lateral scale of the
+particle-induced quadrupole and \(\alpha_i\) the local principal-curvature
+axis. Shaped interfaces already orient and steer interfacial rods
+\cite{cavallaro2011}, so a curvature pulse writes a pattern and flattening
+the interface removes the torque before readout. Second, a nearly uniform
+capillary wave carries no spatial code but modulates the pair term itself:
+with \(g\propto\gamma(\Delta u)^2\) and
+\(\Delta u(t)=\Delta u_0[1+\epsilon\cos\omega t]\), the barriers oscillate at
+\(\omega\) and \(2\omega\), gating annealing or erasure. Third, and now
+quantitatively, a wave that displaces the particles changes the positional
+disorder \(\sigma\) itself. Because retention varies non-monotonically with
+\(\sigma\) and peaks near \(0.11a\), the sign of the response is predicted
+rather than free: undulations that loosen a layer already past the peak erase
+it, whereas undulations that anneal a layer toward the peak consolidate it.
+Capillary-wave annealing of air--water colloidal monolayers and
+ultrasound-driven capillary rearrangement have both been observed
+\cite{caso2025,huerre2018}. Tracking \(\bm r_i(t)\) with \(\theta_i(t)\)
+separates the three channels, since only the third moves the graph.
 
 The demonstrated function is preparation-dependent, particle-resolved
 angular retention without a common director. Video or polarization
@@ -551,11 +561,23 @@ order and independent-equilibrium overlap vanish with size; local pair order
 survives; and descendants of one preparation remain correlated long after
 spatial correlations have ended. The last separation is the central physical
 effect. It suggests that distinct local angular histories can coexist without
-a common optical axis. Curvature writing, capillary-wave control, and erasure
-by positional rearrangement are prospective experimental tests of that
-interpretation. Grooved substrates provide a complementary
-test in which the spatial code is externally specified; in the autonomous
-capillary model the code resides in the bond geometry itself.
+a common optical axis.
+
+Read as a design principle, this is a memory a material could develop rather
+than be given. Nothing here is addressed, patterned, or written by an
+external template: the code is the bond geometry the layer already has, the
+carrier is a coordinate that stays free to move, and each preparation selects
+its own compromise among the same fixed constraints. A layer therefore
+records how it was made and driven while remaining, to the eye and to a
+polarizer, unchanged. The disorder dependence sets the operating point for
+building one, and it is not the naive limit: what stores most is the least
+positional disorder that still hides the director, so an adaptive layer would
+be tuned toward its ordering crossover rather than away from it. Whether a
+layer can be driven to that point by its own environment, with interfacial
+undulations both gating the barriers and adjusting the geometry that sets
+them, is the open question this mechanism raises. Grooved substrates provide
+a complementary test in which the spatial code is externally specified; in
+the autonomous capillary model the code resides in the bond geometry itself.
 
 \begin{acknowledgments}
 The mechanism hypothesis was developed with
