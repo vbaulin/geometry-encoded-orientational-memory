@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+from itertools import combinations
 from pathlib import Path
 from typing import Any
 
@@ -94,6 +95,15 @@ def mean_sd(values) -> tuple[float, float]:
     return float(array.mean()), float(array.std(ddof=1))
 
 
+def standard_error(block: dict[str, Any], count: int) -> float:
+    """Uncertainty in a mean. The graph SD describes the spread of graphs, and
+    comparing two means against it rejects real differences."""
+
+    if count < 2 or math.isnan(block["graph_sd"]):
+        return float("nan")
+    return block["graph_sd"] / math.sqrt(count)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", required=True, type=Path)
@@ -103,6 +113,12 @@ def main() -> None:
         type=float,
         default=0.1,
         help="Fraction of the trajectory tail to average. Use 0 for the final sample only.",
+    )
+    parser.add_argument(
+        "--matched-s",
+        type=float,
+        default=0.10,
+        help="Director threshold for the matched-S control.",
     )
     args = parser.parse_args()
 
@@ -141,14 +157,14 @@ def main() -> None:
             "no_capillary_split_end", "no_capillary_write_end",
         ):
             mean, sd = mean_sd(item[field] for item in block)
-            entry[field] = {"mean": mean, "graph_sd": sd}
+            entry[field] = {"mean": mean, "graph_sd": sd, "sem": sd / math.sqrt(len(block)) if len(block) > 1 else float("nan")}
         for label, field in (
             ("retained_bits_per_rotor", "write_end"),
             ("connected_bits_per_rotor", "connected_write_end"),
         ):
             bits = [retained_bits(max(item[field], 0.0)) for item in block]
             mean, sd = mean_sd(bits)
-            entry[label] = {"mean": mean, "graph_sd": sd}
+            entry[label] = {"mean": mean, "graph_sd": sd, "sem": sd / math.sqrt(len(block)) if len(block) > 1 else float("nan")}
         entry["observation_time"] = block[0]["split_time"]
         # Keep the individual graphs. A wide spread can mean a broad unimodal
         # distribution or a split between graphs that order and graphs that do
@@ -237,20 +253,47 @@ def main() -> None:
         )
         print("  mean is not a description of any of them; excluded from the comparison below.")
     if len(comparable) >= 2:
-        low, high = comparable[0], comparable[-1]
-        for field, label in (
-            ("connected_write_end", "connected written overlap"),
-            ("connected_bits_per_rotor", "connected bits per rotor"),
-        ):
+        field = "connected_write_end"
+        peak = max(comparable, key=lambda item: item[field]["mean"])
+        print(
+            f"  connected written overlap peaks at sigma/a = {peak['disorder']:g}, "
+            f"{peak[field]['mean']:.4f} +- {standard_error(peak[field], peak['graphs']):.4f} (SEM)"
+        )
+        # Compare every pair, not just the endpoints: a series with an interior
+        # maximum has no informative endpoint difference.
+        for low, high in combinations(comparable, 2):
             difference = high[field]["mean"] - low[field]["mean"]
-            spread = max(
-                (value for value in (low[field]["graph_sd"], high[field]["graph_sd"]) if not math.isnan(value)),
-                default=float("nan"),
+            error = math.hypot(
+                standard_error(low[field], low["graphs"]),
+                standard_error(high[field], high["graphs"]),
             )
-            verdict = "" if math.isnan(spread) else (
-                "  RESOLVED" if abs(difference) > 2.0 * spread else "  NOT RESOLVED at 2 graph SD"
+            if math.isnan(error) or error == 0.0:
+                continue
+            ratio = difference / error
+            mark = "   SIGNIFICANT" if abs(ratio) > 2.5 else ""
+            print(
+                f"    {low['disorder']:g} vs {high['disorder']:g}: {difference:+.4f} "
+                f"+- {error:.4f}  t={ratio:+.2f}{mark}"
             )
-            print(f"  {label}: {difference:+.4f} across the scanned range, largest graph SD {spread:.4f}{verdict}")
+    print()
+    # A trend in sigma could simply track the residual director. Compare only
+    # graphs whose director is already suppressed.
+    matched = [
+        (entry["disorder"], [
+            value
+            for value, order in zip(entry["per_graph"]["connected_write_end"], entry["per_graph"]["S_end"])
+            if order < args.matched_s
+        ])
+        for entry in table
+    ]
+    matched = [(amplitude, values) for amplitude, values in matched if values]
+    if len(matched) >= 2:
+        print(f"  Restricted to graphs with S < {args.matched_s:g} (rules out a trend that merely tracks S):")
+        for amplitude, values in matched:
+            print(
+                f"    sigma/a = {amplitude:<5g} n={len(values)}  "
+                f"connected written overlap {np.mean(values):.4f}"
+            )
     print()
     print(
         "Q-S^2 subtracts the overlap two replicas share through a common director; "
