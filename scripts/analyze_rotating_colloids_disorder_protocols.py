@@ -120,6 +120,11 @@ def main() -> None:
         default=0.10,
         help="Director threshold for the matched-S control.",
     )
+    parser.add_argument(
+        "--node-count",
+        type=int,
+        help="Restrict to one rotor count. Required when the tree mixes sizes.",
+    )
     args = parser.parse_args()
 
     paths = sorted(args.input_dir.glob("**/capillary_pair_protocols.json"))
@@ -135,10 +140,25 @@ def main() -> None:
     for path in paths:
         run = json.loads(path.read_text(encoding="utf-8"))
         graph = run["model"]["graph"]
+        size = int(graph["node_count"])
+        if args.node_count is not None and size != args.node_count:
+            continue
         amplitude = float(graph["disorder"])
         groups.setdefault(amplitude, []).append(summarize(run, args.tail_fraction))
         seeds.setdefault(amplitude, []).append(int(graph["seed"]))
-        node_counts.setdefault(amplitude, []).append(int(graph["node_count"]))
+        node_counts.setdefault(amplitude, []).append(size)
+
+    if not groups:
+        raise SystemExit(f"no protocol runs with node_count={args.node_count}")
+    # S is size dependent, and so therefore is the S^2 subtracted from the
+    # overlap. Pooling sizes into one amplitude would mix incomparable states.
+    present = sorted({size for values in node_counts.values() for size in values})
+    if len(present) > 1:
+        raise SystemExit(
+            f"input mixes rotor counts {present}; the connected overlap subtracts a "
+            "size-dependent S^2, so the runs are not comparable.\n"
+            f"Re-run with --node-count {present[0]} to select one."
+        )
 
     amplitudes = sorted(groups)
     table = []
