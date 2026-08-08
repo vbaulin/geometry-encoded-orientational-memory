@@ -36,10 +36,10 @@ relaxation lifetime.
 
 ## Known open item: Letter length
 
-`scripts/count_prl_length.py` estimates the Letter at roughly 4860 APS word
-equivalents against the 3750-word PRL limit (body 3378, captions 583, four
+`scripts/count_prl_length.py` estimates the Letter at roughly 4940 APS word
+equivalents against the 3750-word PRL limit (body 3458, captions 583, four
 full-width figures 552, eleven displayed equation lines 176, abstract 150).
-About 1100 word equivalents must be removed, or the manuscript retargeted.
+About 1200 word equivalents must be removed, or the manuscript retargeted.
 
 ## Known open item: Fig. 4(b) is bounded by the observation window
 

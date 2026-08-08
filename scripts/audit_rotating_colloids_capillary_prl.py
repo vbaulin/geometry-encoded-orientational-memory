@@ -118,7 +118,8 @@ def supplemental_figure_map(supplement: Path, letter_text: str) -> dict[str, Any
 
     import re
 
-    labels = re.findall(r"\\label\{(fig:supp[^}]*)\}", supplement.read_text(encoding="utf-8"))
+    source = supplement.read_text(encoding="utf-8")
+    labels = re.findall(r"\\label\{(fig:supp[^}]*)\}", source)
     numbering = {f"S{index}": label for index, label in enumerate(labels, start=1)}
     referenced = sorted({int(item) for item in re.findall(r"Figs?\.~S(\d+)", letter_text)})
     referenced += [
@@ -127,12 +128,24 @@ def supplemental_figure_map(supplement: Path, letter_text: str) -> dict[str, Any
         if int(item) not in referenced
     ]
     out_of_range = [number for number in sorted(set(referenced)) if number > len(labels)]
+
+    romans = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
+    table_labels = re.findall(r"\\label\{(tab:supp[^}]*)\}", source)
+    table_numbering = {
+        f"S{romans[index]}": label for index, label in enumerate(table_labels) if index < len(romans)
+    }
+    table_references = sorted(set(re.findall(r"Table~S([IVX]+)", letter_text)))
+    unresolved_tables = [item for item in table_references if f"S{item}" not in table_numbering]
     return {
         "supplemental_figure_count": len(labels),
         "numbering": numbering,
         "letter_references": sorted(set(referenced)),
         "out_of_range_references": out_of_range,
-        "all_references_resolve": not out_of_range,
+        "supplemental_table_count": len(table_labels),
+        "table_numbering": table_numbering,
+        "letter_table_references": table_references,
+        "unresolved_table_references": unresolved_tables,
+        "all_references_resolve": not out_of_range and not unresolved_tables,
     }
 
 

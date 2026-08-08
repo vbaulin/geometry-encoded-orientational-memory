@@ -759,6 +759,9 @@
         6,
         7
       ],
+      "letter_table_references": [
+        "IV"
+      ],
       "numbering": {
         "S1": "fig:supp-state-space",
         "S2": "fig:supp-internal",
@@ -769,7 +772,16 @@
         "S7": "fig:supp-groove-dynamics"
       },
       "out_of_range_references": [],
-      "supplemental_figure_count": 7
+      "supplemental_figure_count": 7,
+      "supplemental_table_count": 5,
+      "table_numbering": {
+        "SI": "tab:supp-capacity",
+        "SII": "tab:supp-controls",
+        "SIII": "tab:supp-disorder",
+        "SIV": "tab:supp-disorder-retention",
+        "SV": "tab:supp-size"
+      },
+      "unresolved_table_references": []
     }
   },
   "quantitative_checks": [
