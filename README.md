@@ -19,13 +19,13 @@ regime, global nematic order and independently equilibrated replica overlap
 decrease approximately as `N^-1/2`, while local pair correlations and
 finite-window persistence remain finite. Split descendants of one prepared
 state retain overlap to the longest simulated time. These statements are
-checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 82
+checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 94
 frozen numerical expectations.
 
-The audit separates numerical checks from provenance. A `82/82` numerical
-result does not make the release complete unless the raw
-`activated_memory_scan.jsonl` shards used for Fig. 4 are installed from the
-data deposit.
+The audit separates numerical checks from provenance. A `94/94` numerical
+result does not make the release complete unless both the raw
+`activated_memory_scan.jsonl` shards used for Fig. 4 and the positional-
+disorder write--release trajectories are installed from the data deposit.
 
 ## Installation
 
@@ -60,8 +60,8 @@ MPLCONFIGDIR=/tmp/orientational-memory-mpl \
 python -B scripts/audit_rotating_colloids_capillary_prl.py
 ```
 
-Expected result: `82/82` quantitative checks, all language gates passed, and
-the activated-memory raw provenance gate present after data installation.
+Expected result: `94/94` quantitative checks, all language gates passed, and
+all raw-provenance gates true after data installation.
 
 ## Rebuild figures
 
@@ -77,10 +77,11 @@ python -B scripts/plot_rotating_colloids_activated_memory_prl.py \
   --output-dir tex/rotating_colloids/capillary_prl_figures
 ```
 
-The Fig. 4 ordinate `D_r A_Q` is a finite-window positive integrated overlap,
-not an intrinsic relaxation lifetime:
-
-`A_Q = integral_0^Tobs max(Q(t), 0) dt / abs(Q(0))`.
+The Fig. 4(b) ordinate is the endpoint retained overlap `Q(T_obs)` at the
+common observation time. Physical and `g=0` branches are compared by their
+difference in units of combined graph-level SEM, not by a ratio to a control
+whose mean is statistically zero. The auxiliary finite-window area remains in
+the raw record but is not the plotted statistic.
 
 The Fig. 4 builder writes `activated_memory_figure_report.json` next to the
 figure, including the panel (a) retention surface and the panel (c)
@@ -89,6 +90,12 @@ writes `activated_memory_report_delta.json`. A nonzero `max_relative_change`
 there means the numbers quoted in the Letter and the frozen expectations in
 `scripts/audit_rotating_colloids_capillary_prl.py` have to be updated
 together. Keep a copy of the previous report before rebuilding.
+
+The positional-disorder summary figure is rebuilt with:
+
+```bash
+python -B scripts/plot_rotating_colloids_disorder_retention.py
+```
 
 ## Publication-scale GPU runs
 
@@ -117,7 +124,9 @@ nohup bash scripts/run_rotating_colloids_activated_memory_prl_gpu.sh \
 ## Manuscript length
 
 `scripts/count_prl_length.py tex/rotating_colloids/rotating_colloids_prl_capillary.tex`
-reports the APS word-equivalent count against the 3750-word PRL limit.
+reports the APS core word-equivalent count against the 3750-word PRL limit.
+The current manuscript is estimated at 4624 word equivalents and therefore
+still requires a core/End-Matter restructuring, shortening, or waiver.
 
 ## Manuscript
 
@@ -129,7 +138,9 @@ Live installation.
 
 The Zenodo DOI is pending. `scripts/build_rotating_colloids_release.py`
 assembles the data folder, computes SHA-256 hashes, and refuses a complete
-build when the cluster-generated activated-memory JSONL shard set is absent.
+build when either the activated-memory raw shard set or the disorder-retention
+protocol trajectories are absent. Generated figures and compiled PDFs are
+excluded from the data archive.
 
 ## License
 

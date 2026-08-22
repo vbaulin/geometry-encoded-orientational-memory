@@ -550,19 +550,19 @@
     },
     {
       "absolute_error": 0.0,
-      "actual": 52.086062184868574,
-      "claim": "lambda=0.9 split integrated-overlap ratio",
-      "expected": 52.086062184868574,
+      "actual": 40.470438807650005,
+      "claim": "lambda=0.9 split endpoint separation (sigma)",
+      "expected": 40.470438807650005,
       "passed": true,
-      "tolerance": 1e-10
+      "tolerance": 1e-09
     },
     {
-      "absolute_error": 0.0,
-      "actual": 53.877162532310045,
-      "claim": "lambda=0.9 write integrated-overlap ratio",
-      "expected": 53.877162532310045,
+      "absolute_error": 3.552713678800501e-15,
+      "actual": 28.60705304081906,
+      "claim": "lambda=0.9 write endpoint separation (sigma)",
+      "expected": 28.607053040819057,
       "passed": true,
-      "tolerance": 1e-10
+      "tolerance": 1e-09
     },
     {
       "absolute_error": 0.0,
@@ -657,10 +657,118 @@
       "expected": 0.002853034994366132,
       "passed": true,
       "tolerance": 1e-12
+    },
+    {
+      "actual": [
+        0.11,
+        0.16
+      ],
+      "claim": "N=1024 disorder-retention amplitudes",
+      "expected": [
+        0.11,
+        0.16
+      ],
+      "passed": true
+    },
+    {
+      "actual": [
+        17,
+        29,
+        43,
+        71,
+        97
+      ],
+      "claim": "N=1024 disorder-retention graph seeds",
+      "expected": [
+        17,
+        29,
+        43,
+        71,
+        97
+      ],
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5143,
+      "claim": "N=1024 connected retention at sigma=0.11",
+      "expected": 0.5143,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.45442,
+      "claim": "N=1024 connected retention at sigma=0.16",
+      "expected": 0.45442,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.05988,
+      "claim": "N=1024 paired retention difference",
+      "expected": 0.05988,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0046120469,
+      "claim": "N=1024 paired retention p value",
+      "expected": 0.0046120469,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 24,
+      "claim": "holonomy intervention graph count",
+      "expected": 24,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 5.583333333333333,
+      "claim": "holonomy one-flip stable-state excess",
+      "expected": 5.583333333333333,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 2.6666666666666665,
+      "claim": "holonomy stable-state CI lower",
+      "expected": 2.6666666666666665,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 8.833333333333334,
+      "claim": "holonomy stable-state CI upper",
+      "expected": 8.833333333333334,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": "not_passed",
+      "claim": "holonomy generic dynamic-memory decision",
+      "expected": "not_passed",
+      "passed": true
+    },
+    {
+      "actual": true,
+      "claim": "holonomy generic dynamic-memory CI contains zero",
+      "expected": true,
+      "passed": true
     }
   ],
   "provenance": {
     "activated_memory_raw_jsonl": [
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_17_97/activated_memory_scan.jsonl",
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_29/activated_memory_scan.jsonl",
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_43/activated_memory_scan.jsonl",
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_71/activated_memory_scan.jsonl",
       "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_17_97/activated_memory_scan.jsonl",
       "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_29/activated_memory_scan.jsonl",
       "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu/seeds_43/activated_memory_scan.jsonl",
@@ -668,8 +776,9 @@
     ],
     "activated_memory_raw_jsonl_present": true,
     "activated_memory_reproduction": {
+      "identical_duplicate_rows_ignored": 40,
       "lambdas_match_report": true,
-      "max_relative_deviation": 2.452390756658553e-16,
+      "max_relative_deviation": 0.0,
       "raw_graphs_per_lambda": {
         "0.3": 5,
         "0.45": 5,
@@ -692,19 +801,20 @@
       ],
       "raw_reproduces_derived_report": true,
       "raw_rows": 40,
+      "raw_rows_seen": 80,
       "row_count_matches_report": true,
       "series_absent_from_report": []
     },
     "activated_memory_window_statistics": {
       "longest_window": {
         "0.3": {
-          "q_EA_mean": 0.006598518117674512,
+          "q_EA_mean": 0.006598518117674511,
           "q_EA_sem": 0.0001756447981157214,
           "window": 624.5
         },
         "0.45": {
           "q_EA_mean": 0.053103320305736244,
-          "q_EA_sem": 0.0023686868612739142,
+          "q_EA_sem": 0.0023686868612739147,
           "window": 624.5
         },
         "0.6": {
@@ -718,7 +828,7 @@
           "window": 624.5
         },
         "0.9": {
-          "q_EA_mean": 0.574857541000689,
+          "q_EA_mean": 0.5748575410006891,
           "q_EA_sem": 0.00958615523836958,
           "window": 624.5
         },
@@ -734,13 +844,52 @@
         },
         "1.4": {
           "q_EA_mean": 0.776188858997393,
-          "q_EA_sem": 0.007173486900601567,
+          "q_EA_sem": 0.007173486900601569,
           "window": 624.5
         }
       },
       "recorded_for_all_lambdas": true
     },
     "all_language_gates_passed": true,
+    "all_publication_raw_provenance_passed": false,
+    "disorder_retention_provenance_note": "N=576 aggregate values are frozen from Supplemental Table SIV. N=1024 per-graph values were transcribed from the cluster analyzer output supplied on 2026-08-09. Raw N=1024 protocol trajectories must be added to the Zenodo deposit before submission.",
+    "disorder_retention_raw": {
+      "cells": {},
+      "complete": false,
+      "missing_cells": {
+        "N=1024,sigma=0.11": {
+          "found": 0,
+          "required": 5
+        },
+        "N=1024,sigma=0.16": {
+          "found": 0,
+          "required": 5
+        },
+        "N=576,sigma=0.05": {
+          "found": 0,
+          "required": 3
+        },
+        "N=576,sigma=0.08": {
+          "found": 0,
+          "required": 5
+        },
+        "N=576,sigma=0.11": {
+          "found": 0,
+          "required": 5
+        },
+        "N=576,sigma=0.16": {
+          "found": 0,
+          "required": 5
+        },
+        "N=576,sigma=0.28": {
+          "found": 0,
+          "required": 5
+        }
+      },
+      "protocol_files": [],
+      "root": "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_disorder_retention_protocols"
+    },
+    "disorder_retention_raw_n1024_available": false,
     "language_gates": {
       "constructed_graph_not_called_emergent": true,
       "finite_window_metric_not_called_lifetime": true,
@@ -757,7 +906,8 @@
         4,
         5,
         6,
-        7
+        7,
+        8
       ],
       "letter_table_references": [
         "IV"
@@ -766,13 +916,14 @@
         "S1": "fig:supp-state-space",
         "S2": "fig:supp-internal",
         "S3": "fig:supp-disorder",
-        "S4": "fig:supp-controls",
-        "S5": "fig:supp-spin-glass",
-        "S6": "fig:supp-groove-static",
-        "S7": "fig:supp-groove-dynamics"
+        "S4": "fig:supp-disorder-retention",
+        "S5": "fig:supp-controls",
+        "S6": "fig:supp-spin-glass",
+        "S7": "fig:supp-groove-static",
+        "S8": "fig:supp-groove-dynamics"
       },
       "out_of_range_references": [],
-      "supplemental_figure_count": 7,
+      "supplemental_figure_count": 8,
       "supplemental_table_count": 5,
       "table_numbering": {
         "SI": "tab:supp-capacity",
@@ -1333,19 +1484,19 @@
     },
     {
       "absolute_error": 0.0,
-      "actual": 52.086062184868574,
-      "claim": "lambda=0.9 split integrated-overlap ratio",
-      "expected": 52.086062184868574,
+      "actual": 40.470438807650005,
+      "claim": "lambda=0.9 split endpoint separation (sigma)",
+      "expected": 40.470438807650005,
       "passed": true,
-      "tolerance": 1e-10
+      "tolerance": 1e-09
     },
     {
-      "absolute_error": 0.0,
-      "actual": 53.877162532310045,
-      "claim": "lambda=0.9 write integrated-overlap ratio",
-      "expected": 53.877162532310045,
+      "absolute_error": 3.552713678800501e-15,
+      "actual": 28.60705304081906,
+      "claim": "lambda=0.9 write endpoint separation (sigma)",
+      "expected": 28.607053040819057,
       "passed": true,
-      "tolerance": 1e-10
+      "tolerance": 1e-09
     },
     {
       "absolute_error": 0.0,
@@ -1440,8 +1591,112 @@
       "expected": 0.002853034994366132,
       "passed": true,
       "tolerance": 1e-12
+    },
+    {
+      "actual": [
+        0.11,
+        0.16
+      ],
+      "claim": "N=1024 disorder-retention amplitudes",
+      "expected": [
+        0.11,
+        0.16
+      ],
+      "passed": true
+    },
+    {
+      "actual": [
+        17,
+        29,
+        43,
+        71,
+        97
+      ],
+      "claim": "N=1024 disorder-retention graph seeds",
+      "expected": [
+        17,
+        29,
+        43,
+        71,
+        97
+      ],
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5143,
+      "claim": "N=1024 connected retention at sigma=0.11",
+      "expected": 0.5143,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.45442,
+      "claim": "N=1024 connected retention at sigma=0.16",
+      "expected": 0.45442,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.05988,
+      "claim": "N=1024 paired retention difference",
+      "expected": 0.05988,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0046120469,
+      "claim": "N=1024 paired retention p value",
+      "expected": 0.0046120469,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 24,
+      "claim": "holonomy intervention graph count",
+      "expected": 24,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 5.583333333333333,
+      "claim": "holonomy one-flip stable-state excess",
+      "expected": 5.583333333333333,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 2.6666666666666665,
+      "claim": "holonomy stable-state CI lower",
+      "expected": 2.6666666666666665,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 8.833333333333334,
+      "claim": "holonomy stable-state CI upper",
+      "expected": 8.833333333333334,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": "not_passed",
+      "claim": "holonomy generic dynamic-memory decision",
+      "expected": "not_passed",
+      "passed": true
+    },
+    {
+      "actual": true,
+      "claim": "holonomy generic dynamic-memory CI contains zero",
+      "expected": true,
+      "passed": true
     }
   ],
-  "quantitative_checks_passed": 82,
-  "quantitative_checks_total": 82
+  "quantitative_checks_passed": 94,
+  "quantitative_checks_total": 94
 }

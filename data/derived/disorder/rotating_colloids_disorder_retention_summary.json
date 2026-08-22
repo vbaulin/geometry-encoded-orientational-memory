@@ -1,0 +1,63 @@
+{
+  "schema": "rotating_colloids_disorder_retention_summary_v1",
+  "provenance": {
+    "status": "derived_from_cluster_analysis_output",
+    "description": "N=576 aggregate values are frozen from Supplemental Table SIV. N=1024 per-graph values were transcribed from the cluster analyzer output supplied on 2026-08-09. Raw N=1024 protocol trajectories must be added to the Zenodo deposit before submission.",
+    "raw_n1024_available_locally": false,
+    "tail_fraction": 0.1,
+    "observation_time_D_r_t": 624.5
+  },
+  "metric": {
+    "name": "connected_written_overlap",
+    "symbol": "Q_target_conn",
+    "definition": "Q_target - S_end^2"
+  },
+  "n576": [
+    {"sigma_over_a": 0.08, "graphs": 5, "mean": 0.478, "graph_sd": 0.093, "sem": 0.0415908644},
+    {"sigma_over_a": 0.11, "graphs": 5, "mean": 0.559, "graph_sd": 0.050, "sem": 0.0223606798},
+    {"sigma_over_a": 0.16, "graphs": 5, "mean": 0.472, "graph_sd": 0.068, "sem": 0.0304105245},
+    {"sigma_over_a": 0.28, "graphs": 5, "mean": 0.386, "graph_sd": 0.057, "sem": 0.0254911750}
+  ],
+  "n1024": [
+    {
+      "sigma_over_a": 0.11,
+      "graph_seeds": [17, 29, 43, 71, 97],
+      "S_end": [0.1459, 0.2414, 0.1594, 0.1175, 0.1388],
+      "Q_write": [0.5115, 0.5775, 0.5237, 0.5687, 0.5281],
+      "Q_target_conn": [0.4903, 0.5192, 0.4983, 0.5549, 0.5088],
+      "mean": 0.5143,
+      "graph_sd": 0.0251725048,
+      "sem": 0.0112574864,
+      "connected_split_mean": 0.5054,
+      "connected_split_graph_sd": 0.0205,
+      "bits_per_rotor_mean": 0.4126,
+      "bits_per_rotor_graph_sd": 0.0450
+    },
+    {
+      "sigma_over_a": 0.16,
+      "graph_seeds": [17, 29, 43, 71, 97],
+      "S_end": [0.0598, 0.0606, 0.0762, 0.0530, 0.0891],
+      "Q_write": [0.4531, 0.4609, 0.4236, 0.4733, 0.4851],
+      "Q_target_conn": [0.4495, 0.4572, 0.4178, 0.4705, 0.4771],
+      "mean": 0.45442,
+      "graph_sd": 0.0231619731,
+      "sem": 0.0103583493,
+      "connected_split_mean": 0.4670,
+      "connected_split_graph_sd": 0.0065,
+      "bits_per_rotor_mean": 0.3163,
+      "bits_per_rotor_graph_sd": 0.0335
+    }
+  ],
+  "comparison": {
+    "mean_difference_0p11_minus_0p16": 0.05988,
+    "welch_sem": 0.0152969782,
+    "welch_t": 3.9142572593,
+    "welch_df": 7.9452011935,
+    "welch_p_two_sided": 0.0045146106,
+    "paired_sem": 0.0104619979,
+    "paired_t": 5.7235721694,
+    "paired_df": 4,
+    "paired_p_two_sided": 0.0046120469,
+    "analysis_note": "Matching graph seeds scale the same Gaussian displacement field and use common random numbers. The paired estimate is the natural matched-realization comparison; the Welch estimate is retained as a conservative independent-group comparison."
+  }
+}

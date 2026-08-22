@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit the frozen quantitative claims in the capillary-rotor PRL package.
 
-The 82 numerical checks use only publication-scale artifacts. Provenance and
+The numerical checks use only publication-scale artifacts. Provenance and
 language gates are reported separately because a numerical match cannot prove
 that every raw file needed to reproduce a derived figure has been archived.
 """
@@ -37,6 +37,13 @@ INTERNAL = DATA / "rotating_colloids_capillary_pair_prl_internal/capillary_inter
 SPIN = DATA / "rotating_colloids_spin_glass_prl_gpu/analysis/spin_glass_finite_size_report.json"
 SPIN_SCAN = DATA / "rotating_colloids_spin_glass_prl_gpu"
 ACTIVATED = FIGURES / "activated_memory_figure_report.json"
+DISORDER_RETENTION = DATA / "rotating_colloids_disorder_retention_summary.json"
+DISORDER_RETENTION_RAW = DATA / "rotating_colloids_disorder_retention_protocols"
+HOLONOMY = DATA / "holonomy_memory_intervention/holonomy_memory_intervention_beta1_replication.json"
+
+# Frozen expectations for the endpoint-overlap separation at lambda = 0.9.
+SPLIT_SEPARATION_SIGMA = 40.470438807650005
+WRITE_SEPARATION_SIGMA = 28.607053040819057
 SIZE_PATHS = {
     n * n: GPU / f"finite_size_n{n}/capillary_pair_scan.jsonl"
     for n in (12, 16, 24, 32, 48)
@@ -53,6 +60,27 @@ def read_json(path: Path) -> dict[str, Any]:
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def unique_rows_by_key(rows_with_sources: Iterable[tuple[dict[str, Any], Path]]) -> tuple[list[dict[str, Any]], int]:
+    """Collapse byte-equivalent copies while rejecting conflicting records."""
+
+    by_key: dict[str, str] = {}
+    source_by_key: dict[str, Path] = {}
+    duplicates = 0
+    for row, source in rows_with_sources:
+        key = row.get("key")
+        if not key:
+            raise ValueError(f"activated-memory row without stable key in {source}")
+        frozen = json.dumps(row, sort_keys=True, separators=(",", ":"))
+        if key in by_key:
+            if frozen != by_key[key]:
+                raise ValueError(f"conflicting rows for {key}: {source_by_key[key]} and {source}")
+            duplicates += 1
+            continue
+        by_key[key] = frozen
+        source_by_key[key] = source
+    return [json.loads(by_key[key]) for key in sorted(by_key)], duplicates
 
 
 def sample_mean_std(values: Iterable[float]) -> tuple[float, float]:
@@ -207,7 +235,8 @@ def reproduce_activated_report(paths: list[Path], report: dict[str, Any]) -> dic
     largest relative deviation.
     """
 
-    rows = [row for path in paths for row in read_jsonl(path)]
+    raw_rows = [(row, path) for path in paths for row in read_jsonl(path)]
+    rows, duplicate_rows = unique_rows_by_key(raw_rows)
     groups: dict[float, list[dict[str, Any]]] = {}
     for row in rows:
         groups.setdefault(float(row["lambda"]), []).append(row)
@@ -216,7 +245,10 @@ def reproduce_activated_report(paths: list[Path], report: dict[str, Any]) -> dic
         f"{protocol}_{key}": [
             float(
                 np.mean(
-                    [float(row["protocols"][protocol][key]["positive_integral_time"]) for row in groups[lam]]
+                    # Endpoint overlap, matching the Fig. 4(b) measure. The
+                    # finite-window integral it replaced was bounded above by
+                    # T_obs and so saturated at large lambda.
+                    [float(row["protocols"][protocol][key]["final"]) for row in groups[lam]]
                 )
             )
             for lam in lambdas
@@ -227,7 +259,8 @@ def reproduce_activated_report(paths: list[Path], report: dict[str, Any]) -> dic
     worst = 0.0
     mismatched: list[str] = []
     for name, values in series.items():
-        expected = report["integral_times"].get(name, {}).get("mean")
+        report_series = report.get("endpoint_overlap", report.get("integral_times", {}))
+        expected = report_series.get(name, {}).get("mean")
         if expected is None or len(expected) != len(values):
             mismatched.append(name)
             worst = float("inf")
@@ -237,6 +270,8 @@ def reproduce_activated_report(paths: list[Path], report: dict[str, Any]) -> dic
         worst = max(worst, float(relative.max()))
     return {
         "raw_rows": len(rows),
+        "raw_rows_seen": len(raw_rows),
+        "identical_duplicate_rows_ignored": duplicate_rows,
         "raw_lambdas": lambdas,
         "raw_graphs_per_lambda": {f"{lam:g}": len(groups[lam]) for lam in lambdas},
         "row_count_matches_report": len(rows) == int(report["rows"]),
@@ -252,6 +287,42 @@ def reproduce_activated_report(paths: list[Path], report: dict[str, Any]) -> dic
     }
 
 
+def validate_disorder_retention_raw(root: Path) -> dict[str, Any]:
+    """Verify the graph/size coverage behind the positional-disorder claim."""
+
+    required = {
+        (576, 0.05): 3,
+        (576, 0.08): 5,
+        (576, 0.11): 5,
+        (576, 0.16): 5,
+        (576, 0.28): 5,
+        (1024, 0.11): 5,
+        (1024, 0.16): 5,
+    }
+    cells: dict[tuple[int, float], set[int]] = {}
+    files = sorted(root.glob("**/capillary_pair_protocols.json")) if root.exists() else []
+    for path in files:
+        try:
+            graph = read_json(path)["model"]["graph"]
+            key = (int(graph["node_count"]), round(float(graph["disorder"]), 8))
+            cells.setdefault(key, set()).add(int(graph["seed"]))
+        except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+            continue
+    missing = {
+        f"N={node_count},sigma={sigma:g}": {"required": count, "found": len(cells.get((node_count, sigma), set()))}
+        for (node_count, sigma), count in required.items()
+        if len(cells.get((node_count, sigma), set())) < count
+    }
+    return {
+        "root": str(root),
+        "protocol_files": [str(path) for path in files],
+        "cells": {
+            f"N={node_count},sigma={sigma:g}": sorted(seeds)
+            for (node_count, sigma), seeds in sorted(cells.items())
+        },
+        "missing_cells": missing,
+        "complete": not missing,
+    }
 def power_exponent(grouped: dict[int, list[dict[str, Any]]], name: str) -> float:
     node_counts = np.asarray(sorted(grouped), dtype=float)
     means = np.asarray(
@@ -401,16 +472,30 @@ def main() -> None:
     add_exact(checks, "spin-glass disorder realizations per point", spin["disorder_realizations_per_point"], 5)
     add_exact(checks, "spin-glass finding", spin["finding"], "no_equilibrium_spin_glass_crossing_on_scanned_ray")
 
-    # 67-70: coupling-dependent finite-window integrated overlap.
+    # 67-70: coupling-dependent endpoint retained overlap.
     activated = read_json(ACTIVATED)
     add_exact(checks, "activated-memory summary rows", activated["rows"], 40)
     add_exact(checks, "activated-memory graphs per coupling", sorted(set(activated["graphs_per_lambda"].values())), [5])
     lambda_index = activated["lambdas"].index(0.9)
-    values = activated["integral_times"]
-    split_ratio = values["physical_split_summary"]["mean"][lambda_index] / values["no_capillary_split_summary"]["mean"][lambda_index]
-    write_ratio = values["physical_release_summary"]["mean"][lambda_index] / values["no_capillary_release_summary"]["mean"][lambda_index]
-    add_close(checks, "lambda=0.9 split integrated-overlap ratio", split_ratio, 52.086062184868574, 1e-10)
-    add_close(checks, "lambda=0.9 write integrated-overlap ratio", write_ratio, 53.877162532310045, 1e-10)
+    values = activated.get("endpoint_overlap", activated.get("integral_times", {}))
+
+    # Retention is asserted as a SEPARATION from the g = 0 control, not as a
+    # ratio.  The control endpoint is statistically zero at every lambda, so a
+    # ratio against it is unstable: recomputing the old ratio checks on the
+    # endpoint overlap returns -169 and -55, sign-flipped by a denominator
+    # consistent with zero.  The separation in units of the combined standard
+    # error is well defined and monotonic in lambda.
+    def separation(prefix: str) -> float:
+        mp = values[f"physical_{prefix}"]["mean"][lambda_index]
+        sp = values[f"physical_{prefix}"]["sem"][lambda_index]
+        mz = values[f"no_capillary_{prefix}"]["mean"][lambda_index]
+        sz = values[f"no_capillary_{prefix}"]["sem"][lambda_index]
+        return (mp - mz) / ((sp ** 2 + sz ** 2) ** 0.5)
+
+    add_close(checks, "lambda=0.9 split endpoint separation (sigma)",
+              separation("split_summary"), SPLIT_SEPARATION_SIGMA, 1e-9)
+    add_close(checks, "lambda=0.9 write endpoint separation (sigma)",
+              separation("release_summary"), WRITE_SEPARATION_SIGMA, 1e-9)
 
     # 71-73: waiting-time increment resolved graph by graph.
     increments = paired_aging_increment(dynamics, 30.0)
@@ -442,11 +527,31 @@ def main() -> None:
         add_close(checks, f"g=0 {name}", mean, expected_mean, 1e-12)
         add_close(checks, f"g=0 {name} graph SD", std, expected_std, 1e-12)
 
-    if len(checks) != 82:
-        raise RuntimeError(f"audit contract must contain exactly 82 checks, found {len(checks)}")
+    # 83-88: the positional-disorder retention maximum quoted in the Letter.
+    disorder = read_json(DISORDER_RETENTION)
+    n1024 = {float(row["sigma_over_a"]): row for row in disorder["n1024"]}
+    add_exact(checks, "N=1024 disorder-retention amplitudes", sorted(n1024), [0.11, 0.16])
+    add_exact(checks, "N=1024 disorder-retention graph seeds", n1024[0.11]["graph_seeds"], [17, 29, 43, 71, 97])
+    add_close(checks, "N=1024 connected retention at sigma=0.11", n1024[0.11]["mean"], 0.5143, 1e-12)
+    add_close(checks, "N=1024 connected retention at sigma=0.16", n1024[0.16]["mean"], 0.45442, 1e-12)
+    add_close(checks, "N=1024 paired retention difference", disorder["comparison"]["mean_difference_0p11_minus_0p16"], 0.05988, 1e-12)
+    add_close(checks, "N=1024 paired retention p value", disorder["comparison"]["paired_p_two_sided"], 0.0046120469, 1e-12)
+
+    # 89-94: matched loop intervention quoted in the Letter.
+    holonomy = read_json(HOLONOMY)
+    add_exact(checks, "holonomy intervention graph count", holonomy["parameters"]["seed_count"], 24)
+    add_close(checks, "holonomy one-flip stable-state excess", holonomy["landscape"]["mean_stable_state_excess"], 5.583333333333333, 1e-12)
+    add_close(checks, "holonomy stable-state CI lower", holonomy["landscape"]["graph_bootstrap_95_interval"][0], 2.6666666666666665, 1e-12)
+    add_close(checks, "holonomy stable-state CI upper", holonomy["landscape"]["graph_bootstrap_95_interval"][1], 8.833333333333334, 1e-12)
+    add_exact(checks, "holonomy generic dynamic-memory decision", holonomy["dynamic_memory"]["generic_pattern_decision"], "not_passed")
+    dynamic_ci = holonomy["dynamic_memory"]["graph_bootstrap_95_interval"]
+    add_exact(checks, "holonomy generic dynamic-memory CI contains zero", bool(dynamic_ci[0] <= 0.0 <= dynamic_ci[1]), True)
 
     activated_raw = sorted(DATA.glob("rotating_colloids_activated_memory_prl_gpu/**/activated_memory_scan.jsonl"))
-    required = [DENSE, REGIMES, CONTROLS, INTERNAL, SPIN, ACTIVATED, *SIZE_PATHS.values(), *DYNAMICS_PATHS]
+    required = [
+        DENSE, REGIMES, CONTROLS, INTERNAL, SPIN, ACTIVATED,
+        DISORDER_RETENTION, HOLONOMY, *SIZE_PATHS.values(), *DYNAMICS_PATHS,
+    ]
     text = MAIN_TEX.read_text(encoding="utf-8")
     language_gates = {
         "no_permanent_memory_claim": "permanent memory" not in text.lower(),
@@ -454,6 +559,7 @@ def main() -> None:
         "constructed_graph_not_called_emergent": "grey neighbour network is an emergent cage" not in text.lower(),
         "finite_window_metric_not_called_lifetime": "integral retention time" not in text.lower(),
     }
+    disorder_raw = validate_disorder_retention_raw(DISORDER_RETENTION_RAW)
     provenance = {
         "required_local_artifacts_present": all(path.exists() for path in required),
         "missing_required_local_artifacts": [str(path) for path in required if not path.exists()],
@@ -462,6 +568,9 @@ def main() -> None:
         "language_gates": language_gates,
         "all_language_gates_passed": all(language_gates.values()),
         "supplemental_figure_references": supplemental_figure_map(SUPPLEMENT_TEX, text),
+        "disorder_retention_raw": disorder_raw,
+        "disorder_retention_raw_n1024_available": disorder_raw["complete"],
+        "disorder_retention_provenance_note": disorder.get("provenance", {}).get("description"),
     }
     if activated_raw:
         provenance["activated_memory_reproduction"] = reproduce_activated_report(activated_raw, activated)
@@ -484,6 +593,11 @@ def main() -> None:
             "recorded_for_all_lambdas": False,
             "reason": "report predates the panel (c) window statistics; rebuild Fig. 4 to record them",
         }
+
+    provenance["all_publication_raw_provenance_passed"] = bool(
+        provenance["activated_memory_reproduction"].get("raw_reproduces_derived_report", False)
+        and provenance["disorder_retention_raw_n1024_available"]
+    )
 
     passed = sum(bool(item["passed"]) for item in checks)
     report = {
@@ -513,7 +627,7 @@ def main() -> None:
         f"`{provenance['activated_memory_window_statistics']['recorded_for_all_lambdas']}`",
         f"- Language gates passed: `{provenance['all_language_gates_passed']}`",
         "",
-        "The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, and coupling-dependent finite-window integrated overlap.",
+        "The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, coupling-dependent endpoint overlap, the disorder-retention maximum, and the matched loop intervention.",
         "",
         "## Failed quantitative checks",
         "",
@@ -525,7 +639,9 @@ def main() -> None:
             "",
             "## Provenance gates",
             "",
-            "The raw activated-memory JSONL is generated on the GPU cluster and must be included in the Zenodo deposit. Its derived 40-row figure report is audited numerically here, but the deposit is not complete until the raw rows are present and reproduce that report.",
+            "The raw activated-memory JSONL is generated on the GPU cluster and must be included in the Zenodo deposit. Identical duplicate records are ignored by stable row key, while conflicting duplicates fail the audit.",
+            "",
+            "The N=1024 disorder-retention values are currently transcribed from cluster output. The deposit is not publication-complete until their raw protocol trajectories are present and regenerate the summary.",
         ]
     )
     (output_dir / "capillary_pair_prl_claim_audit.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -539,6 +655,7 @@ def main() -> None:
                 "activated_raw_reproduces_report": provenance["activated_memory_reproduction"][
                     "raw_reproduces_derived_report"
                 ],
+                "all_publication_raw_provenance_passed": provenance["all_publication_raw_provenance_passed"],
                 "language_gates_passed": provenance["all_language_gates_passed"],
             },
             sort_keys=True,

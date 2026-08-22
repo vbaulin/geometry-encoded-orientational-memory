@@ -5,7 +5,8 @@ type: software
 authors:
   - family-names: Baulin
     given-names: Vladimir A.
-affiliation: Synthetix Institute
+    affiliation: Synthetix Institute
+    email: vbaulin@synthetix.institute
 repository-code: "https://github.com/vbaulin/geometry-encoded-orientational-memory"
 license: MIT
 version: 0.1.0

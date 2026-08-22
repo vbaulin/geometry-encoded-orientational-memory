@@ -1,6 +1,6 @@
 # Capillary-pair PRL claim audit
 
-- Quantitative checks passed: `82/82`
+- Quantitative checks passed: `94/94`
 - All quantitative checks passed: `True`
 - Required local artifacts present: `True`
 - Activated-memory raw JSONL present locally: `True`
@@ -8,7 +8,7 @@
 - Fig. 4(c) window statistics recorded: `True`
 - Language gates passed: `True`
 
-The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, and coupling-dependent finite-window integrated overlap.
+The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, coupling-dependent endpoint overlap, the disorder-retention maximum, and the matched loop intervention.
 
 ## Failed quantitative checks
 
@@ -16,4 +16,6 @@ The numerical contract covers the publication-scale regime map, matched controls
 
 ## Provenance gates
 
-The raw activated-memory JSONL is generated on the GPU cluster and must be included in the Zenodo deposit. Its derived 40-row figure report is audited numerically here, but the deposit is not complete until the raw rows are present and reproduce that report.
+The raw activated-memory JSONL is generated on the GPU cluster and must be included in the Zenodo deposit. Identical duplicate records are ignored by stable row key, while conflicting duplicates fail the audit.
+
+The N=1024 disorder-retention values are currently transcribed from cluster output. The deposit is not publication-complete until their raw protocol trajectories are present and regenerate the summary.

@@ -3,8 +3,9 @@
 
 Large simulation records belong in the Zenodo deposit. The companion GitHub
 repository contains code, manuscript sources, and small derived reports only.
-The builder refuses to declare a complete deposit when the cluster-generated
-activated-memory JSONL shard set is absent.
+The builder refuses to declare a complete deposit when cluster-generated raw
+records behind a manuscript claim are absent. Publication figures and PDFs
+belong with the manuscript/code release and are deliberately excluded here.
 """
 
 from __future__ import annotations
@@ -49,7 +50,18 @@ DERIVED_FILES = {
     "derived/figures/groove_evidence_summary.json": Path(
         "tex/rotating_colloids/grooved_prl_figures/groove_evidence_summary.json"
     ),
+    "derived/disorder/rotating_colloids_disorder_retention_summary.json": DATA_ROOT
+    / "rotating_colloids_disorder_retention_summary.json",
+    "derived/holonomy/holonomy_causality.json": DATA_ROOT / "holonomy_causality/holonomy_causality.json",
+    "derived/holonomy/continuous_holonomy_memory.json": DATA_ROOT
+    / "continuous_holonomy_memory/continuous_holonomy_memory.json",
+    "derived/holonomy/holonomy_memory_intervention_beta1_replication.json": DATA_ROOT
+    / "holonomy_memory_intervention/holonomy_memory_intervention_beta1_replication.json",
 }
+
+EXCLUDED_ARCHIVE_PATTERNS = (
+    "__pycache__", "*.pyc", ".DS_Store", "*.pdf", "*.png", "*.jpg", "*.jpeg", "*.svg"
+)
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -64,9 +76,11 @@ def copy_source(source: Path, destination: Path) -> None:
         shutil.copytree(
             source,
             destination,
-            ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store"),
+            ignore=shutil.ignore_patterns(*EXCLUDED_ARCHIVE_PATTERNS),
         )
     else:
+        if source.suffix.lower() in {".pdf", ".png", ".jpg", ".jpeg", ".svg"}:
+            return
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
 
@@ -84,6 +98,112 @@ def activated_source(root: Path, source: Path | None) -> tuple[Path | None, list
         files = sorted(candidate.glob("**/activated_memory_scan.jsonl"))
         return (candidate if files else None), files
     return None, []
+
+
+def resolved_input(root: Path, supplied: Path | None, default_relative: Path) -> Path:
+    candidate = supplied if supplied is not None else root / default_relative
+    if not candidate.is_absolute():
+        candidate = (Path.cwd() / candidate).resolve()
+    return candidate
+
+
+def disorder_retention_source(root: Path, source: Path | None) -> tuple[Path, list[Path], dict[str, Any]]:
+    candidate = resolved_input(
+        root,
+        source,
+        DATA_ROOT / "rotating_colloids_disorder_retention_protocols",
+    )
+    files = sorted(candidate.glob("**/capillary_pair_protocols.json")) if candidate.is_dir() else []
+    cells: dict[tuple[int, float], set[int]] = {}
+    for path in files:
+        try:
+            graph = json.loads(path.read_text(encoding="utf-8"))["model"]["graph"]
+            key = (int(graph["node_count"]), round(float(graph["disorder"]), 8))
+            cells.setdefault(key, set()).add(int(graph["seed"]))
+        except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+            continue
+    required = {
+        (576, 0.05): 3,
+        (576, 0.08): 5,
+        (576, 0.11): 5,
+        (576, 0.16): 5,
+        (576, 0.28): 5,
+        (1024, 0.11): 5,
+        (1024, 0.16): 5,
+    }
+    missing_cells = {
+        f"N={node_count},sigma={sigma:g}": {"required": count, "found": len(cells.get((node_count, sigma), set()))}
+        for (node_count, sigma), count in required.items()
+        if len(cells.get((node_count, sigma), set())) < count
+    }
+    return candidate, files, {
+        "cells": {
+            f"N={node_count},sigma={sigma:g}": sorted(seeds)
+            for (node_count, sigma), seeds in sorted(cells.items())
+        },
+        "missing_cells": missing_cells,
+        "complete": not missing_cells,
+    }
+
+
+def copy_unique_activated_shards(files: list[Path], destination: Path) -> list[dict[str, Any]]:
+    """Stage unique raw shards without copying an accidentally nested project tree."""
+
+    destination.mkdir(parents=True, exist_ok=True)
+    seen_hashes: dict[str, Path] = {}
+    staged: list[dict[str, Any]] = []
+    for path in files:
+        digest = sha256(path)
+        if digest in seen_hashes:
+            staged.append({"source": str(path), "duplicate_of": str(seen_hashes[digest]), "sha256": digest})
+            continue
+        seen_hashes[digest] = path
+        shard_name = path.parent.name
+        target_dir = destination / shard_name
+        suffix = 2
+        while target_dir.exists():
+            target_dir = destination / f"{shard_name}_{suffix}"
+            suffix += 1
+        target_dir.mkdir(parents=True)
+        shutil.copy2(path, target_dir / path.name)
+        manifest = path.parent / "activated_memory_manifest.json"
+        if manifest.exists():
+            shutil.copy2(manifest, target_dir / manifest.name)
+        staged.append({"source": str(path), "destination": str(target_dir), "sha256": digest})
+    return staged
+
+
+def copy_disorder_protocols(files: list[Path], destination: Path) -> list[dict[str, Any]]:
+    """Stage each disorder protocol with its adjacent run metadata."""
+
+    staged: list[dict[str, Any]] = []
+    for path in files:
+        run = json.loads(path.read_text(encoding="utf-8"))
+        graph = run["model"]["graph"]
+        node_count = int(graph["node_count"])
+        sigma = float(graph["disorder"])
+        seed = int(graph["seed"])
+        target = destination / f"N{node_count}_sigma{sigma:g}_seed{seed}"
+        if target.exists():
+            raise RuntimeError(f"duplicate disorder protocol destination: {target}")
+        target.mkdir(parents=True)
+        copied = []
+        for name in ("capillary_pair_protocols.json", "capillary_pair_run_summary.json", "run_manifest.json"):
+            source = path.parent / name
+            if source.exists():
+                shutil.copy2(source, target / name)
+                copied.append(name)
+        staged.append(
+            {
+                "source": str(path.parent),
+                "destination": str(target),
+                "node_count": node_count,
+                "sigma_over_a": sigma,
+                "graph_seed": seed,
+                "files": copied,
+            }
+        )
+    return staged
 
 
 def build_readme(complete: bool, missing: list[str]) -> str:
@@ -108,7 +228,10 @@ https://github.com/vbaulin/{REPOSITORY_NAME}.
 - `raw/equilibrium_replica_discriminant/`: independent-replica finite-size scan.
 - `raw/capillary_internal_correlations/`: real-space correlation analysis.
 - `raw/grooved/`: programmable easy-axis realization reported in the Supplement.
-- `derived/`: figure summaries and the exact 82-check numerical audit.
+- `raw/disorder_retention/`: write--release trajectories behind the positional-
+  disorder optimum at `N=576` and `N=1024`.
+- `derived/`: figure summaries, loop-intervention reports, and the exact
+  numerical audit.
 - `manifest.json` and `SHA256SUMS`: file-level provenance and integrity checks.
 
 ## Missing required sources
@@ -149,7 +272,8 @@ def build_dictionary() -> str:
 | `q_EA_mean` | Finite-window single-trajectory angular persistence statistic. |
 | `window_autocorrelation` | Endpoint angular autocorrelation over the sampled window. |
 | `replica_overlap` | Overlap of independently initialized or split replicas, as identified by the containing protocol. |
-| `positive_integral_time` | Finite-window area `integral max(Q(t),0) dt / abs(Q(0))`; it is not an intrinsic relaxation lifetime. |
+| `final` | Endpoint retained overlap `Q(T_obs)` at the common observation time. |
+| `positive_integral_time` | Auxiliary finite-window area `integral max(Q(t),0) dt / abs(Q(0))`; it is not an intrinsic relaxation lifetime and is not the Fig. 4(b) ordinate. |
 
 ## Independent axes and identifiers
 
@@ -178,6 +302,7 @@ def main() -> None:
         default=Path("release/zenodo_geometry_encoded_orientational_memory"),
     )
     parser.add_argument("--activated-input", type=Path)
+    parser.add_argument("--disorder-retention-input", type=Path)
     parser.add_argument("--allow-incomplete", action="store_true")
     parser.add_argument("--clean", action="store_true")
     args = parser.parse_args()
@@ -185,11 +310,19 @@ def main() -> None:
     root = args.root.resolve()
     output = args.output_dir if args.output_dir.is_absolute() else root / args.output_dir
     source_activated, activated_files = activated_source(root, args.activated_input)
+    disorder_source, disorder_files, disorder_validation = disorder_retention_source(
+        root, args.disorder_retention_input
+    )
 
     missing = [str(path) for path in DATASETS.values() if not (root / path).exists()]
     missing.extend(str(path) for path in DERIVED_FILES.values() if not (root / path).exists())
     if not activated_files:
         missing.append("activated_memory_scan.jsonl shard(s) (cluster-generated raw source for Fig. 4)")
+    if not disorder_validation["complete"]:
+        missing.append(
+            "disorder-retention protocol trajectories: "
+            + json.dumps(disorder_validation["missing_cells"], sort_keys=True)
+        )
     if missing and not args.allow_incomplete:
         raise SystemExit("release is incomplete:\n" + "\n".join(f"- {item}" for item in missing))
 
@@ -214,15 +347,25 @@ def main() -> None:
         copied_sources.append({"source": str(relative_source), "destination": destination})
     if source_activated is not None:
         destination = "raw/activated_memory"
-        if source_activated.is_dir():
-            copy_source(source_activated, output / destination)
-        else:
-            copy_source(source_activated, output / destination / source_activated.name)
+        staged_shards = copy_unique_activated_shards(activated_files, output / destination)
         copied_sources.append(
             {
                 "source": str(source_activated),
                 "destination": destination,
                 "activated_memory_jsonl_shards": [str(path) for path in activated_files],
+                "staged_shards": staged_shards,
+            }
+        )
+    if disorder_files:
+        destination = "raw/disorder_retention"
+        staged_protocols = copy_disorder_protocols(disorder_files, output / destination)
+        copied_sources.append(
+            {
+                "source": str(disorder_source),
+                "destination": destination,
+                "protocol_files": [str(path) for path in disorder_files],
+                "staged_protocols": staged_protocols,
+                "validation": disorder_validation,
             }
         )
 
@@ -268,11 +411,18 @@ def main() -> None:
                 "sha256": sha256(path),
             }
         )
+    forbidden_media = [
+        item["path"] for item in files
+        if Path(item["path"]).suffix.lower() in {".pdf", ".png", ".jpg", ".jpeg", ".svg"}
+    ]
+    if forbidden_media:
+        raise RuntimeError("manuscript media leaked into the data archive: " + ", ".join(forbidden_media))
     manifest = {
         "archive": "geometry_encoded_orientational_memory_data",
         "complete": complete,
         "missing_required_sources": missing,
         "copied_sources": copied_sources,
+        "disorder_retention_validation": disorder_validation,
         "file_count": len(files),
         "total_bytes": sum(item["bytes"] for item in files),
         "files": files,

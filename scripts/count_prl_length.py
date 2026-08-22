@@ -4,12 +4,13 @@
 Physical Review Letters caps a Letter at 3750 word equivalents. The estimate
 follows the APS length guide:
 
-* body text, abstract, and figure captions are counted as words;
+* body text and figure captions are counted as words; the title, byline,
+  abstract, acknowledgments, and references are excluded;
 * each line of a displayed equation counts as 16 word equivalents
   (32 for a full-width ``align``/``equation`` inside a starred float);
 * a figure counts as ``150 / aspect + 20`` words in one column and
-  ``300 / aspect + 40`` words across both, with ``aspect = width / height``
-  taken from the included graphics file;
+  ``300 / (0.5 * aspect) + 40`` words across both, with
+  ``aspect = width / height`` taken from the included graphics file;
 * the reference list is excluded.
 
 The result is an estimate. It is close enough to decide whether a manuscript
@@ -26,9 +27,6 @@ import subprocess
 from pathlib import Path
 
 PRL_LIMIT = 3750
-TITLE_ALLOWANCE = 20  # title and byline block
-
-
 def strip_comments(text: str) -> str:
     return re.sub(r"(?<!\\)%.*", "", text)
 
@@ -92,7 +90,7 @@ def main() -> None:
             resolved = False
         else:
             resolved = True
-        area = (300.0 / aspect + 40.0) if wide else (150.0 / aspect + 20.0)
+        area = (300.0 / (0.5 * aspect) + 40.0) if wide else (150.0 / aspect + 20.0)
         figure_words += area
         figures.append(
             {
@@ -106,6 +104,12 @@ def main() -> None:
         )
 
     text_without_figures = re.sub(r"\\begin\{figure(\*?)\}.*?\\end\{figure\1\}", " ", body, flags=re.S)
+    text_without_figures = re.sub(
+        r"\\begin\{acknowledgments\}.*?\\end\{acknowledgments\}",
+        " ",
+        text_without_figures,
+        flags=re.S,
+    )
     equation_lines = 0
     for match in re.finditer(r"\\begin\{(equation|align|gather|eqnarray)(\*?)\}(.*?)\\end\{\1\2\}", body, re.S):
         content = match.group(3)
@@ -115,17 +119,15 @@ def main() -> None:
     body_words = count_words(text_without_figures)
     abstract_words = count_words(abstract)
 
-    total = round(
-        TITLE_ALLOWANCE + abstract_words + body_words + caption_words + equation_words + figure_words
-    )
+    total = round(body_words + caption_words + equation_words + figure_words)
     report = {
         "source": str(args.tex),
         "limit": args.limit,
+        "estimated_core_word_equivalents": total,
         "estimated_word_equivalents": total,
         "over_limit_by": max(0, total - args.limit),
         "breakdown": {
-            "title_and_byline_allowance": TITLE_ALLOWANCE,
-            "abstract_words": abstract_words,
+            "excluded_abstract_words": abstract_words,
             "body_words": body_words,
             "caption_words": caption_words,
             "equation_lines": equation_lines,

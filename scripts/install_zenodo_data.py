@@ -16,6 +16,7 @@ DIRECTORIES = {
     "raw/capillary_internal_correlations": DATA_ROOT / "rotating_colloids_capillary_pair_prl_internal",
     "raw/equilibrium_replica_discriminant": DATA_ROOT / "rotating_colloids_spin_glass_prl_gpu",
     "raw/activated_memory": DATA_ROOT / "rotating_colloids_activated_memory_prl_gpu",
+    "raw/disorder_retention": DATA_ROOT / "rotating_colloids_disorder_retention_protocols",
     "raw/grooved/uniform_scan_n16": DATA_ROOT / "rotating_colloids_grooved_uniform_scan_n16",
     "raw/grooved/uniform_memory_zoom_n16": DATA_ROOT / "rotating_colloids_grooved_uniform_memory_zoom_n16",
     "raw/grooved/uniform_finite_size": DATA_ROOT / "rotating_colloids_grooved_uniform_finite_size",
@@ -33,8 +34,23 @@ FILES = {
     "derived/figures/activated_memory_figure_report.json": (
         Path("tex/rotating_colloids/capillary_prl_figures/activated_memory_figure_report.json")
     ),
+    "derived/figures/capillary_prl_figure_summary.json": (
+        Path("tex/rotating_colloids/capillary_prl_figures/capillary_prl_figure_summary.json")
+    ),
     "derived/figures/groove_evidence_summary.json": (
         Path("tex/rotating_colloids/grooved_prl_figures/groove_evidence_summary.json")
+    ),
+    "derived/disorder/rotating_colloids_disorder_retention_summary.json": (
+        DATA_ROOT / "rotating_colloids_disorder_retention_summary.json"
+    ),
+    "derived/holonomy/holonomy_causality.json": (
+        DATA_ROOT / "holonomy_causality/holonomy_causality.json"
+    ),
+    "derived/holonomy/continuous_holonomy_memory.json": (
+        DATA_ROOT / "continuous_holonomy_memory/continuous_holonomy_memory.json"
+    ),
+    "derived/holonomy/holonomy_memory_intervention_beta1_replication.json": (
+        DATA_ROOT / "holonomy_memory_intervention/holonomy_memory_intervention_beta1_replication.json"
     ),
 }
 

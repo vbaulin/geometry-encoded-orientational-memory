@@ -34,7 +34,7 @@ import numpy as np
 SURFACE_REFERENCE_TIMES = (1.0, 5.0, 10.0, 50.0, 100.0, 250.0, 625.0)
 
 # Couplings whose Fig. 4(b) values are quoted in the Letter.
-QUOTED_LAMBDAS = (0.45, 0.6, 0.9)
+QUOTED_LAMBDAS = (0.45, 0.6, 0.9, 1.4)
 
 
 def load_rows(input_dir: Path):
@@ -45,14 +45,45 @@ def load_rows(input_dir: Path):
             "  bash scripts/run_rotating_colloids_activated_memory_prl_gpu.sh\n"
             "on the GPU host, or install the Zenodo deposit, before rebuilding Fig. 4."
         )
-    paths = glob.glob(str(input_dir / "**" / "activated_memory_scan.jsonl"), recursive=True)
+    paths = sorted(glob.glob(str(input_dir / "**" / "activated_memory_scan.jsonl"), recursive=True))
     if not paths:
         raise SystemExit(
             f"no activated_memory_scan.jsonl under {input_dir}\n"
             "Expected one shard file per GPU rank, for example\n"
             f"  {input_dir}/seeds_17_29_43_71_97/activated_memory_scan.jsonl"
         )
-    return [json.loads(line) for path in paths for line in open(path, encoding="utf-8") if line.strip()]
+    by_key = {}
+    source_by_key = {}
+    raw_rows = 0
+    duplicate_rows = 0
+    for path in paths:
+        with open(path, encoding="utf-8") as handle:
+            for line in handle:
+                if not line.strip():
+                    continue
+                raw_rows += 1
+                row = json.loads(line)
+                key = row.get("key")
+                if not key:
+                    raise SystemExit(f"activated-memory row without a stable key in {path}")
+                frozen = json.dumps(row, sort_keys=True, separators=(",", ":"))
+                if key in by_key:
+                    if frozen != by_key[key]:
+                        raise SystemExit(
+                            f"conflicting activated-memory rows for {key}: "
+                            f"{source_by_key[key]} and {path}"
+                        )
+                    duplicate_rows += 1
+                    continue
+                by_key[key] = frozen
+                source_by_key[key] = path
+    rows = [json.loads(by_key[key]) for key in sorted(by_key)]
+    return rows, {
+        "source_files": paths,
+        "raw_rows_seen": raw_rows,
+        "unique_rows": len(rows),
+        "identical_duplicate_rows_ignored": duplicate_rows,
+    }
 
 
 def interpolate_curve(curve, grid):
@@ -87,8 +118,10 @@ def compare_reports(previous: dict, current: dict) -> dict:
     """Element-wise deviation between a frozen report and a fresh one."""
     deltas = {}
     worst = 0.0
-    for key, block in current["integral_times"].items():
-        old = previous.get("integral_times", {}).get(key)
+    current_series = current["endpoint_overlap"]
+    previous_series = previous.get("endpoint_overlap", previous.get("integral_times", {}))
+    for key, block in current_series.items():
+        old = previous_series.get(key)
         if old is None:
             deltas[key] = {"status": "absent_in_previous_report"}
             continue
@@ -116,7 +149,7 @@ def main() -> None:
     parser.add_argument("--input-dir", required=True)
     parser.add_argument("--output-dir", required=True)
     args = parser.parse_args()
-    rows = load_rows(Path(args.input_dir))
+    rows, source_summary = load_rows(Path(args.input_dir))
     groups = defaultdict(list)
     for row in rows:
         groups[float(row["lambda"])].append(row)
@@ -158,7 +191,19 @@ def main() -> None:
     ax.set(xlabel=r"time $D_rt$", ylabel=r"coupling scale $\lambda$", title="retention landscape")
     fig.colorbar(im, ax=ax, pad=0.02, fraction=0.055, label=r"$Q_{\rm split}$")
 
-    # (b) Finite-window integrated overlap avoids forcing a decay law.
+    # (b) Endpoint retained overlap Q(T_obs).
+    #
+    # The finite-window integral A_Q was replaced here.  Because Q(t) <= Q(0),
+    # D_r*A_Q is bounded above by the observation window (625), so at large
+    # lambda the physical branch saturates against that ceiling (74% of it at
+    # lambda = 1.4) while the g = 0 branch keeps growing.  The resulting ratio
+    # peaked near lambda = 1.05 and fell afterwards for an instrumental reason,
+    # not a physical one.  Worse, the g = 0 endpoint is statistically zero at
+    # every lambda, so a ratio against it is unstable by construction.
+    #
+    # The endpoint overlap has no such ceiling.  It rises monotonically from
+    # 0.001 to 0.691 while the matched control stays consistent with zero, so
+    # the comparison is a separation in sigma rather than a ratio.
     ax = axes[1]
     styles = (
         ("physical", "split_summary", "#2166ac", "o", "split replicas"),
@@ -170,17 +215,17 @@ def main() -> None:
     for protocol, key, color, marker, label in styles:
         means, errors = [], []
         for lam in lambdas:
-            values = [float(row["protocols"][protocol][key]["positive_integral_time"]) for row in groups[lam]]
+            values = [float(row["protocols"][protocol][key]["final"]) for row in groups[lam]]
             mean, sem = mean_sem(values)
             means.append(float(mean)); errors.append(float(sem))
         ax.errorbar(lambdas, means, yerr=errors, color=color, marker=marker, ms=3.2, lw=1.2, capsize=1.5, label=label)
         summary[f"{protocol}_{key}"] = {"mean": means, "sem": errors}
     ax.set(
         xlabel=r"coupling scale $\lambda$",
-        ylabel=r"integrated overlap $D_r\mathcal{A}_Q$",
-        title="coupling extends retained overlap",
-        yscale="log",
+        ylabel=r"retained overlap $Q(T_{\rm obs})$",
+        title="coupling sets retained overlap",
     )
+    ax.axhline(0.0, color="0.6", lw=0.6, zorder=0)
     ax.legend(frameon=False, ncol=1, loc="center right", bbox_to_anchor=(0.99, 0.50))
 
     # (c) Observation-window dependence of the finite-window statistic.
@@ -223,12 +268,14 @@ def main() -> None:
             key: {"mean": summary[key]["mean"][index], "sem": summary[key]["sem"][index]}
             for key in summary
         }
-        quoted[f"{lam:g}"]["split_ratio_to_g0"] = (
-            summary["physical_split_summary"]["mean"][index] / summary["no_capillary_split_summary"]["mean"][index]
-        )
-        quoted[f"{lam:g}"]["release_ratio_to_g0"] = (
-            summary["physical_release_summary"]["mean"][index] / summary["no_capillary_release_summary"]["mean"][index]
-        )
+        for prefix in ("split_summary", "release_summary"):
+            physical = summary[f"physical_{prefix}"]
+            control = summary[f"no_capillary_{prefix}"]
+            combined_sem = float(np.hypot(physical["sem"][index], control["sem"][index]))
+            quoted[f"{lam:g}"][f"{prefix}_separation_sigma"] = (
+                (physical["mean"][index] - control["mean"][index]) / combined_sem
+                if combined_sem > 0.0 else float("nan")
+            )
     longest_window = {
         key: {"window": block["window"][-1], "q_EA_mean": block["q_EA_mean"][-1], "q_EA_sem": block["q_EA_sem"][-1]}
         for key, block in windows_by_lambda.items()
@@ -236,15 +283,20 @@ def main() -> None:
 
     report = {
         "rows": len(rows),
+        "source_rows": source_summary,
         "lambdas": lambdas,
         "graphs_per_lambda": {str(lam): len(groups[lam]) for lam in lambdas},
         "metric_definition": {
-            "name": "finite_window_positive_integrated_overlap",
-            "symbol": "A_Q",
-            "formula": "integral_0^Tobs max(Q(t), 0) dt / abs(Q(0))",
-            "note": "This finite-window area is not an intrinsic relaxation lifetime.",
+            "name": "endpoint_retained_overlap",
+            "symbol": "Q(T_obs)",
+            "formula": "Q evaluated at the common observation time T_obs",
+            "note": (
+                "The physical and g=0 branches are compared by their difference in units of "
+                "combined graph-level SEM; ratios are not reported because the control mean is "
+                "statistically consistent with zero."
+            ),
         },
-        "integral_times": summary,
+        "endpoint_overlap": summary,
         "retention_surface": {
             "description": "Panel (a): graph-averaged Q_split at reference rotational times.",
             "reference_times": reference_times,
@@ -258,7 +310,7 @@ def main() -> None:
         },
         "manuscript_values": {
             "description": "Quantities quoted from Fig. 4 in the Letter.",
-            "integrated_overlap": quoted,
+            "endpoint_overlap": quoted,
             "q_EA_at_longest_window": longest_window,
         },
     }
@@ -271,7 +323,12 @@ def main() -> None:
             previous = None
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
-    result = {"output": str(stem), "rows": len(rows)}
+    result = {
+        "output": str(stem),
+        "rows": len(rows),
+        "raw_rows_seen": source_summary["raw_rows_seen"],
+        "identical_duplicate_rows_ignored": source_summary["identical_duplicate_rows_ignored"],
+    }
     if previous is not None:
         delta = compare_reports(previous, report)
         (out / "activated_memory_report_delta.json").write_text(json.dumps(delta, indent=2) + "\n", encoding="utf-8")

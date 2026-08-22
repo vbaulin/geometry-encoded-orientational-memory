@@ -13,7 +13,7 @@
 
 \author{Vladimir A. Baulin}
 \affiliation{Synthetix Institute, Amsterdam, The Netherlands}
-\email{info@synthetix.institute}
+\email{vbaulin@synthetix.institute}
 
 \maketitle
 
@@ -237,10 +237,11 @@ split replicas, \(D_rt=625\) & \(0.462\pm0.010\) & \(0.327\pm0.016\) & \(334\pm1
 \end{ruledtabular}
 \end{table}
 
-One fifth of the written information survives the field-free interval, while
-the matched \(g=0\) control retains none of it.  This is a capacity of the
-prepared state under the present protocol, not a device specification: it
-assumes a perfect particle-resolved readout and a single write.
+One fifth of the written target-orientation information survives the
+field-free interval, while the matched \(g=0\) control retains none of it.
+This is a particlewise information bound for the prepared state under the
+present protocol, not a multi-pattern device capacity: it assumes a perfect
+particle-resolved readout and a single write.
 
 \section{Finite-size state diagram and spatial correlations}
 
@@ -485,7 +486,8 @@ and write--release--read protocols of the Letter at five disorder amplitudes,
 with \(N=576\), \((J,g)=(4,5)k_{\rm B}T\), 48 replicas, and the same
 50,000-step equilibration and 250,000-step observation as the main dynamics.
 Each amplitude uses five independently quenched graphs, except
-\(\sigma=0.05a\), which uses three.
+\(\sigma=0.05a\), which uses three.  The two amplitudes bracketing the
+optimum were repeated at \(N=1024\).
 
 Two replicas drawn from the same one-body angular distribution already
 overlap by \(S^2\) through the common director, so the raw released overlap
@@ -539,9 +541,17 @@ another, \(S=0.734,0.723\) and \(0.185\), so two of the three graphs return
 to a conventional nematic and one does not.  No mean describes that
 amplitude, and it is excluded from the comparison above.
 
-The operating point that maximizes retained hidden memory is therefore the
-least positional disorder that still suppresses the director reliably,
-\(\sigma\simeq0.11a\).  The value \(\sigma=0.16a\) used throughout this work
+The optimum is not a finite-size accident.  Repeating the two amplitudes that
+bracket it at \(N=1024\), the size used for the main dynamics, with five
+quenched graphs each, gives \(Q^{\rm conn}=0.514\pm0.025\) at
+\(\sigma=0.11a\) against \(0.454\pm0.023\) at \(0.16a\).  The connected
+overlap falls slightly with size at both amplitudes, by 8\% and 4\%, but the
+ordering is unchanged and the separation is better resolved than at
+\(N=576\): the gap is \(0.060\pm0.015\), or 3.9 standard errors, against
+\(0.088\pm0.038\) and 2.3 standard errors at the smaller size.
+
+The maximum measured retention therefore lies near the onset of director
+suppression, \(\sigma\simeq0.11a\).  The value \(\sigma=0.16a\) used throughout this work
 lies just beyond it and retains \((0.472\pm0.068)/(0.559\pm0.050)\), about
 85\%, of the attainable connected overlap.  We note that the static score
 \(\mathcal H\) of the preceding section rises monotonically to \(0.28a\) and
@@ -549,6 +559,20 @@ so ranks the geometries differently.  The disagreement is the same one the
 regular-lattice control makes for \(q_{\rm EA}\): an equilibrium statistic
 can be large in a state that retains nothing, and only a release protocol
 measures retention.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{capillary_prl_figures/disorder_retention.pdf}
+\caption{\label{fig:supp-disorder-retention}
+Retention against positional disorder. (a) Connected written-state overlap
+at \(N=576\); points and error bars are graph means and standard errors, and
+the shaded interval marks the crossover where the common director is lost.
+(b) Matched \(N=1024\) graph realizations at the two amplitudes bracketing the
+maximum. Grey lines join identical graph seeds; purple symbols are means with
+standard errors. The paired difference is
+\(\Delta Q_{\rm target}^{\rm conn}=0.0599\) with two-sided
+\(p=0.0046\).}
+\end{figure}
 
 \section{Finite-size behavior}
 
@@ -809,6 +833,68 @@ crosslink weight.  The mosaic model is therefore retained as a mechanism
 test, not as evidence for the physical capillary regime.  The Letter instead
 uses a caged disordered monolayer with no imposed orientational domains.
 
+\section{Loop incompatibility and basin multiplicity}
+
+The strong-locking reduction permits a direct intervention on the source of
+the multibasin structure. Write
+\begin{equation}
+ H_{\rm eff}=-\sum_{(bc)}K_{bc}s_bs_c,
+ \qquad
+ \mathcal W_\gamma=\prod_{(bc)\in\gamma}{\rm sgn}(K_{bc}),
+ \label{eq:supp-loop-holonomy}
+\end{equation}
+where \(\gamma\) is a closed path in the domain graph. Changing the sign used
+to name a local director, \(s_b\to\eta_bs_b\) with \(\eta_b=\pm1\), sends
+\(K_{bc}\to\eta_b\eta_cK_{bc}\) but leaves
+\(\mathcal W_\gamma\) unchanged. Thus \(\mathcal W_\gamma=-1\) belongs to
+the loop rather than to a chosen set of local axes. At least one bond on such
+a loop must depart from its preferred relation. This loop product is the
+discrete curvature of the coupling network: local angular relations fail to
+close after transport around the path.
+
+For each quenched graph we compared the measured coupling network with the
+minimum-weight globally flat sign network. The two networks have the same
+vertices, edges, and \(|K_{bc}|\) on every edge; only the loop products differ.
+A second control applies a local sign relabelling to the original network and
+therefore preserves every loop product. Exact enumeration confirms that this
+gauge-equivalent control has the same energies and stable-state count to
+machine precision.
+
+Across 24 independently jittered graphs, removing nontrivial loop products
+reduced the number of one-flip-stable states by \(5.58\) on average. The
+graph-bootstrap 95\% interval for the original-minus-flat difference is
+\(2.67\)--\(8.83\). The effect is on the number of locally stable angular
+compromises. It is not a uniform increase in their lifetimes:
+finite-temperature write--release dynamics gave an original-minus-flat
+overlap-area difference of \(-3.48\times10^{-6}\), with interval
+\([-1.56\times10^{-4},1.47\times10^{-4}]\).
+
+We repeated the intervention in the continuous-angle pair Hamiltonian by
+rotating only the preferred phases of cross-domain bonds. The graph, bond
+amplitudes, positional disorder, thermal-noise histories, and induced
+\(|K_{bc}|\) were matched; the maximum relative error in the coupling
+magnitudes was \(1.24\times10^{-15}\). Transforming the Hamiltonian, angular
+state, and written target by the same local gauge changed the complete
+dynamical trajectory by at most \(6.89\times10^{-14}\).
+
+The mean original-minus-flat retention area over four prescribed written
+patterns was \(0.00286\), with a graph-bootstrap interval
+\([-0.00011,0.00570]\). The target-resolved response reveals what this average
+conceals: the uniform director changes by \(-0.00878\), with interval
+\([-0.01202,-0.00519]\), whereas a fixed random-domain pattern changes by
+\(+0.01084\), with interval \([0.00211,0.01938]\). Loop incompatibility
+redistributes stability among angular basins.
+
+These calculations separate two parts of the memory mechanism. Global
+incompatibility supplies a larger set of metastable states. Writing chooses
+one state from that set, and the energy barriers determine how long thermal
+motion remains in it. The loop structure therefore controls memory capacity
+in this reduction, while retention is a joint property of the chosen pattern
+and its barriers. The phase intervention acts directly on the angular
+Hamiltonian. At an unpatterned interface the preferred phase is the
+line-of-centres angle, so an experimental version of this matched comparison
+requires patterned bond anisotropy or a geometrically embedded flat control.
+
 \section{Experimental parameter estimate}
 
 The required separation between positional and rotational motion has an
@@ -820,7 +906,7 @@ experiment implements the capillary memory interaction, but both establish
 that a persistent positional scaffold can coexist with Brownian angular
 motion.
 
-To close the static-torque assumption, we additionally require the interfacial
+The static-torque assumption also requires the interfacial
 deformation to remain quasistatic over the rotational time scale.
 For a meniscus mode of lateral extent \(\ell\), a conservative viscous estimate is
 \[
@@ -971,7 +1057,7 @@ implemented with an externally specified angular code.
 \section{Publication-scale run}
 
 The complete GPU validation is encoded in
-\texttt{scripts/run\_rotating\_colloids\_capillary\_pair\_prl\_gpu.sh}.
+\path{scripts/run_rotating_colloids_capillary_pair_prl_gpu.sh}.
 It performs:
 \begin{enumerate}
 \item a \(21\times21\) state map at \(N=400\), with three quenched graphs
@@ -987,28 +1073,26 @@ same command resumes completed cells.
 
 The eight-coupling retention scan behind Fig.~4 of the Letter is a separate
 job, encoded in
-\texttt{scripts/run\_rotating\_colloids\_activated\_memory\_prl\_gpu.sh}.
+\path{scripts/run_rotating_colloids_activated_memory_prl_gpu.sh}.
 It uses \(N=576\) with five quenched graphs and 32 thermal replicas per
 graph.  Each graph is an independent shard, so the driver partitions the five
 graphs over whatever CUDA devices are visible; a single device runs them
 sequentially in one process.  Each graph is equilibrated for 50,000 steps and
 observed for 250,000 steps at
 \(D_r\Delta t=0.0025\). Its source record is
-\texttt{activated\_memory\_scan.jsonl}. Figure~4(b) reports
-\begin{equation}
- \mathcal A_Q(T_{\rm obs})=
- \frac{\int_0^{T_{\rm obs}}\max[Q(t),0]dt}{|Q(0)|},
- \label{eq:supp-integrated-overlap}
-\end{equation}
-a finite-window positive integrated overlap. This quantity compares retained
-overlap over the common observation window; it is not an intrinsic
-relaxation lifetime and assumes no exponential decay law.
+\path{activated_memory_scan.jsonl}. Figure~4(b) reports the endpoint overlap
+\(Q(T_{\rm obs})\) at the common observation time
+\(D_rT_{\rm obs}=625\). The physical and \(g=0\) branches are compared by
+their difference in units of the combined graph-level standard error. A ratio
+is not used because the control endpoint is statistically consistent with
+zero. The auxiliary positive area under \(Q(t)\) remains in the raw record,
+but it is bounded by the observation window and is not the plotted ordinate.
 
 The independent finite-size glass test is encoded in
-\texttt{scripts/run\_rotating\_colloids\_spin\_glass\_prl\_4gpu.sh}, with
-\texttt{scripts/run\_rotating\_colloids\_spin\_glass\_prl\_gpu.sh} as the
+\path{scripts/run_rotating_colloids_spin_glass_prl_4gpu.sh}, with
+\path{scripts/run_rotating_colloids_spin_glass_prl_gpu.sh} as the
 single-device equivalent; its analysis is generated by
-\texttt{scripts/analyze\_rotating\_colloids\_spin\_glass\_prl.py}.
+\path{scripts/analyze_rotating_colloids_spin_glass_prl.py}.
 
 The programmable easy-axis protocols are encoded in
 \path{scripts/rotating_colloids_groove_protocols.py}; the two figures are
