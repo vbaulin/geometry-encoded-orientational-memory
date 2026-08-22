@@ -240,8 +240,10 @@ https://github.com/vbaulin/{REPOSITORY_NAME}.
 
 The archive must not be uploaded as the final Zenodo record while this list is
 nonempty. Run the builder on the GPU cluster with `--activated-input` pointing
-to the activated-memory result directory, or copy that directory into the
-project discovery tree and rerun without `--allow-incomplete`.
+to the activated-memory result directory and `--disorder-retention-input`
+pointing to the parent of the disorder protocol runs. Alternatively, install
+both sources in the project discovery tree and rerun without
+`--allow-incomplete`.
 
 ## Units and conventions
 
