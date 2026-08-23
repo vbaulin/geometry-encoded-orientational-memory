@@ -210,7 +210,15 @@ def _observables(theta, tensors) -> Dict[str, object]:
     return {"S": s, "C2": c2, "G2": g2}
 
 
-def _torque(theta, tensors, j_align: float, g_capillary: float, write_axis=None, write_field: float = 0.0):
+def _torque(
+    theta,
+    tensors,
+    j_align: float,
+    g_capillary: float,
+    write_axis=None,
+    write_field: float = 0.0,
+    write_weight=None,
+):
     import torch
 
     src = tensors["src"]
@@ -228,7 +236,12 @@ def _torque(theta, tensors, j_align: float, g_capillary: float, write_axis=None,
     out.index_add_(1, src, edge_src)
     out.index_add_(1, tgt, edge_tgt)
     if write_axis is not None and write_field:
-        out = out - 2.0 * float(write_field) * torch.sin(2.0 * (theta - write_axis))
+        write_torque = -2.0 * float(write_field) * torch.sin(
+            2.0 * (theta - write_axis)
+        )
+        if write_weight is not None:
+            write_torque = write_torque * write_weight
+        out = out + write_torque
     return out
 
 
@@ -247,6 +260,7 @@ def simulate_ensemble(
     initial_theta: Optional[np.ndarray] = None,
     write_axis: Optional[np.ndarray] = None,
     write_field: float = 0.0,
+    write_weight: Optional[np.ndarray] = None,
 ) -> Dict[str, object]:
     import torch
 
@@ -268,7 +282,19 @@ def simulate_ensemble(
         axis = np.asarray(write_axis, dtype=np.float32)
         if axis.ndim == 1:
             axis = np.repeat(axis[None, :], replicas, axis=0)
+        if axis.shape != (replicas, node_count):
+            raise ValueError(f"write_axis shape {axis.shape} != {(replicas, node_count)}")
         axis_t = torch.as_tensor(axis, dtype=torch.float32, device=device)
+    weight_t = None
+    if write_weight is not None:
+        weight = np.asarray(write_weight, dtype=np.float32)
+        if weight.ndim == 1:
+            weight = np.repeat(weight[None, :], replicas, axis=0)
+        if weight.shape != (replicas, node_count):
+            raise ValueError(
+                f"write_weight shape {weight.shape} != {(replicas, node_count)}"
+            )
+        weight_t = torch.as_tensor(weight, dtype=torch.float32, device=device)
 
     snapshots: List[np.ndarray] = []
     metrics = {"time": [], "S": [], "C2": [], "G2": []}
@@ -282,6 +308,7 @@ def simulate_ensemble(
             g_capillary=float(g_capillary),
             write_axis=axis_t,
             write_field=float(write_field),
+            write_weight=weight_t,
         )
         theta = theta + float(dt) * drift + noise_scale * torch.randn(
             theta.shape, generator=generator, device=device
@@ -310,6 +337,7 @@ def simulate_ensemble(
         "metrics": metric_arrays,
         "q_EA": q_ea,
         "final_theta": snap[-1],
+        "state_after_steps": theta.detach().cpu().numpy().astype(np.float32),
     }
 
 

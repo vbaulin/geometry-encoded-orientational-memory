@@ -40,6 +40,10 @@ ACTIVATED = FIGURES / "activated_memory_figure_report.json"
 DISORDER_RETENTION = DATA / "rotating_colloids_disorder_retention_summary.json"
 DISORDER_RETENTION_RAW = DATA / "rotating_colloids_disorder_retention_protocols"
 HOLONOMY = DATA / "holonomy_memory_intervention/holonomy_memory_intervention_beta1_replication.json"
+ORDER_N144 = DATA / "rotating_colloids_operation_order_memory_n12/operation_order_memory.jsonl"
+ORDER_N256 = DATA / "rotating_colloids_operation_order_memory_n16/operation_order_memory.jsonl"
+ORDER_FRACTION_N144 = DATA / "rotating_colloids_operation_order_memory_fraction_n12/operation_order_memory.jsonl"
+RELAXED_EXCHANGE = DATA / "relaxed_exchange_order_minimal.json"
 
 # Frozen expectations for the endpoint-overlap separation at lambda = 0.9.
 SPLIT_SEPARATION_SIGMA = 40.470438807650005
@@ -88,6 +92,13 @@ def sample_mean_std(values: Iterable[float]) -> tuple[float, float]:
     if array.size < 2:
         return float(array.mean()), 0.0
     return float(array.mean()), float(array.std(ddof=1))
+
+
+def sample_mean_sem(values: Iterable[float]) -> tuple[float, float]:
+    array = np.asarray(list(values), dtype=float)
+    if array.size < 2:
+        return float(array.mean()), 0.0
+    return float(array.mean()), float(array.std(ddof=1) / math.sqrt(array.size))
 
 
 def add_close(
@@ -177,13 +188,14 @@ def supplemental_figure_map(supplement: Path, letter_text: str) -> dict[str, Any
     }
 
 
-def retained_bits(resultant: float) -> float:
-    """Lower bound on information retained per rotor, in bits.
+def angular_localization_bits(resultant: float) -> float:
+    """Minimum angular localization relative to uniform, in bits.
 
     Only the mean resultant R = <cos 2 dtheta> is archived. The maximum-entropy
     density on the circle of the doubled angle at fixed R is von Mises with
-    concentration kappa solving I1/I0 = R. Maximizing the entropy minimizes the
-    information, so this is a bound rather than an estimate.
+    concentration kappa solving I1/I0 = R. Maximizing the entropy minimizes its
+    KL divergence from the uniform angular error distribution. This quantity is
+    not a channel capacity or a mutual information.
     """
 
     from scipy.optimize import brentq
@@ -504,15 +516,15 @@ def main() -> None:
     add_close(checks, "paired aging increment graph SD", std, 0.0018613104549769866, 1e-12)
     add_exact(checks, "graphs with positive aging increment", sum(1 for item in increments if item > 0), 3)
 
-    # 74-77: information retained per rotor, bounded from the measured overlaps.
+    # 74-77: angular localization relative to uniform, bounded by the measured overlaps.
     for label, values, expected in (
         ("write field applied", [float(run["write_release"]["write_overlap"][-1]) for run in dynamics], 1.4811116497946106),
         ("written state released", [float(run["write_release"]["release_overlap"][-1]) for run in dynamics], 0.29580233998316197),
         ("split replicas", split_end, 0.32661562528973526),
         ("g=0 written state", [float(run["no_capillary_write_release"]["release_overlap"][-1]) for run in dynamics], 6.572039757639629e-05),
     ):
-        bits = [retained_bits(max(value, 0.0)) for value in values]
-        add_close(checks, f"retained bits per rotor, {label}", float(np.mean(bits)), expected, 1e-10)
+        bits = [angular_localization_bits(max(value, 0.0)) for value in values]
+        add_close(checks, f"angular localization bits per rotor, {label}", float(np.mean(bits)), expected, 1e-10)
 
     # 78: unnormalized overlap correlation length on the scanned ray.
     lengths = overlap_correlation_lengths(SPIN_SCAN)
@@ -547,10 +559,51 @@ def main() -> None:
     dynamic_ci = holonomy["dynamic_memory"]["graph_bootstrap_95_interval"]
     add_exact(checks, "holonomy generic dynamic-memory CI contains zero", bool(dynamic_ci[0] <= 0.0 <= dynamic_ci[1]), True)
 
+    # 95-110: signed AB/BA readout and the relaxation-quotient control.
+    order_n144 = read_jsonl(ORDER_N144)
+    order_n256 = read_jsonl(ORDER_N256)
+    order_fraction = read_jsonl(ORDER_FRACTION_N144)
+    add_exact(checks, "N=144 order-memory raw rows", len(order_n144), 30)
+    for mode, expected_mean, expected_sem in (
+        ("contested", 0.5985411324151126, 0.001476314098046082),
+        ("partitioned", 0.02653158374959344, 0.010361239611684695),
+    ):
+        values = [
+            float(row["terminal_order_readout"])
+            for row in order_n144
+            if math.isclose(float(row["field"]), 8.0) and row["mode"] == mode
+        ]
+        mean, sem = sample_mean_sem(values)
+        add_exact(checks, f"N=144 h=8 {mode} graph count", len(values), 3)
+        add_close(checks, f"N=144 h=8 {mode} readout mean", mean, expected_mean, 1e-12)
+        add_close(checks, f"N=144 h=8 {mode} readout SEM", sem, expected_sem, 1e-12)
+    for mode, expected in (
+        ("contested", 0.5780788838797862),
+        ("partitioned", 0.0014965786804022453),
+    ):
+        values = [float(row["terminal_order_readout"]) for row in order_n256 if row["mode"] == mode]
+        add_close(checks, f"N=256 h=8 {mode} readout mean", np.mean(values), expected, 1e-12)
+    full_values = [
+        float(row["terminal_order_readout"])
+        for row in order_fraction
+        if math.isclose(float(row["contest_fraction_requested"]), 1.0)
+    ]
+    full_mean, full_sem = sample_mean_sem(full_values)
+    add_close(checks, "N=144 full-support readout mean", full_mean, 0.6669145621655357, 1e-12)
+    add_close(checks, "N=144 full-support readout SEM", full_sem, 0.02238124394420527, 1e-12)
+
+    relaxed = read_json(RELAXED_EXCHANGE)["bracket_control"]
+    add_close(checks, "partial-support reduced-model bracket", relaxed["partial_k4"]["bracket_norm"], 8.892175983509397, 1e-12)
+    add_close(checks, "full-support reduced-model bracket", relaxed["full_k8"]["bracket_norm"], 11.69703197342181, 1e-12)
+    add_close(checks, "partial-support retained basin separation", relaxed["partial_k4"]["separation_retained"], 1.2999999999999952, 1e-12)
+    add_close(checks, "full-support retained basin separation", relaxed["full_k8"]["separation_retained"], 0.0, 1e-12)
+    add_exact(checks, "partial-support transmission outside write support", relaxed["partial_k4"]["retained_outside_common_support"], 4)
+
     activated_raw = sorted(DATA.glob("rotating_colloids_activated_memory_prl_gpu/**/activated_memory_scan.jsonl"))
     required = [
         DENSE, REGIMES, CONTROLS, INTERNAL, SPIN, ACTIVATED,
-        DISORDER_RETENTION, HOLONOMY, *SIZE_PATHS.values(), *DYNAMICS_PATHS,
+        DISORDER_RETENTION, HOLONOMY, ORDER_N144, ORDER_N256,
+        ORDER_FRACTION_N144, RELAXED_EXCHANGE, *SIZE_PATHS.values(), *DYNAMICS_PATHS,
     ]
     text = MAIN_TEX.read_text(encoding="utf-8")
     language_gates = {
@@ -601,7 +654,7 @@ def main() -> None:
 
     passed = sum(bool(item["passed"]) for item in checks)
     report = {
-        "audit_contract": "capillary_prl_publication_scale_v2",
+        "audit_contract": "capillary_prl_publication_scale_v3",
         "quantitative_checks": checks,
         "checks": checks,
         "quantitative_checks_passed": passed,
@@ -627,7 +680,7 @@ def main() -> None:
         f"`{provenance['activated_memory_window_statistics']['recorded_for_all_lambdas']}`",
         f"- Language gates passed: `{provenance['all_language_gates_passed']}`",
         "",
-        "The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, coupling-dependent endpoint overlap, the disorder-retention maximum, and the matched loop intervention.",
+        "The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, coupling-dependent endpoint overlap, the disorder-retention maximum, the matched loop intervention, and the signed AB/BA release readout.",
         "",
         "## Failed quantitative checks",
         "",

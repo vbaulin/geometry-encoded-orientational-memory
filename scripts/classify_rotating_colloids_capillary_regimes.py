@@ -32,6 +32,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import ListedColormap
+from sklearn.decomposition import PCA
 from scipy.spatial import ConvexHull
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score, silhouette_score
@@ -104,6 +105,97 @@ def choose_clusters(x_scaled: np.ndarray, requested: int) -> Tuple[int, Dict[int
         labels = KMeans(n_clusters=count, random_state=11, n_init=100).fit_predict(x_scaled)
         scores[count] = float(silhouette_score(x_scaled, labels))
     return max(scores, key=scores.get), scores
+
+
+def _cluster_variant(
+    values: np.ndarray,
+    *,
+    requested: int,
+    reference_labels: np.ndarray,
+    reference_hidden: np.ndarray,
+) -> Dict[str, object]:
+    """Cluster one feature representation and compare it with the full model."""
+
+    scaled = StandardScaler().fit_transform(np.asarray(values, dtype=float))
+    count, scores = choose_clusters(scaled, requested)
+    labels = KMeans(n_clusters=count, random_state=11, n_init=200).fit_predict(scaled)
+
+    best = {
+        "cluster": -1,
+        "jaccard": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+    }
+    for cluster in range(count):
+        candidate = labels == cluster
+        intersection = int(np.count_nonzero(candidate & reference_hidden))
+        union = int(np.count_nonzero(candidate | reference_hidden))
+        precision = intersection / max(int(np.count_nonzero(candidate)), 1)
+        recall = intersection / max(int(np.count_nonzero(reference_hidden)), 1)
+        jaccard = intersection / max(union, 1)
+        if jaccard > float(best["jaccard"]):
+            best = {
+                "cluster": int(cluster),
+                "jaccard": float(jaccard),
+                "precision": float(precision),
+                "recall": float(recall),
+            }
+
+    return {
+        "cluster_count": int(count),
+        "silhouette_scores": {str(key): float(value) for key, value in scores.items()},
+        "selected_silhouette": float(scores[count]),
+        "adjusted_rand_index_to_full": float(
+            adjusted_rand_score(reference_labels, labels)
+        ),
+        "hidden_regime_best_match": best,
+    }
+
+
+def build_feature_ablation_report(
+    x: np.ndarray,
+    *,
+    full_scaled: np.ndarray,
+    full_labels: np.ndarray,
+    full_regime_names: Sequence[str],
+    requested: int,
+) -> Dict[str, object]:
+    """Test whether the regime taxonomy depends on duplicate persistence features."""
+
+    hidden = np.asarray(
+        [name == "hidden mixed memory" for name in full_regime_names], dtype=bool
+    )
+    z = StandardScaler().fit_transform(np.asarray(x, dtype=float))
+    variants = {
+        "drop_q_EA": x[:, [0, 1, 2, 4]],
+        "drop_C_window": x[:, [0, 1, 2, 3]],
+        "merge_persistence_coordinates": np.column_stack(
+            [z[:, :3], 0.5 * (z[:, 3] + z[:, 4])]
+        ),
+        "pca_whitened": PCA(
+            n_components=full_scaled.shape[1], whiten=True, random_state=11
+        ).fit_transform(full_scaled),
+    }
+    return {
+        "feature_order": list(FEATURES),
+        "feature_correlation": np.corrcoef(x, rowvar=False).tolist(),
+        "q_EA_C_window_correlation": float(np.corrcoef(x[:, 3], x[:, 4])[0, 1]),
+        "full_hidden_cell_count": int(np.count_nonzero(hidden)),
+        "variants": {
+            name: _cluster_variant(
+                values,
+                requested=requested,
+                reference_labels=full_labels,
+                reference_hidden=hidden,
+            )
+            for name, values in variants.items()
+        },
+        "interpretation": (
+            "The four-regime map is robust only if dropping or merging the two "
+            "persistence coordinates preserves both the selected cluster count and "
+            "the hidden-regime membership."
+        ),
+    }
 
 
 def regime_name(centroid: np.ndarray) -> str:
@@ -340,6 +432,17 @@ def main() -> None:
     plot_regime_diagram(cells, regime_names, confidence, output_dir)
     plot_state_space(cells, regime_names, output_dir)
 
+    ablation = build_feature_ablation_report(
+        x,
+        full_scaled=x_scaled,
+        full_labels=labels,
+        full_regime_names=regime_names,
+        requested=args.clusters,
+    )
+    (output_dir / "capillary_regime_feature_ablation.json").write_text(
+        json.dumps(ablation, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
     report = {
         "input": str(input_path),
         "raw_rows": len(rows),
@@ -352,6 +455,7 @@ def main() -> None:
         "initialization_ARI_min": float(np.min(ari)),
         "classification_confidence_mean": float(confidence.mean()),
         "classification_confidence_min": float(confidence.min()),
+        "feature_ablation": "capillary_regime_feature_ablation.json",
         "regimes": [],
         "disclaimer": "Finite-size data-resolved regimes; no thermodynamic phase boundary is inferred.",
     }

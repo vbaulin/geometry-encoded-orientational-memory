@@ -226,7 +226,16 @@ def main() -> None:
         title="coupling sets retained overlap",
     )
     ax.axhline(0.0, color="0.6", lw=0.6, zorder=0)
-    ax.legend(frameon=False, ncol=1, loc="center right", bbox_to_anchor=(0.99, 0.50))
+    ax.legend(
+        frameon=False,
+        ncol=1,
+        loc="upper left",
+        bbox_to_anchor=(0.10, 0.97),
+        borderaxespad=0.0,
+        columnspacing=0.8,
+        handlelength=1.4,
+        handletextpad=0.4,
+    )
 
     # (c) Observation-window dependence of the finite-window statistic.
     windows_by_lambda = window_statistics(groups, lambdas)
@@ -239,7 +248,13 @@ def main() -> None:
             block["window"], block["q_EA_mean"], yerr=block["q_EA_sem"],
             color=color, marker="o", ms=3.0, lw=1.2, capsize=1.5, label=rf"$\lambda={lam:g}$",
         )
-    ax.set(xlabel=r"observation window $D_rT_{\rm obs}$", ylabel=r"finite-window $q_{\rm EA}$", title="memory depends on read time", xscale="log", ylim=(0, 1.02))
+    ax.set(
+        xlabel=r"observation window $D_rT_{\rm obs}$",
+        ylabel=r"finite-window $q_{\rm EA}$",
+        title=r"finite-window $q_{\rm EA}$ is window dependent",
+        xscale="log",
+        ylim=(0, 1.02),
+    )
     ax.legend(frameon=False)
 
     for label, ax in zip("abc", axes):

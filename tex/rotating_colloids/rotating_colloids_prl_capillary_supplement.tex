@@ -191,57 +191,61 @@ give \(+0.0262,+0.0232,+0.0266\), so
 deviation of \(C_{\rm age}\) itself is 0.006, three times the increment, which
 is why the paired form is reported in the Letter.
 
-\section{Retained information}
+\section{Angular localization relative to a written target}
 
 The write--release--read and split-replica overlaps measure a mean resultant
 of the doubled angle, \(R=\langle\cos2\Delta\theta\rangle\), where
 \(\Delta\theta\) is the per-particle angular error against the reference
-state.  Because only \(R\) is measured, we bound the retained information by
-the maximum-entropy distribution consistent with it.  On the circle of the
+state. Because only \(R\) is measured, the least-structured angular-error
+distribution consistent with it is the maximum-entropy distribution. On the circle of the
 doubled angle this is the von Mises density with concentration \(\kappa\)
 fixed by
 \begin{equation}
  \frac{I_1(\kappa)}{I_0(\kappa)}=R,
  \label{eq:supp-vonmises}
 \end{equation}
-where \(I_n\) is a modified Bessel function.  Its differential entropy is
-\(H=\ln[2\pi I_0(\kappa)]-\kappa I_1(\kappa)/I_0(\kappa)\), so the information
-retained per rotor relative to a uniform angle is
+where \(I_n\) is a modified Bessel function. Its differential entropy is
+\(H=\ln[2\pi I_0(\kappa)]-\kappa I_1(\kappa)/I_0(\kappa)\), so the angular
+localization relative to a uniform error is
 \begin{equation}
  \mathcal I=\ln 2\pi-H=
  \kappa\frac{I_1(\kappa)}{I_0(\kappa)}-\ln I_0(\kappa)
  \quad\text{nats.}
- \label{eq:supp-capacity}
+ \label{eq:supp-localization}
 \end{equation}
-Maximizing the entropy at fixed \(R\) minimizes \(\mathcal I\), so
-Eq.~\eqref{eq:supp-capacity} is a lower bound.  It also assumes the angular
-error is statistically identical across particles; the archived runs store the
-particle-averaged overlap only, so a particle-resolved release trajectory
-would replace this bound by a direct estimate.
+Maximizing the entropy at fixed \(R\) minimizes this Kullback--Leibler
+divergence. Equation~\eqref{eq:supp-localization} therefore bounds the
+single-particle angular localization implied by the measured resultant. It is
+not, without further assumptions, a mutual information or a memory capacity.
+That identification would require a uniformly sampled target ensemble and a
+shift-invariant additive-error channel. Summing particlewise values would
+further require control of redundancy among the correlated rotors. The
+present simulations use a fixed compatible target and archive a
+particle-averaged overlap. We therefore report only the per-rotor localization
+diagnostic and do not infer bits per layer.
 
 \begin{table}[ht]
 \centering
-\caption{Retained information at \(N=1024\), \(J=4\), \(g=5\).  Values are
+\caption{Angular localization at \(N=1024\), \(J=4\), \(g=5\). Values are
 means over three quenched graphs, with standard deviations obtained by
-evaluating Eq.~\eqref{eq:supp-capacity} for each graph separately.}
-\label{tab:supp-capacity}
+evaluating Eq.~\eqref{eq:supp-localization} for each graph separately.}
+\label{tab:supp-localization}
 \begin{ruledtabular}
-\begin{tabular}{lccc}
-state & \(R\) & bits per rotor & bits per layer\\
+\begin{tabular}{lcc}
+state & \(R\) & localization bits per rotor\\
 \hline
-written, field applied & \(0.863\pm0.009\) & \(1.481\pm0.051\) & \(1517\pm52\)\\
-written, \(D_rt=625\) after removal & \(0.441\pm0.021\) & \(0.296\pm0.029\) & \(303\pm30\)\\
-split replicas, \(D_rt=625\) & \(0.462\pm0.010\) & \(0.327\pm0.016\) & \(334\pm16\)\\
-\(g=0\) written, \(D_rt=625\) & \(0.006\pm0.004\) & \(7\times10^{-5}\) & \(0.07\)\\
+written, field applied & \(0.863\pm0.009\) & \(1.481\pm0.051\)\\
+written, \(D_rt=625\) after removal & \(0.441\pm0.021\) & \(0.296\pm0.029\)\\
+split replicas, \(D_rt=625\) & \(0.462\pm0.010\) & \(0.327\pm0.016\)\\
+\(g=0\) written, \(D_rt=625\) & \(0.006\pm0.004\) & \(7\times10^{-5}\)\\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
 
-One fifth of the written target-orientation information survives the
-field-free interval, while the matched \(g=0\) control retains none of it.
-This is a particlewise information bound for the prepared state under the
-present protocol, not a multi-pattern device capacity: it assumes a perfect
-particle-resolved readout and a single write.
+The localization relative to the written target remains finite after the
+field-free interval, whereas the matched \(g=0\) value approaches zero. This
+quantifies angular concentration around one prepared pattern. It does not
+establish arbitrary-pattern storage or device capacity.
 
 \section{Finite-size state diagram and spatial correlations}
 
@@ -271,7 +275,14 @@ between \(k=4\) and \(k=5\) is 0.0075,
 \(\operatorname{corr}(q_{\rm EA},C_{\rm window})=0.986\), and removing
 \(C_2\) selects \(k=2\).  We consequently use the clusters to locate a
 reproducible memory-bearing population, not to assign a thermodynamic phase
-count.  Regime names are assigned only after fitting, from
+count. The persistence redundancy was tested directly. Removing
+\(q_{\rm EA}\) or \(C_{\rm window}\) still selects \(k=4\), with adjusted
+Rand indices 0.821 and 0.805 relative to the full assignment. The best-matched
+hidden-memory population has Jaccard indices 0.918 and 0.906, respectively.
+Replacing both persistence coordinates by their standardized mean also
+selects \(k=4\), with adjusted Rand index 0.878 and hidden-population Jaccard
+index 0.959. These ablations are recorded in
+\path{capillary_regime_feature_ablation.json}. Regime names are assigned only after fitting, from
 the observable centroids.  The confidence plotted in the Letter is
 \begin{equation}
  m=\frac{d_2-d_1}{d_2},
@@ -505,12 +516,12 @@ construction used for the connected \(C_2(r)\) above.
 \caption{Write--release--read retention at \(D_rt=625\) against positional
 disorder, at \(N=576\), \(J=4\), \(g=5\).  Means and standard deviations are
 over quenched graphs.  \(Q^{\rm conn}\) is Eq.~\eqref{eq:supp-connected-overlap}
-and the last column is the retained information of
-Eq.~\eqref{eq:supp-capacity} evaluated on it.}
+and the last column is the angular localization of
+Eq.~\eqref{eq:supp-localization} evaluated on it.}
 \label{tab:supp-disorder-retention}
 \begin{ruledtabular}
 \begin{tabular}{lccccc}
-\(\sigma/a\)&graphs&\(S\)&\(Q_{\rm target}\)&\(Q^{\rm conn}\)&bits per rotor\\
+\(\sigma/a\)&graphs&\(S\)&\(Q_{\rm target}\)&\(Q^{\rm conn}\)&localization bits\\
 \hline
 0.05&3&\multicolumn{4}{c}{released state differs between graphs; see text}\\
 0.08&5&\(0.301\pm0.105\)&\(0.577\pm0.098\)&\(0.478\pm0.093\)&\(0.366\pm0.153\)\\
@@ -888,7 +899,7 @@ redistributes stability among angular basins.
 These calculations separate two parts of the memory mechanism. Global
 incompatibility supplies a larger set of metastable states. Writing chooses
 one state from that set, and the energy barriers determine how long thermal
-motion remains in it. The loop structure therefore controls memory capacity
+motion remains in it. The loop structure therefore controls basin multiplicity
 in this reduction, while retention is a joint property of the chosen pattern
 and its barriers. The phase intervention acts directly on the angular
 Hamiltonian. At an unpatterned interface the preferred phase is the
@@ -1040,6 +1051,188 @@ claim is rejected if low \(S\) is accompanied by vanishing \(G_2\), if the
 field-free overlap is indistinguishable from the low-quadrupole control, or
 if retention disappears when the observation window is extended.
 
+\section{Order of operations as a stored variable}
+
+The single-pattern protocol establishes retention of a prepared angular
+state.  A stronger test asks whether two histories containing the same
+operations can be distinguished after both controls have been removed.  We
+represent the two temporary fields by
+\begin{equation}
+ \frac{U_X}{k_{\rm B}T}=-h\sum_i m_i^X
+ \cos2(\theta_i-\alpha_i^X),\qquad X\in\{A,B\},
+ \label{eq:supp-order-fields}
+\end{equation}
+where \(m_i^X\) is a binary support mask.  Pattern \(A\) is an equilibrated
+configuration of the autonomous pair model, and
+\(\alpha_i^B=\alpha_i^A+\pi/2\).  Each pulse lasts \(D_rt=5\).  We apply
+\(A\) then \(B\), or \(B\) then \(A\), set \(h=0\), and follow both states
+for a further \(D_rt=20\).  The histories start from the same configurations
+and use common Brownian increments at every corresponding time step, so their
+difference is caused by pulse order rather than independent thermal noise.
+
+For either history \(X\), define the overlap with pattern \(A\) on the read
+support \({\cal S}\) as
+\begin{equation}
+ Q_A^X(t)=\frac{1}{|{\cal S}|}\sum_{i\in{\cal S}}
+ \cos2[\theta_i^X(t)-\alpha_i^A].
+\end{equation}
+The signed order readout is
+\begin{equation}
+ M_{\rm ord}(t)=\frac{Q_A^{BA}(t)-Q_A^{AB}(t)}{2}.
+ \label{eq:supp-order-readout}
+\end{equation}
+A positive value identifies which opposed pattern acted last.  This readout
+must be distinguished from the unsigned separation
+\(1-|{\cal S}|^{-1}\sum_{i\in{\cal S}}
+\cos2(\theta_i^{AB}-\theta_i^{BA})\).  Nonlinear Brownian trajectories can
+separate while carrying no decodable information about pulse order; only
+Eq.~\eqref{eq:supp-order-readout} tests the order bit.
+
+Two support geometries isolate the mechanism.  In the contested protocol,
+both fields act on the same quarter-width stripe and favor orthogonal
+orientations there.  In the partitioned control, the fields act on two
+quarter-width stripes separated by one quarter of the periodic box.  The
+two partitioned masks share no particle, and no interaction edge directly
+joins them in any of the tested graphs.  The autonomous pair Hamiltonian is
+unchanged between protocols.
+
+The \(N=144\) scan uses three independently disordered graphs and 12 thermal
+replicas per graph.  At \(h=k_{\rm B}T\), both protocols give a terminal
+readout consistent with zero.  The contested response appears on the sampled
+grid between \(h=2\) and \(3k_{\rm B}T\), reaching
+\(M_{\rm ord}=0.355\pm0.078\) at \(h=3k_{\rm B}T\),
+\(0.586\pm0.010\) at \(5k_{\rm B}T\), and
+\(0.5985\pm0.0015\) at \(8k_{\rm B}T\).  The corresponding partitioned
+values are \(0.007\pm0.025\), \(0.022\pm0.002\), and
+\(0.0265\pm0.0104\).  Errors are standard errors over quenched graphs.  Over
+the final quarter of the \(h=8k_{\rm B}T\) release trajectory, the contested
+slope is \((0.3\pm3.5)\times10^{-3}\) per rotational time and is unresolved
+from zero.  Repeating the endpoint at \(N=256\) gives
+\(0.5781\pm0.0030\) for contested writes and
+\(0.0015\pm0.0010\) for partitioned writes.
+A separate \(N=144\) support test applies both fields to all particles at
+\(h=8k_{\rm B}T\).  Its terminal readout is
+\(M_{\rm ord}=0.667\pm0.022\), compared with
+\(0.5985\pm0.0015\) for the quarter-width support.  The sequence record is
+therefore not produced by the edge of the driven stripe, and it does not
+require an undriven reference region in the capillary-rotor model.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{capillary_prl_figures/figS_operation_order_memory.pdf}
+\caption{\label{fig:supp-operation-order}
+Order-of-operations memory. (a) Signed \(AB/BA\) readout after a field-free
+interval \(D_rt=20\). Points and error bars are means and standard errors over
+three quenched \(N=144\) graphs. Opposed fields on the same rotors produce a
+finite-amplitude onset; the separated-support signal remains more than an
+order of magnitude smaller. (b) Release curves at \(h=8k_{\rm B}T\). Bands are graph-level
+standard errors. Both fields are absent throughout the plotted interval.}
+\end{figure}
+
+The general criterion can be stated without reference to a particular
+substrate.  Let \(\Phi_A\) and \(\Phi_B\) denote the finite-time write maps,
+\({\cal R}_t\) field-free relaxation, and \({\cal B}\) the basin readout.
+Define \(\Pi_t={\cal B}{\cal R}_t\), and call two post-write states equivalent
+when \(\Pi_t(\bm x)=\Pi_t(\bm y)\).  The quotient
+\({\cal X}/{\sim_t}\) is then the set of records that remain distinguishable
+after release.  Order is retained only if
+\begin{equation}
+ \Pi_t\Phi_B\Phi_A(\bm\theta_0)\ne
+ \Pi_t\Phi_A\Phi_B(\bm\theta_0).
+ \label{eq:supp-order-map}
+\end{equation}
+The exchange \(A\leftrightarrow B\) is broken in the retained state when this
+inequality holds.  The signed variable \(M_{\rm ord}\) is its order parameter.
+A nonzero Lie bracket of the driven vector fields, or a finite difference
+between \(\Phi_B\Phi_A\bm\theta_0\) and
+\(\Phi_A\Phi_B\bm\theta_0\) immediately after writing, establishes
+order-sensitive dynamics but not memory: \(\Pi_t\) can still map the two
+states to the same equivalence class.
+
+The failure of bracket magnitude to predict retention is explicit in an
+eight-coordinate multibasin reduction,
+\begin{equation}
+ \dot q_i=-q_i(q_i^2-q_{\rm w}^2)
+ -c\sum_j L_{ij}q_j+f_i^X ,
+ \label{eq:supp-double-well-order}
+\end{equation}
+where \(q_i=\pm q_{\rm w}\) label two local wells, \(L\) is the ring-graph
+Laplacian, \(c\) is the coupling, and \(f_i^X\) is the temporary force from
+operation \(X\).  The two operations exert opposite forces on \(k\) common
+coordinates.  At \(q_{\rm w}=0.65\), fixed drive amplitude 12, and
+\(c=0.30\), neither extreme retains order: \(k=0\) and \(k=8\) both return to
+the same basin after release.  By contrast, \(k=4,5,6\) place all eight
+coordinates in different wells under the two pulse orders.  For \(k=4\),
+four retained coordinates were never directly driven, showing that coupling
+transmits the sequence distinction beyond the write support.
+
+The full-support null is not a weak-response limit.  The Lie-bracket norm is
+11.70 at \(k=8\), larger than 8.89 at \(k=4\), and the maximum AB/BA
+separation immediately after writing is nearly identical
+(1.6958 and 1.6965).  Release erases the first difference and retains the
+second at 1.30.  At weaker coupling \(c=0.13\), full support again retains
+four coordinates, so the re-entrant null results from collective-mode
+selection rather than support geometry alone.
+
+For binary write masks, the spatial overlap variable
+\(s_i=m_i^Am_i^B\) has contrast
+\begin{equation}
+ \chi_{\rm ov}=\frac{1}{N}\sum_i(s_i-\bar s)^2 .
+\end{equation}
+It vanishes for disjoint supports (\(s_i=0\)) and uniform full contest
+(\(s_i=1\)), and is positive for partial contest.  In the double-well
+reduction, \(\chi_{\rm ov}\) is the control that separates the retained
+exchange-broken regime from the two exchange-symmetric limits.  The rotor
+result at full support shows that this particular re-entrant structure is not
+universal.  What transfers between the two models is
+Eq.~\eqref{eq:supp-order-map}: microscopic noncommutation must survive the
+relaxation map as a difference between basin labels.
+
+Equation~\eqref{eq:supp-order-map} is a criterion for sequence storage in a
+relaxing material.  It assumes dissipation and a specified readout and
+therefore does not define a microscopic arrow of time.
+
+\section{Submission validation protocols}
+
+Three prospective tests address assumptions that are not resolved by the
+fixed-graph production runs. They are launched together by
+\path{scripts/run_rotating_colloids_prl_submission_validations_4gpu.sh}. Each
+job writes append-only JSONL records and resumes from completed graph--parameter
+keys.
+
+The time-step test holds every physical duration fixed while reducing
+\(D_r\Delta t\) from 0.0025 to 0.00125 and 0.000625. It compares
+\(S,C_2,G_2,q_{\rm EA},C_{\rm window}\), the split-replica endpoint, and the
+written-state endpoint on five independently disordered \(N=576\) graphs.
+This is a weak-convergence test of graph-averaged observables. Agreement with
+the finest step must lie within the larger of the graph standard error and a
+predeclared numerical tolerance before a value is promoted into the Letter.
+
+The mobile-centre test replaces the fixed graph by overdamped translational
+motion. Capillary and alignment forces act together with a soft excluded-volume
+core and an isotropic cage potential
+\begin{equation}
+ U_{\rm cage}=\frac{k_{\rm cage}}{2}
+ \sum_i|\bm r_i-\bm r_i^0|^2.
+\end{equation}
+The dimensionless translational mobility is
+\(D_t/(a^2D_r)\). The scan reports split-replica retention, root-mean-square
+centre displacement, minimum separation, force-clipping frequency, and the
+fraction of initial graph edges that survive. A tested cage stiffness passes
+only if the endpoint overlap exceeds 0.30, root-mean-square displacement is
+below \(0.10a\), at least 95\% of initial edges remain, and fewer than 1\% of
+positional force evaluations are clipped. Passing defines a finite-time
+operating window for the effective mobile model, not an equilibrium glass
+state.
+
+The sequence test separates two uses of thermal noise. Common Brownian
+increments isolate the deterministic difference between \(AB\) and \(BA\).
+Independent increments test experimental readability. For the latter, each
+history is generated independently and classified by the sign of its overlap
+with pattern \(A\). The report gives balanced single-trajectory decoding
+accuracy and \(d'\) across five \(N=256\) graphs. This test is required before
+the order-of-events construction is interpreted as a passive sensor.
+
 \section{Discovery and validation sequence}
 
 The calculations were organized so that the same statistic did not both
@@ -1098,6 +1291,17 @@ The programmable easy-axis protocols are encoded in
 \path{scripts/rotating_colloids_groove_protocols.py}; the two figures are
 generated from the archived JSON and JSONL records by
 \path{scripts/plot_rotating_colloids_groove_evidence.py}.
+
+The two-operation test is encoded in
+\path{scripts/test_rotating_colloids_operation_order_memory.py}.  Its
+append-only records are analysed by
+\path{scripts/plot_rotating_colloids_operation_order_memory.py}; the
+publication scan uses \(N=144\), with an endpoint size check at \(N=256\).
+The same executable accepts a list of jointly driven support fractions; the
+full-support control reported above uses the same three graphs, 12 thermal
+replicas, pulse duration, and release interval as the quarter-width scan.
+The minimal double-well calculation and its bracket controls are reproduced
+by \path{scripts/test_relaxed_exchange_order.py}.
 
 \begin{thebibliography}{10}
 

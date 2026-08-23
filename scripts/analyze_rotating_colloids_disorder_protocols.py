@@ -4,8 +4,8 @@
 The static disorder scan measures the finite-window persistence q_EA, not
 retention. This script reduces the split-replica and write-release-read
 protocols run at two or more disorder amplitudes to the endpoint overlaps and
-the information they imply, so that the collapse of the global director can be
-compared against what is actually retained.
+the angular localization they imply, so that the collapse of the global
+director can be compared against what is actually retained.
 
 Note that `rotating_colloids_capillary_pair.py --skip-scan` builds its graph
 from the FIRST entry of --graph-seeds only. One output directory therefore
@@ -28,12 +28,13 @@ from typing import Any
 import numpy as np
 
 
-def retained_bits(resultant: float) -> float:
-    """Lower bound on information retained per rotor, in bits.
+def angular_localization_bits(resultant: float) -> float:
+    """Minimum angular localization relative to uniform, in bits.
 
     Maximum-entropy (von Mises) density on the circle of the doubled angle at
-    fixed mean resultant. Maximizing entropy minimizes information, so this is
-    a bound rather than an estimate.
+    fixed mean resultant. Maximizing entropy minimizes the KL divergence from
+    the uniform angular-error distribution. This is not a channel capacity or
+    a mutual information.
     """
 
     from scipy.optimize import brentq
@@ -179,10 +180,10 @@ def main() -> None:
             mean, sd = mean_sd(item[field] for item in block)
             entry[field] = {"mean": mean, "graph_sd": sd, "sem": sd / math.sqrt(len(block)) if len(block) > 1 else float("nan")}
         for label, field in (
-            ("retained_bits_per_rotor", "write_end"),
-            ("connected_bits_per_rotor", "connected_write_end"),
+            ("angular_localization_bits_per_rotor", "write_end"),
+            ("connected_angular_localization_bits_per_rotor", "connected_write_end"),
         ):
-            bits = [retained_bits(max(item[field], 0.0)) for item in block]
+            bits = [angular_localization_bits(max(item[field], 0.0)) for item in block]
             mean, sd = mean_sd(bits)
             entry[label] = {"mean": mean, "graph_sd": sd, "sem": sd / math.sqrt(len(block)) if len(block) > 1 else float("nan")}
         entry["observation_time"] = block[0]["split_time"]
@@ -234,8 +235,9 @@ def main() -> None:
             "connected_write_gain": (
                 high["connected_write_end"]["mean"] / max(low["connected_write_end"]["mean"], 1e-12)
             ),
-            "connected_bits_gain": (
-                high["connected_bits_per_rotor"]["mean"] / max(low["connected_bits_per_rotor"]["mean"], 1e-12)
+            "connected_angular_localization_gain": (
+                high["connected_angular_localization_bits_per_rotor"]["mean"]
+                / max(low["connected_angular_localization_bits_per_rotor"]["mean"], 1e-12)
             ),
         }
     (args.output_dir / "disorder_protocol_report.json").write_text(
@@ -250,7 +252,7 @@ def main() -> None:
 
     header = (
         f"{'sigma/a':>8} {'n':>2} {'S_end':>16} {'Q_write':>16} {'Q-S^2':>16} "
-        f"{'Qs-S^2':>16} {'bits conn':>16}"
+        f"{'Qs-S^2':>16} {'loc. bits conn':>16}"
     )
     print(header)
     print("-" * len(header))
@@ -260,7 +262,7 @@ def main() -> None:
             f"{cell(entry, 'S_end'):>16} {cell(entry, 'write_end'):>16} "
             f"{cell(entry, 'connected_write_end'):>16} "
             f"{cell(entry, 'connected_split_end'):>16} "
-            f"{cell(entry, 'connected_bits_per_rotor'):>16}"
+            f"{cell(entry, 'connected_angular_localization_bits_per_rotor'):>16}"
         )
     print()
     # Differences are only worth reading against the graph-to-graph spread,

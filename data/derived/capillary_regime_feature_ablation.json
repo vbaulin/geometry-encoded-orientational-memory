@@ -1,0 +1,123 @@
+{
+  "feature_correlation": [
+    [
+      0.9999999999999999,
+      0.8262318756056093,
+      -0.7095927369255225,
+      -0.07687829902784189,
+      -0.0880832391730487
+    ],
+    [
+      0.8262318756056094,
+      1.0,
+      -0.6751930892002369,
+      0.05224779918440477,
+      0.060330007481119524
+    ],
+    [
+      -0.7095927369255225,
+      -0.6751930892002369,
+      1.0,
+      0.5284687372929266,
+      0.4733672808562866
+    ],
+    [
+      -0.07687829902784189,
+      0.05224779918440476,
+      0.5284687372929266,
+      0.9999999999999998,
+      0.9864454839124128
+    ],
+    [
+      -0.08808323917304868,
+      0.06033000748111952,
+      0.47336728085628654,
+      0.9864454839124128,
+      0.9999999999999999
+    ]
+  ],
+  "feature_order": [
+    "S_mean",
+    "C2_mean",
+    "G2_mean",
+    "q_EA_mean",
+    "window_autocorrelation"
+  ],
+  "full_hidden_cell_count": 169,
+  "interpretation": "The four-regime map is robust only if dropping or merging the two persistence coordinates preserves both the selected cluster count and the hidden-regime membership.",
+  "q_EA_C_window_correlation": 0.9864454839124128,
+  "variants": {
+    "drop_C_window": {
+      "adjusted_rand_index_to_full": 0.8046962140404427,
+      "cluster_count": 4,
+      "hidden_regime_best_match": {
+        "cluster": 0,
+        "jaccard": 0.9060773480662984,
+        "precision": 0.9318181818181818,
+        "recall": 0.9704142011834319
+      },
+      "selected_silhouette": 0.4610499386317639,
+      "silhouette_scores": {
+        "2": 0.38158455613515296,
+        "3": 0.4273845697721807,
+        "4": 0.4610499386317639,
+        "5": 0.45537776279901204,
+        "6": 0.39279352251954647
+      }
+    },
+    "drop_q_EA": {
+      "adjusted_rand_index_to_full": 0.8212238025805345,
+      "cluster_count": 4,
+      "hidden_regime_best_match": {
+        "cluster": 0,
+        "jaccard": 0.9176470588235294,
+        "precision": 0.9936305732484076,
+        "recall": 0.9230769230769231
+      },
+      "selected_silhouette": 0.44008858434736225,
+      "silhouette_scores": {
+        "2": 0.37942811263537046,
+        "3": 0.4197780279107925,
+        "4": 0.44008858434736225,
+        "5": 0.4392099417463028,
+        "6": 0.3940171157177578
+      }
+    },
+    "merge_persistence_coordinates": {
+      "adjusted_rand_index_to_full": 0.8781011153240277,
+      "cluster_count": 4,
+      "hidden_regime_best_match": {
+        "cluster": 2,
+        "jaccard": 0.9590643274853801,
+        "precision": 0.9879518072289156,
+        "recall": 0.9704142011834319
+      },
+      "selected_silhouette": 0.45054532885914506,
+      "silhouette_scores": {
+        "2": 0.38153658461250883,
+        "3": 0.4234185168832623,
+        "4": 0.45054532885914506,
+        "5": 0.44632659027449767,
+        "6": 0.39634688298601883
+      }
+    },
+    "pca_whitened": {
+      "adjusted_rand_index_to_full": 0.4771158434186235,
+      "cluster_count": 6,
+      "hidden_regime_best_match": {
+        "cluster": 4,
+        "jaccard": 0.7314285714285714,
+        "precision": 0.9552238805970149,
+        "recall": 0.757396449704142
+      },
+      "selected_silhouette": 0.4089729293153374,
+      "silhouette_scores": {
+        "2": 0.31602626529450745,
+        "3": 0.26180236414876656,
+        "4": 0.31973051395481555,
+        "5": 0.36490821576192756,
+        "6": 0.4089729293153374
+      }
+    }
+  }
+}

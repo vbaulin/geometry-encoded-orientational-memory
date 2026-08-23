@@ -1,6 +1,6 @@
 {
   "all_checks_passed": true,
-  "audit_contract": "capillary_prl_publication_scale_v2",
+  "audit_contract": "capillary_prl_publication_scale_v3",
   "checks": [
     {
       "actual": 1323,
@@ -589,7 +589,7 @@
     {
       "absolute_error": 0.0,
       "actual": 1.4811116497946106,
-      "claim": "retained bits per rotor, write field applied",
+      "claim": "angular localization bits per rotor, write field applied",
       "expected": 1.4811116497946106,
       "passed": true,
       "tolerance": 1e-10
@@ -597,7 +597,7 @@
     {
       "absolute_error": 0.0,
       "actual": 0.29580233998316197,
-      "claim": "retained bits per rotor, written state released",
+      "claim": "angular localization bits per rotor, written state released",
       "expected": 0.29580233998316197,
       "passed": true,
       "tolerance": 1e-10
@@ -605,7 +605,7 @@
     {
       "absolute_error": 0.0,
       "actual": 0.32661562528973526,
-      "claim": "retained bits per rotor, split replicas",
+      "claim": "angular localization bits per rotor, split replicas",
       "expected": 0.32661562528973526,
       "passed": true,
       "tolerance": 1e-10
@@ -613,7 +613,7 @@
     {
       "absolute_error": 0.0,
       "actual": 6.572039757639629e-05,
-      "claim": "retained bits per rotor, g=0 written state",
+      "claim": "angular localization bits per rotor, g=0 written state",
       "expected": 6.572039757639629e-05,
       "passed": true,
       "tolerance": 1e-10
@@ -761,6 +761,126 @@
       "claim": "holonomy generic dynamic-memory CI contains zero",
       "expected": true,
       "passed": true
+    },
+    {
+      "actual": 30,
+      "claim": "N=144 order-memory raw rows",
+      "expected": 30,
+      "passed": true
+    },
+    {
+      "actual": 3,
+      "claim": "N=144 h=8 contested graph count",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5985411324151126,
+      "claim": "N=144 h=8 contested readout mean",
+      "expected": 0.5985411324151126,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.001476314098046082,
+      "claim": "N=144 h=8 contested readout SEM",
+      "expected": 0.001476314098046082,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 3,
+      "claim": "N=144 h=8 partitioned graph count",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.02653158374959344,
+      "claim": "N=144 h=8 partitioned readout mean",
+      "expected": 0.02653158374959344,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.010361239611684695,
+      "claim": "N=144 h=8 partitioned readout SEM",
+      "expected": 0.010361239611684695,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5780788838797862,
+      "claim": "N=256 h=8 contested readout mean",
+      "expected": 0.5780788838797862,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0014965786804022453,
+      "claim": "N=256 h=8 partitioned readout mean",
+      "expected": 0.0014965786804022453,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6669145621655357,
+      "claim": "N=144 full-support readout mean",
+      "expected": 0.6669145621655357,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.02238124394420527,
+      "claim": "N=144 full-support readout SEM",
+      "expected": 0.02238124394420527,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 8.892175983509397,
+      "claim": "partial-support reduced-model bracket",
+      "expected": 8.892175983509397,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 11.69703197342181,
+      "claim": "full-support reduced-model bracket",
+      "expected": 11.69703197342181,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.2999999999999952,
+      "claim": "partial-support retained basin separation",
+      "expected": 1.2999999999999952,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0,
+      "claim": "full-support retained basin separation",
+      "expected": 0.0,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 4,
+      "claim": "partial-support transmission outside write support",
+      "expected": 4,
+      "passed": true
     }
   ],
   "provenance": {
@@ -901,17 +1021,11 @@
     "supplemental_figure_references": {
       "all_references_resolve": true,
       "letter_references": [
-        2,
         3,
         4,
-        5,
-        6,
-        7,
-        8
+        9
       ],
-      "letter_table_references": [
-        "IV"
-      ],
+      "letter_table_references": [],
       "numbering": {
         "S1": "fig:supp-state-space",
         "S2": "fig:supp-internal",
@@ -920,13 +1034,14 @@
         "S5": "fig:supp-controls",
         "S6": "fig:supp-spin-glass",
         "S7": "fig:supp-groove-static",
-        "S8": "fig:supp-groove-dynamics"
+        "S8": "fig:supp-groove-dynamics",
+        "S9": "fig:supp-operation-order"
       },
       "out_of_range_references": [],
-      "supplemental_figure_count": 8,
+      "supplemental_figure_count": 9,
       "supplemental_table_count": 5,
       "table_numbering": {
-        "SI": "tab:supp-capacity",
+        "SI": "tab:supp-localization",
         "SII": "tab:supp-controls",
         "SIII": "tab:supp-disorder",
         "SIV": "tab:supp-disorder-retention",
@@ -1523,7 +1638,7 @@
     {
       "absolute_error": 0.0,
       "actual": 1.4811116497946106,
-      "claim": "retained bits per rotor, write field applied",
+      "claim": "angular localization bits per rotor, write field applied",
       "expected": 1.4811116497946106,
       "passed": true,
       "tolerance": 1e-10
@@ -1531,7 +1646,7 @@
     {
       "absolute_error": 0.0,
       "actual": 0.29580233998316197,
-      "claim": "retained bits per rotor, written state released",
+      "claim": "angular localization bits per rotor, written state released",
       "expected": 0.29580233998316197,
       "passed": true,
       "tolerance": 1e-10
@@ -1539,7 +1654,7 @@
     {
       "absolute_error": 0.0,
       "actual": 0.32661562528973526,
-      "claim": "retained bits per rotor, split replicas",
+      "claim": "angular localization bits per rotor, split replicas",
       "expected": 0.32661562528973526,
       "passed": true,
       "tolerance": 1e-10
@@ -1547,7 +1662,7 @@
     {
       "absolute_error": 0.0,
       "actual": 6.572039757639629e-05,
-      "claim": "retained bits per rotor, g=0 written state",
+      "claim": "angular localization bits per rotor, g=0 written state",
       "expected": 6.572039757639629e-05,
       "passed": true,
       "tolerance": 1e-10
@@ -1695,8 +1810,128 @@
       "claim": "holonomy generic dynamic-memory CI contains zero",
       "expected": true,
       "passed": true
+    },
+    {
+      "actual": 30,
+      "claim": "N=144 order-memory raw rows",
+      "expected": 30,
+      "passed": true
+    },
+    {
+      "actual": 3,
+      "claim": "N=144 h=8 contested graph count",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5985411324151126,
+      "claim": "N=144 h=8 contested readout mean",
+      "expected": 0.5985411324151126,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.001476314098046082,
+      "claim": "N=144 h=8 contested readout SEM",
+      "expected": 0.001476314098046082,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 3,
+      "claim": "N=144 h=8 partitioned graph count",
+      "expected": 3,
+      "passed": true
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.02653158374959344,
+      "claim": "N=144 h=8 partitioned readout mean",
+      "expected": 0.02653158374959344,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.010361239611684695,
+      "claim": "N=144 h=8 partitioned readout SEM",
+      "expected": 0.010361239611684695,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.5780788838797862,
+      "claim": "N=256 h=8 contested readout mean",
+      "expected": 0.5780788838797862,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0014965786804022453,
+      "claim": "N=256 h=8 partitioned readout mean",
+      "expected": 0.0014965786804022453,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.6669145621655357,
+      "claim": "N=144 full-support readout mean",
+      "expected": 0.6669145621655357,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.02238124394420527,
+      "claim": "N=144 full-support readout SEM",
+      "expected": 0.02238124394420527,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 8.892175983509397,
+      "claim": "partial-support reduced-model bracket",
+      "expected": 8.892175983509397,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 11.69703197342181,
+      "claim": "full-support reduced-model bracket",
+      "expected": 11.69703197342181,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 1.2999999999999952,
+      "claim": "partial-support retained basin separation",
+      "expected": 1.2999999999999952,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "absolute_error": 0.0,
+      "actual": 0.0,
+      "claim": "full-support retained basin separation",
+      "expected": 0.0,
+      "passed": true,
+      "tolerance": 1e-12
+    },
+    {
+      "actual": 4,
+      "claim": "partial-support transmission outside write support",
+      "expected": 4,
+      "passed": true
     }
   ],
-  "quantitative_checks_passed": 94,
-  "quantitative_checks_total": 94
+  "quantitative_checks_passed": 110,
+  "quantitative_checks_total": 110
 }

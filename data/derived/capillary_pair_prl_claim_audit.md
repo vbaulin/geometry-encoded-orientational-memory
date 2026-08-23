@@ -1,6 +1,6 @@
 # Capillary-pair PRL claim audit
 
-- Quantitative checks passed: `94/94`
+- Quantitative checks passed: `110/110`
 - All quantitative checks passed: `True`
 - Required local artifacts present: `True`
 - Activated-memory raw JSONL present locally: `True`
@@ -8,7 +8,7 @@
 - Fig. 4(c) window statistics recorded: `True`
 - Language gates passed: `True`
 
-The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, coupling-dependent endpoint overlap, the disorder-retention maximum, and the matched loop intervention.
+The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, coupling-dependent endpoint overlap, the disorder-retention maximum, the matched loop intervention, and the signed AB/BA release readout.
 
 ## Failed quantitative checks
 
