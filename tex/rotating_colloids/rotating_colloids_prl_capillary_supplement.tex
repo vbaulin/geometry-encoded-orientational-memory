@@ -1129,6 +1129,53 @@ order of magnitude smaller. (b) Release curves at \(h=8k_{\rm B}T\). Bands are g
 standard errors. Both fields are absent throughout the plotted interval.}
 \end{figure}
 
+Common Brownian increments isolate the order-dependent driven response, but
+they suppress ordinary replica decorrelation. We therefore repeated the
+sequence test with independent noise for every \(AB\) and \(BA\) history.
+Five independently disordered \(N=256\) graphs were used, with 48 replicas
+for each pulse order and graph. Table~\ref{tab:supp-independent-order}
+reports means and standard errors over graphs. The contested protocol becomes
+decodable between \(h=1\) and \(2k_{\rm B}T\), reaches 98.96\% accuracy at
+\(3k_{\rm B}T\), and reaches 100\% at \(5\) and \(8k_{\rm B}T\). At the
+largest field, its terminal readout is \(0.6336\pm0.0198\), compared with
+\(0.0123\pm0.0027\) for partitioned writes. The difference between the two
+graph-averaged readouts is \(0.6213\pm0.0200\). Partitioned writes retain a
+weak residual bias at the
+largest field, with \(55.0\pm1.3\%\) accuracy and \(d'=0.31\pm0.05\), but do
+not approach the contested separation. Pulse order is therefore readable
+from individual noisy trajectories and is not an artifact of common-random-
+number cancellation.
+
+\begin{table}[ht]
+\centering
+\caption{\label{tab:supp-independent-order}
+Independent-noise decoding of pulse order. The terminal order readout
+\(M_{\rm ord}\), balanced zero-threshold decoding accuracy \(A\), and
+discriminability \(d'\) are graph means \(\pm\) standard errors. Each entry
+uses five \(N=256\) graphs and 48 replicas per pulse order and graph.}
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\begin{tabular}{c ccc ccc}
+\hline\hline
+ & \multicolumn{3}{c}{Contested supports} &
+   \multicolumn{3}{c}{Partitioned supports}\\
+\(h/k_{\rm B}T\) & \(M_{\rm ord}\) & \(A\) & \(d'\) &
+\(M_{\rm ord}\) & \(A\) & \(d'\)\\
+\hline
+1 & \(0.0346\pm0.0052\) & \(0.527\pm0.021\) & \(0.262\pm0.046\) &
+    \(0.0033\pm0.0032\) & \(0.485\pm0.016\) & \(0.037\pm0.033\)\\
+2 & \(0.2344\pm0.0212\) & \(0.815\pm0.055\) & \(2.09\pm0.40\) &
+    \(0.0003\pm0.0063\) & \(0.513\pm0.014\) & \(0.007\pm0.079\)\\
+3 & \(0.4885\pm0.0196\) & \(0.990\pm0.010\) & \(6.13\pm0.79\) &
+    \(0.0071\pm0.0030\) & \(0.540\pm0.017\) & \(0.133\pm0.054\)\\
+5 & \(0.6223\pm0.0176\) & \(1.000\pm0.000\) & \(11.81\pm1.46\) &
+    \(0.0025\pm0.0028\) & \(0.492\pm0.013\) & \(0.047\pm0.071\)\\
+8 & \(0.6336\pm0.0198\) & \(1.000\pm0.000\) & \(12.55\pm0.97\) &
+    \(0.0123\pm0.0027\) & \(0.550\pm0.013\) & \(0.307\pm0.052\)\\
+\hline\hline
+\end{tabular}
+\end{table}
+
 The general criterion can be stated without reference to a particular
 substrate.  Let \(\Phi_A\) and \(\Phi_B\) denote the finite-time write maps,
 \({\cal R}_t\) field-free relaxation, and \({\cal B}\) the basin readout.
@@ -1192,21 +1239,26 @@ Equation~\eqref{eq:supp-order-map} is a criterion for sequence storage in a
 relaxing material.  It assumes dissipation and a specified readout and
 therefore does not define a microscopic arrow of time.
 
-\section{Submission validation protocols}
+\section{Submission validation results}
 
-Three prospective tests address assumptions that are not resolved by the
-fixed-graph production runs. They are launched together by
+Three tests address assumptions that are not resolved by the fixed-graph
+production runs. They are launched together by
 \path{scripts/run_rotating_colloids_prl_submission_validations_4gpu.sh}. Each
 job writes append-only JSONL records and resumes from completed graph--parameter
 keys.
 
-The time-step test holds every physical duration fixed while reducing
+The time-step test held every physical duration fixed while reducing
 \(D_r\Delta t\) from 0.0025 to 0.00125 and 0.000625. It compares
 \(S,C_2,G_2,q_{\rm EA},C_{\rm window}\), the split-replica endpoint, and the
 written-state endpoint on five independently disordered \(N=576\) graphs.
-This is a weak-convergence test of graph-averaged observables. Agreement with
-the finest step must lie within the larger of the graph standard error and a
-predeclared numerical tolerance before a value is promoted into the Letter.
+Relative to the finest step, the production step changes \(C_2,G_2,q_{\rm
+EA}\), and \(C_{\rm window}\) by at most 0.0031. Its paired split-endpoint
+difference is \(0.0114\pm0.0149\). The written endpoint changes by
+\(-0.0396\pm0.0150\), whereas the intermediate step differs from the finest
+by \(-0.0105\pm0.0216\). Thus the state observables and split memory are
+weakly converged at the production step. The written endpoint has a resolved
+coarse-step bias, which underestimates rather than creates the retained
+signal.
 
 The mobile-centre test replaces the fixed graph by overdamped translational
 motion. Capillary and alignment forces act together with a soft excluded-volume
@@ -1223,15 +1275,25 @@ only if the endpoint overlap exceeds 0.30, root-mean-square displacement is
 below \(0.10a\), at least 95\% of initial edges remain, and fewer than 1\% of
 positional force evaluations are clipped. Passing defines a finite-time
 operating window for the effective mobile model, not an equilibrium glass
-state.
+state. The first passing stiffness is
+\(k_{\rm cage}=500k_{\rm B}T/a^2\), where
+\(Q_{\rm split}=0.466\pm0.032\), the root-mean-square displacement is
+\((0.0917\pm0.0043)a\), and \(96.33\pm0.19\%\) of initial edges survive.
+At \(k_{\rm cage}=2000k_{\rm B}T/a^2\), these values become
+\(0.577\pm0.029\), \((0.0311\pm0.0006)a\), and
+\(98.56\pm0.06\%\). The quadrupolar interaction is retained in this
+mobile-centre calculation. Because the soft repulsion permits nominal-core
+overlap, the calculation tests robustness to centre motion and neighbour
+changes but not hard-particle excluded volume.
 
 The sequence test separates two uses of thermal noise. Common Brownian
 increments isolate the deterministic difference between \(AB\) and \(BA\).
 Independent increments test experimental readability. For the latter, each
 history is generated independently and classified by the sign of its overlap
 with pattern \(A\). The report gives balanced single-trajectory decoding
-accuracy and \(d'\) across five \(N=256\) graphs. This test is required before
-the order-of-events construction is interpreted as a passive sensor.
+accuracy and \(d'\) across five \(N=256\) graphs. The field-resolved results
+in Table~\ref{tab:supp-independent-order} establish single-trajectory
+readability for contested writes under independent Brownian histories.
 
 \section{Discovery and validation sequence}
 

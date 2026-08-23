@@ -77,8 +77,11 @@ The remaining discriminating tests are resumable and sharded across four
 GPUs: weak time-step convergence at equal physical duration, retention when
 the particle centres undergo caged translational Brownian motion, and
 two-pulse decoding with independent thermal noise. Their outputs are merged
-with conflict detection and a predeclared mobile-cage gate. They are not used
-to support claims in the current Letter until the cluster run is complete.
+with conflict detection and a predeclared mobile-cage gate. The completed
+cluster run contains 15 time-step rows, 25 mobile-cage rows, and 50
+independent-noise sequence rows. Its aggregate results are reported in the
+Supplement; the complete validation directory must be present when building
+the archival release.
 
 Run from the repository root on the four-GPU machine:
 

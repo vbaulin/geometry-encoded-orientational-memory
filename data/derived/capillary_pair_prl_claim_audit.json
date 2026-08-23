@@ -1,5 +1,5 @@
 {
-  "all_checks_passed": true,
+  "all_checks_passed": false,
   "audit_contract": "capillary_prl_publication_scale_v3",
   "checks": [
     {
@@ -845,6 +845,12 @@
       "tolerance": 1e-12
     },
     {
+      "actual": false,
+      "claim": "independent-noise order report present",
+      "expected": true,
+      "passed": false
+    },
+    {
       "absolute_error": 0.0,
       "actual": 8.892175983509397,
       "claim": "partial-support reduced-model bracket",
@@ -1016,8 +1022,16 @@
       "no_equilibrium_glass_claim": true,
       "no_permanent_memory_claim": true
     },
-    "missing_required_local_artifacts": [],
-    "required_local_artifacts_present": true,
+    "missing_required_local_artifacts": [
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_submission_validations/independent_order/operation_order_memory.jsonl",
+      "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_submission_validations/independent_order/independent_noise_order_report.json"
+    ],
+    "required_local_artifacts_present": false,
+    "submission_validation_archive": {
+      "complete": false,
+      "manifest": "/Users/vbaulin/antigr/KnowledgeParser/discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_submission_validations/validation_manifest.json",
+      "reason": "completed cluster validation directory is absent on this host"
+    },
     "supplemental_figure_references": {
       "all_references_resolve": true,
       "letter_references": [
@@ -1025,7 +1039,9 @@
         4,
         9
       ],
-      "letter_table_references": [],
+      "letter_table_references": [
+        "VI"
+      ],
       "numbering": {
         "S1": "fig:supp-state-space",
         "S2": "fig:supp-internal",
@@ -1039,13 +1055,14 @@
       },
       "out_of_range_references": [],
       "supplemental_figure_count": 9,
-      "supplemental_table_count": 5,
+      "supplemental_table_count": 6,
       "table_numbering": {
         "SI": "tab:supp-localization",
         "SII": "tab:supp-controls",
         "SIII": "tab:supp-disorder",
         "SIV": "tab:supp-disorder-retention",
-        "SV": "tab:supp-size"
+        "SV": "tab:supp-size",
+        "SVI": "tab:supp-independent-order"
       },
       "unresolved_table_references": []
     }
@@ -1894,6 +1911,12 @@
       "tolerance": 1e-12
     },
     {
+      "actual": false,
+      "claim": "independent-noise order report present",
+      "expected": true,
+      "passed": false
+    },
+    {
       "absolute_error": 0.0,
       "actual": 8.892175983509397,
       "claim": "partial-support reduced-model bracket",
@@ -1933,5 +1956,5 @@
     }
   ],
   "quantitative_checks_passed": 110,
-  "quantitative_checks_total": 110
+  "quantitative_checks_total": 111
 }

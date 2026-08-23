@@ -44,6 +44,14 @@ ORDER_N144 = DATA / "rotating_colloids_operation_order_memory_n12/operation_orde
 ORDER_N256 = DATA / "rotating_colloids_operation_order_memory_n16/operation_order_memory.jsonl"
 ORDER_FRACTION_N144 = DATA / "rotating_colloids_operation_order_memory_fraction_n12/operation_order_memory.jsonl"
 RELAXED_EXCHANGE = DATA / "relaxed_exchange_order_minimal.json"
+SUBMISSION_VALIDATIONS = DATA / "rotating_colloids_submission_validations"
+ORDER_INDEPENDENT = (
+    SUBMISSION_VALIDATIONS / "independent_order/operation_order_memory.jsonl"
+)
+ORDER_INDEPENDENT_REPORT = (
+    SUBMISSION_VALIDATIONS
+    / "independent_order/independent_noise_order_report.json"
+)
 
 # Frozen expectations for the endpoint-overlap separation at lambda = 0.9.
 SPLIT_SEPARATION_SIGMA = 40.470438807650005
@@ -130,6 +138,72 @@ def add_exact(checks: list[dict[str, Any]], label: str, actual: Any, expected: A
             "passed": bool(actual == expected),
         }
     )
+
+
+def audit_independent_order(
+    checks: list[dict[str, Any]], report_path: Path
+) -> None:
+    """Audit independent-noise sequence claims when the cluster report exists."""
+
+    if not report_path.exists():
+        add_exact(checks, "independent-noise order report present", False, True)
+        return
+    report = read_json(report_path)
+    add_exact(checks, "independent-noise order report present", True, True)
+    add_exact(checks, "independent-noise order rows", report["row_count"], 50)
+    add_close(
+        checks,
+        "independent-noise h=8 contested-partitioned contrast",
+        report["highest_field_contested_minus_partitioned"]["mean"],
+        0.621257760240627,
+        1e-12,
+    )
+    add_close(
+        checks,
+        "independent-noise h=8 contrast SEM",
+        report["highest_field_contested_minus_partitioned"]["sem"],
+        0.019976817317675182,
+        1e-12,
+    )
+    for mode, expected in (
+        (
+            "contested",
+            {
+                "readout": (0.6335929224283922, 0.01979755507788101),
+                "accuracy": (1.0, 0.0),
+                "d_prime": (12.545756466746118, 0.9719137815444875),
+            },
+        ),
+        (
+            "partitioned",
+            {
+                "readout": (0.01233516218776521, 0.0026702140517260073),
+                "accuracy": (0.55, 0.012499999999999999),
+                "d_prime": (0.30705569373101216, 0.05237423499319883),
+            },
+        ),
+    ):
+        summary = report["summaries"][f"8:{mode}"]
+        for metric, report_key in (
+            ("readout", "terminal_order_readout"),
+            ("accuracy", "decode_accuracy_zero_threshold"),
+            ("d_prime", "decode_d_prime"),
+        ):
+            expected_mean, expected_sem = expected[metric]
+            add_close(
+                checks,
+                f"independent-noise h=8 {mode} {metric} mean",
+                summary[report_key]["mean"],
+                expected_mean,
+                1e-12,
+            )
+            add_close(
+                checks,
+                f"independent-noise h=8 {mode} {metric} SEM",
+                summary[report_key]["sem"],
+                expected_sem,
+                1e-12,
+            )
 
 
 def first_sample_below(time: Sequence[float], values: Sequence[float], threshold: float) -> float:
@@ -592,6 +666,8 @@ def main() -> None:
     add_close(checks, "N=144 full-support readout mean", full_mean, 0.6669145621655357, 1e-12)
     add_close(checks, "N=144 full-support readout SEM", full_sem, 0.02238124394420527, 1e-12)
 
+    audit_independent_order(checks, ORDER_INDEPENDENT_REPORT)
+
     relaxed = read_json(RELAXED_EXCHANGE)["bracket_control"]
     add_close(checks, "partial-support reduced-model bracket", relaxed["partial_k4"]["bracket_norm"], 8.892175983509397, 1e-12)
     add_close(checks, "full-support reduced-model bracket", relaxed["full_k8"]["bracket_norm"], 11.69703197342181, 1e-12)
@@ -603,7 +679,8 @@ def main() -> None:
     required = [
         DENSE, REGIMES, CONTROLS, INTERNAL, SPIN, ACTIVATED,
         DISORDER_RETENTION, HOLONOMY, ORDER_N144, ORDER_N256,
-        ORDER_FRACTION_N144, RELAXED_EXCHANGE, *SIZE_PATHS.values(), *DYNAMICS_PATHS,
+        ORDER_FRACTION_N144, RELAXED_EXCHANGE, ORDER_INDEPENDENT,
+        ORDER_INDEPENDENT_REPORT, *SIZE_PATHS.values(), *DYNAMICS_PATHS,
     ]
     text = MAIN_TEX.read_text(encoding="utf-8")
     language_gates = {
@@ -647,9 +724,34 @@ def main() -> None:
             "reason": "report predates the panel (c) window statistics; rebuild Fig. 4 to record them",
         }
 
+    validation_manifest_path = SUBMISSION_VALIDATIONS / "validation_manifest.json"
+    if validation_manifest_path.exists():
+        validation_manifest = read_json(validation_manifest_path)
+        provenance["submission_validation_archive"] = {
+            "manifest": str(validation_manifest_path),
+            "complete": bool(validation_manifest.get("complete"))
+            and int(validation_manifest.get("timestep_rows", 0)) == 15
+            and int(validation_manifest.get("mobile_cage_rows", 0)) == 25
+            and int(validation_manifest.get("independent_order_rows", 0)) == 50
+            and ORDER_INDEPENDENT.exists()
+            and ORDER_INDEPENDENT_REPORT.exists(),
+            "timestep_rows": int(validation_manifest.get("timestep_rows", 0)),
+            "mobile_cage_rows": int(validation_manifest.get("mobile_cage_rows", 0)),
+            "independent_order_rows": int(
+                validation_manifest.get("independent_order_rows", 0)
+            ),
+        }
+    else:
+        provenance["submission_validation_archive"] = {
+            "manifest": str(validation_manifest_path),
+            "complete": False,
+            "reason": "completed cluster validation directory is absent on this host",
+        }
+
     provenance["all_publication_raw_provenance_passed"] = bool(
         provenance["activated_memory_reproduction"].get("raw_reproduces_derived_report", False)
         and provenance["disorder_retention_raw_n1024_available"]
+        and provenance["submission_validation_archive"]["complete"]
     )
 
     passed = sum(bool(item["passed"]) for item in checks)
@@ -680,7 +782,7 @@ def main() -> None:
         f"`{provenance['activated_memory_window_statistics']['recorded_for_all_lambdas']}`",
         f"- Language gates passed: `{provenance['all_language_gates_passed']}`",
         "",
-        "The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, coupling-dependent endpoint overlap, the disorder-retention maximum, the matched loop intervention, and the signed AB/BA release readout.",
+        "The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, coupling-dependent endpoint overlap, the disorder-retention maximum, the matched loop intervention, and both common- and independent-noise AB/BA release readouts.",
         "",
         "## Failed quantitative checks",
         "",
@@ -695,6 +797,8 @@ def main() -> None:
             "The raw activated-memory JSONL is generated on the GPU cluster and must be included in the Zenodo deposit. Identical duplicate records are ignored by stable row key, while conflicting duplicates fail the audit.",
             "",
             "The N=1024 disorder-retention values are currently transcribed from cluster output. The deposit is not publication-complete until their raw protocol trajectories are present and regenerate the summary.",
+            "",
+            "The completed submission-validation directory must include 15 time-step rows, 25 mobile-cage rows, and 50 independent-noise sequence rows before the independent-noise Letter claims are publication-complete.",
         ]
     )
     (output_dir / "capillary_pair_prl_claim_audit.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
