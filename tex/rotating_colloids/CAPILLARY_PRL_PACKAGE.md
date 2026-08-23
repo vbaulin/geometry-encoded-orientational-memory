@@ -88,6 +88,24 @@ Run from the repository root on the four-GPU machine:
 The runner is resumable. Rerunning it skips complete JSONL records and rebuilds
 the merged reports.
 
+## Restore the disorder-retention trajectories
+
+The local Zenodo staging tree remains incomplete until the 33 raw
+write--release cells behind the positional-disorder result are restored. The
+four-GPU driver reproduces the exact production schedule used by the quoted
+(D_rt=624.5) endpoints. It validates and skips complete cells, so a restart
+reruns only an interrupted graph:
+
+    nohup bash scripts/run_rotating_colloids_disorder_retention_4gpu.sh \
+      > rotating_colloids_disorder_retention_4gpu.log 2>&1 < /dev/null &
+
+After completion, rebuild the Zenodo tree with:
+
+    python -B scripts/build_rotating_colloids_release.py \
+      --disorder-retention-input discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_disorder_retention_protocols \
+      --output-dir release/zenodo_geometry_encoded_orientational_memory \
+      --clean
+
 ## Resolved: Fig. 4(b) window censoring
 
 Panel (b) previously reported the finite-window integrated overlap

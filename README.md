@@ -107,6 +107,7 @@ The production shell drivers are:
   (`scripts/run_rotating_colloids_spin_glass_prl_gpu.sh` for one device)
 - `scripts/run_rotating_colloids_groove_protocols_gpu.sh`
 - `scripts/run_rotating_colloids_prl_submission_validations_4gpu.sh`
+- `scripts/run_rotating_colloids_disorder_retention_4gpu.sh`
 
 Each simulation output is append-only and resumes completed parameter points.
 The shell scripts document the exact replica counts, graph seeds, step counts,
@@ -131,6 +132,16 @@ noise. It uses four GPUs concurrently and resumes append-only records:
 nohup bash scripts/run_rotating_colloids_prl_submission_validations_4gpu.sh \
   > rotating_colloids_prl_submission_validations.log 2>&1 < /dev/null &
 ```
+
+To reconstruct the 33 disorder-retention trajectories required by the data
+deposit, run:
+
+```bash
+nohup bash scripts/run_rotating_colloids_disorder_retention_4gpu.sh \
+  > rotating_colloids_disorder_retention_4gpu.log 2>&1 < /dev/null &
+```
+
+Complete graph/disorder cells are JSON-validated and skipped on restart.
 
 ## Manuscript length
 
