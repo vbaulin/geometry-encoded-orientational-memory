@@ -14,6 +14,9 @@ PHASE_OUTPUT="${PHASE_OUTPUT:-discoveries/theory_experiment_interface/rotating_c
 
 mkdir -p "$BASE"
 
+echo "[-1/4] Simulator protocol API preflight"
+$PYTHON_BIN -c 'import inspect, torch; from scripts.rotating_colloids_capillary_pair import make_caged_graph, simulate_ensemble; assert "write_weight" in inspect.signature(simulate_ensemble).parameters; g=make_caged_graph(4, disorder=0.16, cutoff=2.6, alignment_range=1.35, alignment_decay=0.20, seed=17); r=simulate_ensemble(g, j_align=4.0, g_capillary=5.0, replicas=1, burn_in_steps=1, sample_steps=1, sample_stride=1, dt=0.0025, seed=23, device=torch.device("cpu")); assert "state_after_steps" in r'
+
 echo "[0/4] Nonredundant regime-feature ablation"
 MPLBACKEND=Agg OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
   $PYTHON_BIN scripts/classify_rotating_colloids_capillary_regimes.py \

@@ -9,6 +9,7 @@ from scripts.rotating_colloids_capillary_pair import (
     _torque,
     make_caged_graph,
     replica_overlap,
+    simulate_ensemble,
 )
 from scripts.test_rotating_colloids_operation_order_memory import masks
 
@@ -73,6 +74,32 @@ def test_write_weight_localizes_the_external_torque():
     )
     np.testing.assert_allclose(torque[0, :5].numpy(), 4.0, atol=1e-6)
     np.testing.assert_allclose(torque[0, 5:].numpy(), 0.0, atol=1e-7)
+
+
+def test_simulator_exposes_terminal_state_for_chained_protocols():
+    graph = make_caged_graph(
+        4,
+        disorder=0.16,
+        cutoff=2.6,
+        alignment_range=1.35,
+        alignment_decay=0.20,
+        seed=17,
+    )
+    result = simulate_ensemble(
+        graph,
+        j_align=4.0,
+        g_capillary=5.0,
+        replicas=2,
+        burn_in_steps=2,
+        sample_steps=3,
+        sample_stride=2,
+        dt=0.0025,
+        seed=23,
+        device=torch.device("cpu"),
+    )
+    terminal = np.asarray(result["state_after_steps"])
+    assert terminal.shape == (2, 16)
+    assert np.isfinite(terminal).all()
 
 
 def test_partitioned_write_supports_share_no_particles_or_direct_edges():
