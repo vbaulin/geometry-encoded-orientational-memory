@@ -434,6 +434,7 @@ def main() -> None:
         raise RuntimeError("manuscript media leaked into the data archive: " + ", ".join(forbidden_media))
     manifest = {
         "archive": "geometry_encoded_orientational_memory_data",
+        "schema_version": 2,
         "complete": complete,
         "missing_required_sources": missing,
         "copied_sources": copied_sources,
