@@ -66,8 +66,9 @@ def build_report(rows: List[Dict[str, object]]) -> Dict[str, object]:
     for row in rows:
         by_dt.setdefault(float(row["dt"]), []).append(row)
     finest = min(by_dt)
+    reference_rows = {int(row["graph_seed"]): row for row in by_dt[finest]}
     reference = {
-        key: float(np.mean([float(row[key]) for row in by_dt[finest]]))
+        key: float(np.mean([float(row[key]) for row in reference_rows.values()]))
         for key in observables
     }
     summaries = []
@@ -77,14 +78,44 @@ def build_report(rows: List[Dict[str, object]]) -> Dict[str, object]:
             key: float(np.mean([float(row[key]) for row in group]))
             for key in observables
         }
+        sems = {
+            key: (
+                float(np.std([float(row[key]) for row in group], ddof=1))
+                / math.sqrt(len(group))
+                if len(group) > 1 else 0.0
+            )
+            for key in observables
+        }
+        group_rows = {int(row["graph_seed"]): row for row in group}
+        common_graphs = sorted(set(group_rows) & set(reference_rows))
+        paired = {}
+        for key in observables:
+            differences = np.asarray(
+                [
+                    float(group_rows[seed][key])
+                    - float(reference_rows[seed][key])
+                    for seed in common_graphs
+                ],
+                dtype=float,
+            )
+            paired[key] = {
+                "mean": float(differences.mean()) if differences.size else float("nan"),
+                "sem": (
+                    float(differences.std(ddof=1) / math.sqrt(differences.size))
+                    if differences.size > 1 else 0.0
+                ),
+                "graph_count": int(differences.size),
+            }
         summaries.append(
             {
                 "dt": dt,
                 "graph_count": len({int(row["graph_seed"]) for row in group}),
                 "means": values,
+                "sems": sems,
                 "absolute_difference_from_finest": {
                     key: abs(values[key] - reference[key]) for key in observables
                 },
+                "paired_difference_from_finest": paired,
             }
         )
     return {
@@ -92,10 +123,10 @@ def build_report(rows: List[Dict[str, object]]) -> Dict[str, object]:
         "finest_dt": finest,
         "observables": list(observables),
         "summaries": summaries,
-        "criterion": (
-            "The published step is converged when its graph-averaged values agree "
-            "with the finest step within the larger of the graph standard error "
-            "and a predeclared absolute tolerance."
+        "diagnostic": (
+            "Weak convergence is reported as graph-averaged and matched-graph "
+            "differences from the finest simulated step. No post-hoc pass threshold "
+            "is applied."
         ),
     }
 

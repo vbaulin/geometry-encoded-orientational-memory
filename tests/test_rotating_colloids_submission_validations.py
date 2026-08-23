@@ -10,6 +10,10 @@ from scripts.test_rotating_colloids_operation_order_memory import compare_orders
 from scripts.rotating_colloids_capillary_pair import make_caged_graph
 from scripts.validate_rotating_colloids_mobile_cage import mobile_energy
 from scripts.validate_rotating_colloids_timestep import build_report
+from scripts.merge_rotating_colloids_submission_validations import (
+    independent_order_report,
+    mobile_report,
+)
 
 
 def test_feature_ablation_report_keeps_persistence_coordinates_separate():
@@ -138,3 +142,50 @@ def test_timestep_report_uses_finest_step_as_reference():
     report = build_report(rows)
     assert report["finest_dt"] == 0.005
     assert report["summaries"][-1]["absolute_difference_from_finest"]["S_mean"] == 0.0
+    assert math.isclose(
+        report["summaries"][0]["paired_difference_from_finest"]["S_mean"]["mean"],
+        -0.1,
+        abs_tol=1e-12,
+    )
+
+
+def test_mobile_report_discloses_soft_core_penetration():
+    rows = []
+    for seed, minimum in ((17, 0.40), (29, 0.42)):
+        rows.append({
+            "graph_seed": seed,
+            "cage_stiffness": 1000.0,
+            "split_endpoint": 0.55,
+            "rms_displacement_endpoint": 0.06,
+            "edge_jaccard_mean": 0.94,
+            "initial_edges_retained_mean": 0.98,
+            "minimum_separation_mean": minimum,
+            "position_force_clip_fraction": 0.0,
+        })
+    report = mobile_report(rows, core_diameter=0.55)
+    assert report["minimum_tested_passing_stiffness"] == 1000.0
+    assert report["summaries"][0]["soft_core_penetration_observed"] is True
+
+
+def test_independent_order_report_includes_decode_contrast():
+    rows = []
+    for field in (1.0, 8.0):
+        for mode, readout, accuracy in (
+            ("partitioned", 0.01, 0.51),
+            ("contested", 0.60 if field == 8.0 else 0.02, 0.98 if field == 8.0 else 0.52),
+        ):
+            for seed in (17, 29):
+                rows.append({
+                    "graph_seed": seed,
+                    "field": field,
+                    "mode": mode,
+                    "contest_fraction_requested": 0.25,
+                    "noise_mode": "independent",
+                    "terminal_order_readout": readout,
+                    "terminal_decode_accuracy_zero_threshold": accuracy,
+                    "terminal_decode_d_prime": 3.0 if accuracy > 0.9 else 0.1,
+                })
+    report = independent_order_report(rows)
+    assert report["row_count"] == 8
+    assert report["highest_field"] == 8.0
+    assert report["highest_field_contested_minus_partitioned"]["mean"] > 0.5

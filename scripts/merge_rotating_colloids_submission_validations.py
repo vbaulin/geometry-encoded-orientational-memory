@@ -61,7 +61,9 @@ def mean_sem(values: Iterable[float]) -> Dict[str, float]:
     }
 
 
-def mobile_report(rows: Sequence[Dict[str, object]]) -> Dict[str, object]:
+def mobile_report(
+    rows: Sequence[Dict[str, object]], *, core_diameter: float = 0.55
+) -> Dict[str, object]:
     metrics = (
         "split_endpoint",
         "rms_displacement_endpoint",
@@ -90,6 +92,9 @@ def mobile_report(rows: Sequence[Dict[str, object]]) -> Dict[str, object]:
                 "graph_count": len({int(row["graph_seed"]) for row in group}),
                 "metrics": aggregate,
                 "meets_predeclared_cage_memory_gate": bool(qualifies),
+                "soft_core_penetration_observed": bool(
+                    aggregate["minimum_separation_mean"]["mean"] < core_diameter
+                ),
             }
         )
     passing = [
@@ -107,10 +112,76 @@ def mobile_report(rows: Sequence[Dict[str, object]]) -> Dict[str, object]:
             "initial_edges_retained_min": 0.95,
             "position_force_clip_fraction_max": 0.01,
         },
+        "core_diameter": core_diameter,
+        "soft_core_scope": (
+            "A minimum-separation mean below the nominal core diameter records "
+            "penetration of the deliberately soft core. Such a row tests retention "
+            "under centre motion and topology change, but is not a hard-particle "
+            "realization of finite-sized ellipsoids."
+        ),
         "interpretation": (
             "Passing identifies an effective cage stiffness for which the mobile "
             "model preserves topology and orientational inheritance over the same "
             "finite observation window. It is not an equilibrium glass criterion."
+        ),
+    }
+
+
+def independent_order_report(
+    rows: Sequence[Dict[str, object]],
+) -> Dict[str, object]:
+    selected = [
+        row for row in rows
+        if str(row.get("noise_mode", "common")) == "independent"
+        and (
+            str(row["mode"]) == "partitioned"
+            or math.isclose(float(row.get("contest_fraction_requested", 0.25)), 0.25)
+        )
+    ]
+    if not selected:
+        raise ValueError("no primary independent-noise order rows")
+    fields = sorted({float(row["field"]) for row in selected})
+    summaries: Dict[str, object] = {}
+    for field in fields:
+        for mode in ("partitioned", "contested"):
+            group = [
+                row for row in selected
+                if math.isclose(float(row["field"]), field)
+                and str(row["mode"]) == mode
+            ]
+            if not group:
+                raise ValueError(f"missing independent-noise rows for field={field}, mode={mode}")
+            summaries[f"{field:g}:{mode}"] = {
+                "graph_count": len({int(row["graph_seed"]) for row in group}),
+                "terminal_order_readout": mean_sem(
+                    float(row["terminal_order_readout"]) for row in group
+                ),
+                "decode_accuracy_zero_threshold": mean_sem(
+                    float(row["terminal_decode_accuracy_zero_threshold"])
+                    for row in group
+                ),
+                "decode_d_prime": mean_sem(
+                    float(row["terminal_decode_d_prime"]) for row in group
+                ),
+            }
+    highest = max(fields)
+    contested = summaries[f"{highest:g}:contested"]["terminal_order_readout"]
+    partitioned = summaries[f"{highest:g}:partitioned"]["terminal_order_readout"]
+    contrast_sem = math.hypot(float(contested["sem"]), float(partitioned["sem"]))
+    contrast = float(contested["mean"]) - float(partitioned["mean"])
+    return {
+        "row_count": len(selected),
+        "fields": fields,
+        "summaries": summaries,
+        "highest_field": highest,
+        "highest_field_contested_minus_partitioned": {
+            "mean": contrast,
+            "sem": contrast_sem,
+            "z": contrast / contrast_sem if contrast_sem > 0.0 else None,
+        },
+        "interpretation": (
+            "Independent Brownian histories test whether pulse order remains "
+            "decodable without common-random-number cancellation."
         ),
     }
 
@@ -130,16 +201,26 @@ def main() -> int:
 
     timestep_paths = sorted(root.glob("timestep_shard_*/timestep_validation.jsonl"))
     mobile_paths = sorted(root.glob("mobile_shard_*/mobile_cage_validation.jsonl"))
+    order_path = root / "order_independent_n16" / "operation_order_memory.jsonl"
     if not timestep_paths:
         raise FileNotFoundError("no timestep validation shards found")
     if not mobile_paths:
         raise FileNotFoundError("no mobile-cage validation shards found")
+    if not order_path.exists():
+        raise FileNotFoundError("no independent-noise order validation rows found")
 
     timestep_rows = deduplicate(
         read_jsonl(timestep_paths), ("graph_seed", "dt")
     )
     mobile_rows = deduplicate(
         read_jsonl(mobile_paths), ("graph_seed", "cage_stiffness")
+    )
+    order_rows = deduplicate(
+        read_jsonl([order_path]),
+        (
+            "graph_seed", "field", "mode", "contest_fraction_requested",
+            "noise_mode",
+        ),
     )
     timestep_dir = root / "timestep"
     mobile_dir = root / "mobile_cage"
@@ -153,10 +234,19 @@ def main() -> int:
         json.dumps(mobile_report(mobile_rows), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    order_dir = root / "independent_order"
+    order_dir.mkdir(parents=True, exist_ok=True)
+    write_jsonl(order_dir / "operation_order_memory.jsonl", order_rows)
+    (order_dir / "independent_noise_order_report.json").write_text(
+        json.dumps(independent_order_report(order_rows), indent=2, sort_keys=True)
+        + "\n",
+        encoding="utf-8",
+    )
     manifest = {
         "complete": True,
         "timestep_rows": len(timestep_rows),
         "mobile_cage_rows": len(mobile_rows),
+        "independent_order_rows": len(order_rows),
         "timestep_shards": [str(path) for path in timestep_paths],
         "mobile_cage_shards": [str(path) for path in mobile_paths],
     }
