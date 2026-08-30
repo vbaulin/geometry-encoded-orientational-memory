@@ -672,12 +672,12 @@ def main() -> None:
     add_exact(checks, "N=1024 disorder-retention amplitudes", sorted(n1024), [0.11, 0.16])
     add_exact(checks, "N=1024 disorder-retention graph seeds", n1024[0.11]["graph_seeds"], [17, 29, 43, 71, 97])
     # The archived summary is regenerated from full-precision trajectories;
-    # compare at the precision reported in the Letter rather than against the
-    # earlier four-decimal console transcription.
-    add_close(checks, "N=1024 connected retention at sigma=0.11", n1024[0.11]["mean"], 0.5143, 5e-5)
-    add_close(checks, "N=1024 connected retention at sigma=0.16", n1024[0.16]["mean"], 0.45442, 5e-5)
-    add_close(checks, "N=1024 paired retention difference", disorder["comparison"]["mean_difference_0p11_minus_0p16"], 0.05988, 5e-5)
-    add_close(checks, "N=1024 paired retention p value", disorder["comparison"]["paired_p_two_sided"], 0.0046120469, 5e-5)
+    # compare with the values at the precision reported in the Letter rather
+    # than against an earlier four-decimal console transcription.
+    add_close(checks, "N=1024 connected retention at sigma=0.11", n1024[0.11]["mean"], 0.514, 5e-4)
+    add_close(checks, "N=1024 connected retention at sigma=0.16", n1024[0.16]["mean"], 0.454, 5e-4)
+    add_close(checks, "N=1024 paired retention difference", disorder["comparison"]["mean_difference_0p11_minus_0p16"], 0.060, 5e-4)
+    add_close(checks, "N=1024 paired retention p value", disorder["comparison"]["paired_p_two_sided"], 0.0046, 5e-5)
 
     # 89-94: matched loop intervention quoted in the Letter.
     holonomy = read_json(HOLONOMY)
