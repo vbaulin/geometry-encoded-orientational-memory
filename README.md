@@ -96,7 +96,9 @@ together. Keep a copy of the previous report before rebuilding.
 The positional-disorder summary figure is rebuilt with:
 
 ```bash
-python -B scripts/plot_rotating_colloids_disorder_retention.py
+python -B scripts/plot_rotating_colloids_disorder_retention.py \
+  --input data/derived/disorder/rotating_colloids_disorder_retention_summary.json \
+  --output build/disorder_retention
 ```
 
 ## Publication-scale GPU runs
@@ -110,6 +112,7 @@ The production shell drivers are:
 - `scripts/run_rotating_colloids_groove_protocols_gpu.sh`
 - `scripts/run_rotating_colloids_prl_submission_validations_4gpu.sh`
 - `scripts/run_rotating_colloids_disorder_retention_4gpu.sh`
+- `scripts/run_rotating_colloids_order_memory_publication.sh`
 - `scripts/run_holonomy_matched_release_crossover_4gpu.sh`
 
 Each simulation output is append-only and resumes completed parameter points.
@@ -145,6 +148,21 @@ nohup bash scripts/run_rotating_colloids_disorder_retention_4gpu.sh \
 ```
 
 Complete graph/disorder cells are JSON-validated and skipped on restart.
+
+The operation-order evidence is compact and was generated on CPU. This
+resumable runner reconstructs the N=144 amplitude scan, N=256 size check,
+support-fraction control, and reduced relaxation model:
+
+```bash
+DEVICE=cpu bash scripts/run_rotating_colloids_order_memory_publication.sh
+```
+
+The loop-intervention evidence can be regenerated independently with
+`scripts/test_colloid_holonomy_memory.py`,
+`scripts/test_rotating_colloids_holonomy_causality.py`, and
+`scripts/test_continuous_colloid_holonomy_memory.py`. Their focused unit tests
+verify gauge invariance, matched unsigned couplings, stochastic controls, and
+the matched-release analysis.
 
 The matched-release driver starts the original and loop-flattened networks
 from identical angles and applies paired Brownian noise. It isolates release

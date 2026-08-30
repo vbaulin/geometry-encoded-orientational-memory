@@ -1,4 +1,5 @@
 import math
+import json
 
 import numpy as np
 import torch
@@ -13,6 +14,9 @@ from scripts.validate_rotating_colloids_timestep import build_report
 from scripts.merge_rotating_colloids_submission_validations import (
     independent_order_report,
     mobile_report,
+)
+from scripts.audit_rotating_colloids_capillary_prl import (
+    independent_order_archive_status,
 )
 
 
@@ -189,3 +193,15 @@ def test_independent_order_report_includes_decode_contrast():
     assert report["row_count"] == 8
     assert report["highest_field"] == 8.0
     assert report["highest_field_contested_minus_partitioned"]["mean"] > 0.5
+
+
+def test_independent_order_archive_rejects_declared_count_without_raw_rows(tmp_path):
+    rows_path = tmp_path / "operation_order_memory.jsonl"
+    report_path = tmp_path / "independent_noise_order_report.json"
+    rows_path.write_text("", encoding="utf-8")
+    report_path.write_text(json.dumps({"row_count": 50}), encoding="utf-8")
+
+    status = independent_order_archive_status(rows_path, report_path)
+
+    assert status["row_count"] == 0
+    assert status["report_reproduced"] is False
