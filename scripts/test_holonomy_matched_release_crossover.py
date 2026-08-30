@@ -24,6 +24,11 @@ from typing import Any, Sequence
 
 import numpy as np
 
+
+_TRAPEZOID = getattr(np, "trapezoid", None)
+if _TRAPEZOID is None:  # NumPy < 2.0
+    _TRAPEZOID = np.trapz
+
 ROOT = Path(__file__).resolve().parents[1]
 for path in (ROOT, ROOT / "scripts"):
     if str(path) not in sys.path:
@@ -63,8 +68,8 @@ def normalized_survival(result: dict[str, object]) -> dict[str, object]:
         raise ValueError("matched preparation has vanishing target overlap")
     normalized = curve / initial
     duration = max(float(times[-1] - times[0]), 1e-12)
-    auc = float(np.trapz(normalized, times) / duration)
-    positive_auc = float(np.trapz(np.maximum(normalized, 0.0), times) / duration)
+    auc = float(_TRAPEZOID(normalized, times) / duration)
+    positive_auc = float(_TRAPEZOID(np.maximum(normalized, 0.0), times) / duration)
     return {
         "time": times.tolist(),
         "curve": normalized.tolist(),

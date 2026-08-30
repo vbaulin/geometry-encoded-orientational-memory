@@ -20,6 +20,11 @@ from typing import Dict, Mapping, Sequence, Tuple
 
 import numpy as np
 
+
+_TRAPEZOID = getattr(np, "trapezoid", None)
+if _TRAPEZOID is None:  # NumPy < 2.0
+    _TRAPEZOID = np.trapz
+
 from discovery.colloid_holonomy_memory import fundamental_cycle_fluxes
 
 
@@ -358,8 +363,8 @@ def simulate_write_release(
     mean_curve = np.mean(overlap, axis=1)
     times_a = np.asarray(times, dtype=float)
     duration = max(float(times_a[-1] - times_a[0]), float(dt))
-    auc = float(np.trapz(mean_curve, times_a) / duration)
-    positive_auc = float(np.trapz(np.maximum(mean_curve, 0.0), times_a) / duration)
+    auc = float(_TRAPEZOID(mean_curve, times_a) / duration)
+    positive_auc = float(_TRAPEZOID(np.maximum(mean_curve, 0.0), times_a) / duration)
     threshold = 0.5 * max(float(mean_curve[0]), 0.0)
     crossing = np.flatnonzero(mean_curve <= threshold)
     half_life = float(times_a[crossing[0]]) if crossing.size else float(times_a[-1])

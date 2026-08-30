@@ -12,6 +12,11 @@ from typing import Dict, List
 
 import numpy as np
 
+
+_TRAPEZOID = getattr(np, "trapezoid", None)
+if _TRAPEZOID is None:  # NumPy < 2.0
+    _TRAPEZOID = np.trapz
+
 from rotating_colloids_capillary_pair import (
     make_caged_graph,
     parse_float_list,
@@ -42,7 +47,7 @@ def curve_summary(times: List[float], values: List[float]) -> Dict[str, object]:
     if t.size == 0:
         raise ValueError("empty retention curve")
     positive = np.maximum(y, 0.0)
-    integral = float(np.trapz(positive, t) / max(abs(y[0]), 1e-12))
+    integral = float(_TRAPEZOID(positive, t) / max(abs(y[0]), 1e-12))
     tail_count = max(1, t.size // 10)
     return {
         "initial": float(y[0]),

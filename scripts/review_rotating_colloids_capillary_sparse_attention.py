@@ -36,6 +36,11 @@ os.environ.setdefault("VECLIB_MAXIMUM_THREADS", "1")
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+_TRAPEZOID = getattr(np, "trapezoid", None)
+if _TRAPEZOID is None:  # NumPy < 2.0
+    _TRAPEZOID = np.trapz
 from scipy import stats
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score, silhouette_score
@@ -288,7 +293,7 @@ def summarize_time_channel(runs: Sequence[dict[str, Any]], block: str, time_key:
     tail_start = max(1, int(0.8 * time.size))
     slopes = [float(stats.linregress(time[tail_start:], curve[tail_start:]).slope) for curve in values]
     tail_changes = [float(curve[-1] - curve[tail_start]) for curve in values]
-    integrals = [float(np.trapz(np.maximum(curve, 0.0), time)) for curve in values]
+    integrals = [float(_TRAPEZOID(np.maximum(curve, 0.0), time)) for curve in values]
     return {
         "time": time.tolist(),
         "mean_curve": values.mean(axis=0).tolist(),
