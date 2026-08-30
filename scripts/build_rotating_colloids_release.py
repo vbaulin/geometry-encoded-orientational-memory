@@ -39,6 +39,8 @@ DATASETS = {
     "raw/grooved/protocols_n16_validation": DATA_ROOT / "rotating_colloids_grooved_protocols_n16_validation",
     "raw/grooved/protocols_quick_mosaic": DATA_ROOT / "rotating_colloids_grooved_protocols_quick_mosaic",
     "raw/submission_validations": DATA_ROOT / "rotating_colloids_submission_validations",
+    "raw/holonomy_matched_release_crossover": DATA_ROOT
+    / "holonomy_matched_release_crossover",
     "derived/quantitative_claim_audit": DATA_ROOT / "rotating_colloids_capillary_pair_prl_claim_audit",
 }
 
@@ -243,6 +245,8 @@ https://github.com/vbaulin/{REPOSITORY_NAME}.
   disorder optimum at `N=576` and `N=1024`.
 - `raw/submission_validations/`: time-step, mobile-cage, and independent-noise
   tests supporting the convergence and sequence-decoding claims.
+- `raw/holonomy_matched_release_crossover/`: identical-start, paired-noise
+  comparison of the original and loop-flattened networks across coupling.
 - `derived/`: figure summaries, loop-intervention reports, and the exact
   numerical audit.
 - `manifest.json` and `SHA256SUMS`: file-level provenance and integrity checks.

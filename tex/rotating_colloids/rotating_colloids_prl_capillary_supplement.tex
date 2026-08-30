@@ -247,6 +247,33 @@ field-free interval, whereas the matched \(g=0\) value approaches zero. This
 quantifies angular concentration around one prepared pattern. It does not
 establish arbitrary-pattern storage or device capacity.
 
+\subsection{Basin channel and usable memory capacity}
+
+The distinction between landscape multiplicity and usable memory can be
+stated as a coarse-grained channel. Let \(W\) denote a written pattern,
+\(B_0\) the basin entered after writing, \(B_t\) the basin occupied after a
+field-free interval \(t\), and \(R\) the measured readout. Their conditional
+distribution factors as
+\begin{equation}
+ p(r\mid w;t)=\sum_{b_0,b_t}p(r\mid b_t)
+ K_t(b_t\mid b_0)p(b_0\mid w),
+ \label{eq:supp-basin-channel}
+\end{equation}
+where \(p(b_0\mid w)\) measures write capture and \(K_t\) is the thermally
+activated transition kernel between basins. The usable capacity at read time
+\(t\) is
+\begin{equation}
+ C(t)=\max_{p(w)} I(W;R_t).
+ \label{eq:supp-memory-capacity}
+\end{equation}
+Equation~\eqref{eq:supp-memory-capacity} separates the number of available
+states from their addressability and survival. A count of one-flip-stable
+states bounds the alphabet but is neither an entropy nor a device capacity
+unless the states can be written and distinguished. The present fixed-target
+protocol measures one diagonal retention channel. Estimating \(C(t)\) requires
+an ensemble of prescribed targets and the complete post-release confusion
+matrix.
+
 \section{Finite-size state diagram and spatial correlations}
 
 The state diagram in the Letter contains 441 coupling cells on a
@@ -896,6 +923,41 @@ conceals: the uniform director changes by \(-0.00878\), with interval
 \(+0.01084\), with interval \([0.00211,0.01938]\). Loop incompatibility
 redistributes stability among angular basins.
 
+We then separated writing from release by preparing the original and
+loop-flattened networks in identical angular configurations, removing the
+write field, and applying paired Brownian increments.  The scan contained
+eight graphs, fourteen prescribed targets per graph, and 48 descendants per
+target, with \(g/J=1.614\) and an observation time \(D_rt=100\).  Let
+\(\Delta R\) denote the original-minus-flat difference in the time-integrated,
+initially normalized target overlap.  At intermediate coupling the flattened
+network retained more: \(\Delta R=-0.02599\) at \(\beta J=0.6\), with a
+graph-bootstrap interval \([-0.03175,-0.02050]\), and
+\(\Delta R=-0.02579\) at \(\beta J=0.8\), with interval
+\([-0.03052,-0.02119]\).  The difference weakened as both landscapes became
+more strongly confining.  From \(\beta J=1.2\) to 2.4 every interval included
+zero; no coupling showed a resolved retention advantage for the incompatible
+network.  Thus the apparent change of sign in the mean response is not a
+resolved crossover.  The physical result is instead a nonmonotonic response
+to loop flattening: the difference is small at \(\beta J=0.4\), largest at
+\(\beta J=0.6\)--0.8, and unresolved from \(\beta J=1.2\) onward.  The
+absolute survival areas identify the two limits.  They rise from 0.0153 and
+0.0174 for the original and flattened networks at \(\beta J=0.4\) to 0.6861
+and 0.6856 at \(\beta J=2.4\).  Weak coupling therefore permits Brownian
+erasure in both networks, whereas strong coupling traps the preparation in
+both on the observation window.  Loop flattening improves survival only in
+the intermediate escape window; the incompatible network never acquires a
+resolved lifetime advantage.
+
+Across every coupling, the target-resolved retention difference decreased as
+the energetic advantage of the flattened target increased.  Ordinary basin
+energetics therefore explains part of the redistribution.  Because flattening
+also changes the target torque and local Hessian, this comparison does not
+assign the release difference to cycle holonomy alone.  It establishes the
+sharper separation used in the Letter: incompatible loops enlarge the
+catalogue of available compromises, whereas the survival of a selected
+compromise is set jointly by its energy, local restoring torques, and escape
+barriers.
+
 These calculations separate two parts of the memory mechanism. Global
 incompatibility supplies a larger set of metastable states. Writing chooses
 one state from that set, and the energy barriers determine how long thermal
@@ -905,6 +967,38 @@ and its barriers. The phase intervention acts directly on the angular
 Hamiltonian. At an unpatterned interface the preferred phase is the
 line-of-centres angle, so an experimental version of this matched comparison
 requires patterned bond anisotropy or a geometrically embedded flat control.
+
+\subsection{Particle-resolved localization of retained memory}
+
+The same trajectories can determine where the retained state resides. For
+two descendants of one preparation, define the local overlap
+\begin{equation}
+ m_i(t)=\left\langle
+ \cos 2[\theta_i^{(1)}(t)-\theta_i^{(2)}(t)]
+ \right\rangle .
+ \label{eq:supp-local-memory}
+\end{equation}
+For every cycle \(C\) based at particle \(i\), let \(\mathcal T_C\) denote the
+composed bond-frame transport. A local common-fixed-point residual is
+\begin{equation}
+ d_i=\min_{\theta}\sum_{C\ni i}w_C
+ d_\pi^2[\mathcal T_C(\theta),\theta],
+ \label{eq:supp-local-incompatibility}
+\end{equation}
+where \(d_\pi\) is angular distance modulo \(\pi\) and \(w_C\) fixes the cycle
+weighting convention. This residual vanishes when the incident cycle maps
+share a fixed apolar orientation. The connected spatial correlation
+\begin{equation}
+ C_{md}(r)=\left\langle
+ [m_i-\bar m][d_j-\bar d]
+ \right\rangle_{r_{ij}\simeq r}
+ \label{eq:supp-memory-defect-correlation}
+\end{equation}
+distinguishes three locations for memory. A positive short-range value places
+retention on incompatible cores; a finite-distance maximum places it on their
+boundaries; a negative short-range value places it in compatible patches.
+Degree, local bond energy, and initial torque must be conditioned when these
+correlations are compared across disordered graphs.
 
 \section{Experimental parameter estimate}
 

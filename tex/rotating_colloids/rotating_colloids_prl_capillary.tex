@@ -37,41 +37,41 @@ geometry can encode long-lived orientational memory.
 \maketitle
 
 A material memory links a present response to a past perturbation. In soft
-matter, that link is commonly carried by rearranged particles, hysteretic
-elements, defects, or fixed alignment fields \cite{keim2019}. Cyclically
-sheared suspensions, for example, reorganize until their trajectories encode
-the training amplitude \cite{keim2011,paulsen2014}. Quenched-disorder nematics
-instead retain local easy axes \cite{rotunno2005}. Both mechanisms store the
-record outside a freely evolving orientation. Rotational arrest provides a
-different contrast. Colloidal ellipsoids exhibit orientational and
-liquid-glass arrest \cite{zheng2011,roller2021}. Slow angles, however, need not
-preserve a specific preparation after its field is removed.
-We therefore use a stricter criterion. A preparation must remain identifiable
-after its conjugate field is absent. Its overlap must also exceed a matched
-system in which the proposed storage interaction is removed. This separates a
-memory from slow relaxation measured over one finite window.
+matter, rearranged particles, hysteretic elements, defects, or fixed alignment
+fields commonly carry that link \cite{keim2019}. Cyclically sheared
+suspensions reorganize until their trajectories encode the training amplitude
+\cite{keim2011,paulsen2014}. Quenched-disorder nematics instead retain local
+easy axes \cite{rotunno2005}. Both mechanisms place the record outside a
+freely evolving orientation. Colloidal ellipsoids provide a different
+contrast: their orientations can arrest while their positions remain fluid
+\cite{zheng2011,roller2021}. Slow rotation alone, however, does not identify
+which microscopic pattern was prepared.
 
-Here we ask whether pair interactions can store such a preparation while the
-centres and external fields remain unchanged. The key distinction is between
-relative-angle and bond-frame coupling. Nematic alignment constrains
-\(\theta_i-\theta_j\). A bond-frame interaction instead constrains
+The unresolved question is whether an unchanged network of pair interactions
+can retain a specified angular pattern after its writing field disappears.
+Here we test that possibility in caged interfacial ellipsoids. A stored pattern
+must remain identifiable after release and must outlive a matched realization
+without the proposed storage interaction. These two conditions distinguish
+memory from a nonzero autocorrelation measured over one finite window.
+
+Bond-frame coupling supplies the required mechanism. Nematic alignment favors
+\(\theta_i-\theta_j=0\). A capillary bond instead favors a value of
 \(\theta_i+\theta_j-2\phi_{ij}\), where \(\phi_{ij}\) is the bond direction.
-Several differently oriented bonds cannot generally satisfy both conditions
-with one director. Closed paths then divide the angular landscape into
-graph-dependent compromises.
-Each bond can still be locally well satisfied. The frustration appears when
-those choices are continued around a loop and fail to close. A prepared state
-can then select one compromise without producing a laboratory-frame nematic
-axis. The memory is hidden from a bulk polarizer but remains accessible to a
-particle-resolved overlap.
+Several differently oriented bonds cannot generally satisfy both preferences
+with one director. Each bond can remain locally ordered, but the conditions
+accumulated around intersecting loops need not close on one orientation field.
+The rotors then settle into graph-dependent compromise states. A temporary
+field selects one compromise, and interaction barriers preserve that choice
+after release. The resulting memory is hidden from a bulk polarizer but
+remains visible in a particle-resolved overlap.
 
 Interfacial ellipsoids provide this interaction directly. Their leading
 contact-line deformation is quadrupolar,
 \(u_i\propto\Delta u_{\max}(R/r)^2\cos2(\phi-\theta_i)\). Meniscus overlap
-gives
-\(U^{\rm cap}_{ij}=-A_4(r_{ij})\cos2(\theta_i+\theta_j-2\phi_{ij})\), with
-\(A_4=3\pi\gamma(\Delta u_{\max})^2(R/r_{ij})^4\)
-\cite{loudet2005,luo2019}. Here \(\gamma\) is the interfacial tension and
+gives the pair potential
+\(U^{\rm cap}_{ij}=-A_4(r_{ij})\cos2(\theta_i+\theta_j-2\phi_{ij})\)
+\cite{loudet2005,luo2019}. Its amplitude is
+\(A_4=3\pi\gamma(\Delta u_{\max})^2(R/r_{ij})^4\). Here \(\gamma\) is the interfacial tension and
 \(R\) is a particle length scale. This static deformation supplies a
 persistent pair torque without a one-particle easy axis.
 For \(A_4>0\), an isolated pair minimizes its energy when
@@ -90,18 +90,16 @@ frustration using the particle positions themselves.
  Nanometre menisci place separated particles in the Brownian energy range.}
 \end{figure*}
 
-Figure~\ref{fig:realization} makes the physical separation of roles explicit.
-The meniscus in panel (a) generates a pair constraint, not a local easy axis.
-The grey network in panel (b) records which particles interact, while the rod
-angles remain dynamical. The irregular orientations are therefore not an
-imposed domain pattern. They are compromises selected by the fixed bond
-geometry. Panel (c) identifies the required interaction window. A quadrupole
-below thermal energy decorrelates, whereas a much stronger quadrupole would
-aggregate or immobilize the particles. Nanometre contact-line amplitudes place
-the torque between these limits without patterned grooves.
+The contact-line meniscus in panel (a) supplies a pair constraint rather than
+a one-particle easy axis (Fig.~\ref{fig:realization}). The neighbour graph in panel (b) remains fixed while
+the rod angles undergo Brownian rotation. Nanometre contact-line amplitudes
+place the far-field torque in the thermal range, $1$--$5k_{\rm B}T$
+[Fig.~\ref{fig:realization}(c)], without patterned grooves. Below this window,
+thermal rotation erases bond registration; far above it, capillary attraction
+immobilizes or aggregates the particles.
 
-We model \(N\) apolar Brownian rotors on a fixed neighbour graph. Their energy
-is
+The competing bond preferences enter the energy of \(N\) apolar Brownian
+rotors on a fixed neighbour graph,
 \begin{align}
  U={}&-\sum_{(ij)}J w^-_{ij}\cos2(\theta_i-\theta_j)\nonumber\\
  &-\sum_{(ij)}g w^+_{ij}
@@ -116,10 +114,10 @@ channel, with \(g=A_4(r_0)\) and
 \(r_0\). Particle centres are displaced from a triangular cage by a Gaussian
 width \(\sigma\); no orientational blocks are imposed. The Supplemental
 Material specifies both weights, graph construction, and simulation schedule.
-The graph remains fixed during each angular trajectory. Equation~\eqref{eq:model}
-therefore tests the hierarchy in which centre motion is caged while rotation
-remains Brownian. Temporary writing fields are absent during every reported
-retention interval.
+The graph remains fixed during each angular trajectory, while the orientations
+remain Brownian. Equation~\eqref{eq:model} therefore isolates angular memory
+from positional rearrangement. Temporary writing fields are absent during
+every reported retention interval.
 
 \begin{figure*}[t]
  \includegraphics[width=\textwidth]{capillary_prl_figures/capillary_regime_diagram.pdf}\\[-1.5mm]
@@ -157,8 +155,10 @@ response hidden orientational memory only when \(S\) is small, local
 correlations are finite, and a post-release overlap survives. Equilibrium
 replica tests are evaluated separately.
 
-Figure~\ref{fig:map} resolves four finite-size response classes in the
-observable vector \((S,C_2,G_2,q_{\rm EA},C_{\rm window})\). The coupling
+Competing bond preferences produce a mixed regime with local order but no
+common director. Figure~\ref{fig:map} resolves four finite-size response
+classes in the observable vector
+\((S,C_2,G_2,q_{\rm EA},C_{\rm window})\). The coupling
 coordinates are withheld from clustering. All 27 graph bootstraps select four
 classes. Dropping either persistence coordinate still selects four, with
 adjusted Rand indices 0.821 and 0.805. The map is therefore a dynamical
@@ -183,22 +183,22 @@ shows how increasing \(J\) builds \(C_2\) while \(G_2\) remains finite. The
 marked state lies beyond this crossover, where both constraints act but
 global order remains weak.
 
-The marked hidden-memory point was fixed before the long runs. Five
-\(N=1024\) graphs give
+The low-order mixed regime persists on the larger graphs used for the memory
+tests. At the marked point, five \(N=1024\) graphs give
 \((S,C_2,G_2,q_{\rm EA})=(0.067,0.627,0.447,0.658)\). Graph standard
 deviations are below 0.011. Removing the capillary term sets \(G_2\) to zero and
 reduces \(q_{\rm EA}\) to \(0.022\), even though \(S\) and \(C_2\) increase.
 On a regular graph the same couplings instead give \(S=0.945\). Thus the
 bond-frame term suppresses a common director while preserving local angular
-constraints. Varying positional disorder alone confirms the mechanism:
-retention peaks near \(\sigma=0.11a\), where nematic order first collapses
+constraints. Positional disorder resolves a finite memory window: retention
+peaks near \(\sigma=0.11a\), where nematic order first collapses
 (Supplemental Figs.~S3 and S4).
 Across the wider disorder scan, \(S\) falls thirteenfold, from 0.916 to 0.069,
 whereas \(q_{\rm EA}\) changes by only a factor of 1.3. Above the retention
 maximum, the connected written overlap decreases from \(0.559\pm0.022\) at
 \(\sigma=0.11a\) to \(0.386\pm0.026\) at \(0.28a\). Disorder first removes
-the common director, but stronger disorder also weakens the compatible local
-network that carries the record.
+the common director. Beyond the maximum, it also weakens the compatible local
+network that carries the written pattern.
 
 \begin{figure*}[t]
  \includegraphics[width=\textwidth]{capillary_prl_figures/fig3_capillary_memory_dynamics.pdf}
@@ -210,7 +210,7 @@ network that carries the record.
  records within a few rotational times.}
 \end{figure*}
 
-The dynamical tests establish memory beyond static graph registration.
+Post-release dynamics establish memory beyond static bond registration.
 Figure~\ref{fig:dynamics}(a) gives
 \(Q_{\rm split}=0.462\pm0.010\) at \(D_rt=625\); the matched control falls
 below 0.2 by \(D_rt=2.7\pm0.3\). A temporary field produces
@@ -221,20 +221,13 @@ increment is positive on every tested graph. These observations identify a
 history-conditioned basin rather than a slowly relaxing interface. The
 estimated interface relaxation time is at least three orders of magnitude
 shorter (Supplemental Material).
-The two-time correlation also grows with waiting time. At fixed lag
+
+The selected basin becomes more persistent as the preparation ages. At fixed lag
 \(D_r\Delta t=30\), the paired increase is
 \(0.0253\pm0.0019\), and it is positive on every graph. This finite-size aging
-is consistent with slow exploration of the same multibasin landscape. It is
-not used as evidence for an equilibrium glass transition.
-
-The three panels test complementary consequences of the same landscape.
-Panel (a) asks whether two noisy descendants retain a common basin without
-specifying which basin it is. Panel (b) asks whether a chosen pattern can be
-written and recovered after its field disappears. Panel (c) asks whether the
-relaxation law depends on the age of the prepared state. Agreement of (a) and
-(b) separates retained preparation from an arbitrary nonzero autocorrelation.
-The aging trend shows that the basin population evolves during the quench. It
-does not supply a separate memory definition.
+quantifies slow exploration of the same multibasin landscape. Split-replica
+and written-state retention therefore establish two complementary facts:
+basin identity and a specified preparation both survive field removal.
 
 \begin{figure*}[t]
  \includegraphics[width=\textwidth]{capillary_prl_figures/fig4_activated_memory_results.pdf}
@@ -247,26 +240,24 @@ does not supply a separate memory definition.
  (b).}
 \end{figure*}
 
-Figure~\ref{fig:activated} resolves a coupling-controlled onset. At
-\(D_rT_{\rm obs}=625\), descendant overlap rises from values consistent with
-zero below \(\lambda=0.6\) to \(0.405\pm0.008\) at 0.9 and
-\(0.691\pm0.005\) at 1.4. Written-state retention rises in parallel, whereas
-the \(g=0\) branch remains zero. Panel (c) also shows why \(q_{\rm EA}\) is a
-diagnostic rather than the memory readout.
-At \(\lambda=0.30\), \(q_{\rm EA}\) decays to zero as the observation window
-grows. At 1.40 it remains near 0.78 over the longest window. In contrast,
-Fig.~\ref{fig:activated}(b) compares every coupling at the same read time and
-against the same null channel. The onset is therefore not created by fitting
-a decay law or by integrating up to a finite-window ceiling.
+The retained preparation appears only after the interactions become strong
+enough to oppose Brownian escape. Figure~\ref{fig:activated} resolves this
+coupling-controlled onset. At the common read time
+\(D_rT_{\rm obs}=625\), split-replica overlap is statistically consistent
+with zero at \(\lambda=0.30\) and 0.45. It reaches
+\(0.405\pm0.008\) at 0.90 and \(0.691\pm0.005\) at 1.40.
+Written-state retention reaches \(0.466\pm0.016\) and
+\(0.497\pm0.010\) at the same two couplings, whereas both \(g=0\)
+controls remain consistent with zero. The capillary bond-frame
+interaction is required for retention on this observation scale.
 
-Panel (a) also shows that the onset is broad rather than singular. Increasing
-\(\lambda\) extends the time over which overlap survives and raises its
-endpoint. Panel (b) reads every trajectory at one common physical time, so
-the increasing branch cannot result from a longer integration window. The
-written and split-replica observables rise together, although they start from
-different preparations. This links the onset to autonomous basin retention
-rather than to the writing field. Panel (c) supplies the necessary contrast:
-finite-window persistence can be large before its long-window limit is known.
+Scaling both interaction terms with \(\lambda\) locates the finite-time
+crossover while leaving barrier growth and loop incompatibility coupled.
+Panel (c) separates finite-window persistence from memory.
+At \(\lambda=0.30\), \(q_{\rm EA}\) falls to \(0.0066\) as the window
+approaches \(D_rT=625\). At 1.40 it remains \(0.776\).
+The broad onset is a finite-time dynamical crossover rather than a singular
+transition.
 
 Finite-size scaling separates this memory from equilibrium glass order.
 Between \(N=144\) and 2304, \(S\propto N^{-0.479}\) and independently
@@ -281,48 +272,71 @@ not select one macroscopic state. Descendants of the same preparation remain
 related because they begin in the same local basin. This is genealogical
 memory rather than equilibrium replica order.
 
-A strong-locking intervention identifies the origin of those basins. The
-apolar reduction assigns each local region a binary state and each loop the
-gauge-invariant product \(\mathcal W_\gamma\) of its coupling signs. Removing
-loops with \(\mathcal W_\gamma=-1\), while preserving the graph and coupling
-magnitudes, removes \(5.58\) one-flip-stable states on average. Closed-path
-incompatibility creates additional choices; preparation selects among them.
-The full intervention and target-resolved controls are in the Supplemental
-Material.
-The graph intervention changes topology of the constraints without changing
-their magnitudes. Across 24 graphs, the excess stable-state count has a
+The capillary minimum admits a discrete transport description. Transport
+across bond \((ij)\) reflects an apolar angle about the bond frame; transport
+around a cycle composes these reflections,
+\begin{align}
+ \mathcal T_{ij}(\theta)&=2\phi_{ij}-\theta\pmod{\pi},\nonumber\\
+ \mathcal T_C&=\mathcal T_{i_0i_1}\circ\cdots\circ
+ \mathcal T_{i_{n-1}i_0}.
+ \label{eq:transport}
+\end{align}
+The maps in Eq.~\eqref{eq:transport} form a discrete \(O(2)\) connection, and
+\(\mathcal T_C\) is its cycle holonomy. One odd cycle produces a reflection
+and therefore possesses fixed orientations. Frustration arises when the cycle
+maps of the bond-frame graph have no common fixed orientation. This
+common-fixed-point condition states precisely when locally preferred bond
+frames fail to define one global angular state.
+
+Closed-path incompatibility enlarges the metastable-state catalogue in the
+strong-locking limit. The apolar reduction assigns each local region a binary state and
+each loop the gauge-invariant product
+\(\mathcal W_\gamma\) of its coupling signs. Flattening loops with
+\(\mathcal W_\gamma=-1\), while preserving the graph and coupling
+magnitudes, removes \(5.58\) one-flip-stable states on average. The reduced
+landscape therefore contains additional choices when closed-path
+constraints are incompatible.
+The intervention changes loop compatibility without changing the graph or
+coupling magnitudes. Across 24 graphs, the excess stable-state count has a
 bootstrap 95\% interval of 2.67--8.83. Individual written patterns can improve
 or worsen when loop mismatch is removed. Thus incompatible loops create
 alternatives; they do not guarantee that every target will be retained.
 
-The same landscape records operation order. With independent Brownian
-histories at \(N=256\), two opposed write fields applied as \(AB\) or \(BA\)
-give \(M_{\rm ord}=0.634\pm0.020\) for overlapping supports and
-\(0.0123\pm0.0027\) for separated supports. At \(h=8k_{\rm B}T\), the sign of
-the single-trajectory readout identifies the order in 100\% and
-\(55.0\pm1.3\%\) of the two cases, respectively. Their discriminabilities are
+Landscape capacity and retrieval fidelity vary independently. Incompatible
+loops enlarge the alphabet of compromise states. A written pattern \(W\) is
+captured in a basin \(B_0\), Brownian relaxation carries it to \(B_t\), and a
+readout \(R\) identifies what survives: \(W\to B_0\to B_t\to R\). Stable-state
+count bounds the available alphabet; capture probabilities and escape rates
+set retrieval fidelity. The post-release overlaps measure this
+\emph{relaxation-retained incompatibility}, not loop holonomy alone.
+
+The distinction between an available state and a retained state also governs
+operation-order memory. Athermal disordered Ising models show that two
+protocols reaching identical final controls can leave distinct microstates
+\cite{croce2026}. Thermal release adds a second requirement: the two histories
+must remain distinguishable after both controls vanish. With independent
+Brownian histories at \(N=256\), two opposed write fields are applied as
+\(AB\) or \(BA\). They give \(M_{\rm ord}=0.634\pm0.020\) for overlapping
+supports and \(0.0123\pm0.0027\) for separated supports. At
+\(h=8k_{\rm B}T\), the single-trajectory readout identifies the order in
+100\% of overlapping trials and \(55.0\pm1.3\%\) of separated trials. Their discriminabilities are
 \(d'=12.55\pm0.97\) and \(0.31\pm0.05\) across five graphs. A nonzero response
-during writing is not sufficient: the histories must remain in different
-basins after both fields are removed. The protocol and controls appear in
-Supplemental Fig.~S9 and Table~SVI.
-Equivalently, field-free relaxation defines which driven states become
-indistinguishable. Pulse order is stored only when the \(AB\) and \(BA\)
-histories relax to different readout classes. This makes the signed
-post-release overlap a material order parameter for sequence, rather than a
-measure of transient noncommutativity during writing.
+during writing is insufficient. The protocol and controls appear in
+Supplemental Fig.~S9 and Table~SVI. Field-free relaxation projects the two
+driven histories onto their readout classes. The signed post-release overlap
+is therefore the material order parameter for sequence.
 
-The support controls reveal why overlap matters. Partitioned fields address
-disjoint rotors, so reversing their order does not reverse a shared local
-decision. Their driven trajectories may differ, but field-free relaxation
-maps them to the same readout class. Contested fields instead favor opposite
-orientations on the same rotors. The last pulse places those coordinates on
-opposite sides of a basin boundary in the two histories. Coupling transmits
-that choice beyond the written set and stabilizes it after removal. Sequence
-memory thus requires nonuniform overlap between operations in this model.
-It is not determined by the instantaneous noncommutativity of the driven
-dynamics alone; the difference must survive the relaxation map.
+Overlapping and opposing fields make the sequence observable. Partitioned
+fields address disjoint rotors, so reversing their order does not reverse a
+shared local decision. Contested fields instead favor opposite orientations
+on the same rotors. The last pulse places those coordinates on opposite sides
+of a basin boundary, and coupling propagates that choice beyond the written
+set. Sequence memory in this realization therefore requires the dynamical
+influence of the two operations to overlap on retained coordinates. Transient
+noncommutativity matters only through the component that survives field-free
+relaxation.
 
-The fixed-graph approximation requires
+The mechanism requires the timescale separation
 \(\tau_{\rm int}\ll D_r^{-1}\ll\tau_{\rm cage}\). Charged rods already show
 caged translation with rotational mobility \cite{besseling2026}, and Brownian
 colloidal pivots demonstrate accessible angular motion \cite{melio2026}. A
@@ -330,7 +344,7 @@ candidate realization is a dense air--water monolayer of polymer ellipsoids.
 Electrostatic repulsion and crowding maintain the cage, while roughness and
 wetting tune capillary attraction \cite{trevenen2023,rahman2026}. At
 \(\gamma=10\,\mathrm{mN\,m^{-1}}\) and \(r/R=3\), the target
-\(A_4=1\)--\(5k_{\rm B}T\) requires
+\(A_4=1\)--\(5k_{\rm B}T\) requires contact-line amplitudes of
 \(\Delta u_{\max}=1.9\)--\(4.2\,\mathrm{nm}\).
 The condition \(\tau_{\rm int}\ll D_r^{-1}\) makes the interface follow the
 rotor quasistatically. The condition \(D_r^{-1}\ll\tau_{\rm cage}\) allows
@@ -355,8 +369,9 @@ removes the perturbation, and compares post-release overlap with a
 low-quadrupole control. Polarized traps provide a temporary write torque
 \cite{lapointe2011}. Shaped interfaces offer a mechanical alternative because
 deviatoric curvature couples directly to a capillary quadrupole
-\cite{cavallaro2011}. These measurements test the predicted separation of
-short spatial correlations from long temporal inheritance.
+\cite{cavallaro2011}. Correlating local retained overlap with local loop-closure
+mismatch would distinguish memory centered on incompatible cores, their
+boundaries, or compatible patches.
 A pair calibration is essential because \(J\) is not fixed by the far-field
 quadrupole. It may contain steric and near-field capillary harmonics. Measuring
 \(p(\theta_i,\theta_j\mid r)\) before the collective experiment separates the
@@ -370,18 +385,19 @@ as a passive last-event sensor. A transient surface-curvature pattern provides
 a nonoptical write channel; flattening the interface removes that torque
 before readout.
 
-The result is a finite-time orientational-memory regime on a quenched
-positional graph. Equilibrium glass order and operation in a mobile monolayer
-are distinct questions. They reduce to measurable tests: time-step
-convergence, retention under translational Brownian motion, and
-independent-noise decoding of the two-pulse protocol. The Supplemental
-Material gives the protocols and predeclared criteria.
+Finite-time orientational memory persists on the quenched positional graphs
+examined here. Translational motion and equilibrium glass order define the
+next physical boundaries. Time-step convergence, translational Brownian
+motion, and independent-noise sequence decoding provide direct tests of those
+boundaries (Supplemental Material).
 
-Bond geometry can therefore store preparation history without selecting a
-common director. Local incompatibility creates alternative angular basins,
-and interactions delay escape from the selected basin. This mechanism turns
-positional disorder from a source of orientational noise into a carrier of
-rewritable material memory.
+Particle positions supply a quenched network, capillary quadrupoles define
+bond-frame transport, and incompatible loops create alternative angular
+compromises. Field-free Smoluchowski dynamics projects a written configuration
+into one such compromise, while interaction barriers delay escape. When two
+writes contest the same rotors, reversing their order selects different
+basins. Geometry therefore stores both a hidden orientational state and the
+order of the operations that prepared it.
 
 \begin{acknowledgments}
 The mechanism hypothesis was developed with
@@ -476,6 +492,11 @@ A. Huerre, M. De Corato, and V. Garbin,
 Dynamic capillary assembly of colloids at interfaces with 10,000\(g\)
 accelerations,
 Nat. Commun. \textbf{9}, 3620 (2018).
+
+\bibitem{croce2026}
+N. Croce, S. Salahshoor, and D. Z. Rocklin,
+Multi-field return point memory,
+arXiv:2605.23781 (2026).
 
 \bibitem{lapointe2011}
 C. P. Lapointe, T. G. Mason, and I. I. Smalyukh,

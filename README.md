@@ -19,13 +19,15 @@ regime, global nematic order and independently equilibrated replica overlap
 decrease approximately as `N^-1/2`, while local pair correlations and
 finite-window persistence remain finite. Split descendants of one prepared
 state retain overlap to the longest simulated time. These statements are
-checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 110
+checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 129
 frozen numerical expectations.
 
-The audit separates numerical checks from provenance. A `110/110` numerical
+The audit separates numerical checks from provenance. A `129/129` numerical
 result does not make the release complete unless both the raw
 `activated_memory_scan.jsonl` shards used for Fig. 4 and the positional-
-disorder write--release trajectories are installed from the data deposit.
+disorder write--release trajectories are installed from the data deposit. The
+identical-start loop-flattening scan cited in the Supplemental Material is a
+third required raw source.
 
 ## Installation
 
@@ -60,7 +62,7 @@ MPLCONFIGDIR=/tmp/orientational-memory-mpl \
 python -B scripts/audit_rotating_colloids_capillary_prl.py
 ```
 
-Expected result: `110/110` quantitative checks, all language gates passed, and
+Expected result: `129/129` quantitative checks, all language gates passed, and
 all raw-provenance gates true after data installation.
 
 ## Rebuild figures
@@ -108,6 +110,7 @@ The production shell drivers are:
 - `scripts/run_rotating_colloids_groove_protocols_gpu.sh`
 - `scripts/run_rotating_colloids_prl_submission_validations_4gpu.sh`
 - `scripts/run_rotating_colloids_disorder_retention_4gpu.sh`
+- `scripts/run_holonomy_matched_release_crossover_4gpu.sh`
 
 Each simulation output is append-only and resumes completed parameter points.
 The shell scripts document the exact replica counts, graph seeds, step counts,
@@ -143,11 +146,20 @@ nohup bash scripts/run_rotating_colloids_disorder_retention_4gpu.sh \
 
 Complete graph/disorder cells are JSON-validated and skipped on restart.
 
+The matched-release driver starts the original and loop-flattened networks
+from identical angles and applies paired Brownian noise. It isolates release
+from arm-dependent writing and resumes by graph, coupling and target key:
+
+```bash
+nohup bash scripts/run_holonomy_matched_release_crossover_4gpu.sh \
+  > holonomy_matched_release_crossover.log 2>&1 < /dev/null &
+```
+
 ## Manuscript length
 
 `scripts/count_prl_length.py tex/rotating_colloids/rotating_colloids_prl_capillary.tex`
 reports the APS core word-equivalent count against the 3750-word PRL limit.
-The current manuscript is estimated at 3683 word equivalents. It retains all
+The current manuscript is estimated at 3749 word equivalents. It retains all
 four main figures and is below the PRL limit without an editorial waiver.
 
 ## Manuscript
@@ -161,8 +173,9 @@ Live installation.
 The Zenodo DOI is pending. `scripts/build_rotating_colloids_release.py`
 assembles the data folder, computes SHA-256 hashes, and refuses a complete
 build when either the activated-memory raw shard set or the disorder-retention
-protocol trajectories are absent. Generated figures and compiled PDFs are
-excluded from the data archive.
+protocol trajectories are absent. The matched-release crossover archive is
+also mandatory because its result is reported in the Supplemental Material.
+Generated figures and compiled PDFs are excluded from the data archive.
 
 ## License
 
