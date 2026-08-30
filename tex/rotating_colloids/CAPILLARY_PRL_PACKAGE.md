@@ -92,11 +92,12 @@ Run from the repository root on the four-GPU machine:
 The runner is resumable. Rerunning it skips complete JSONL records and rebuilds
 the merged reports.
 
-## Restore the disorder-retention trajectories
+## Archived disorder-retention trajectories
 
-The local Zenodo staging tree remains incomplete until the 33 raw
-write--release cells behind the positional-disorder result are restored. The
-four-GPU driver reproduces the exact production schedule used by the quoted
+The 33 raw write--release cells behind the positional-disorder result are
+included in the published data release,
+[doi:10.5281/zenodo.22174752](https://doi.org/10.5281/zenodo.22174752). The
+four-GPU driver reproduces the production schedule used by the quoted
 (D_rt=624.5) endpoints. It validates and skips complete cells, so a restart
 reruns only an interrupted graph:
 
@@ -136,8 +137,9 @@ true.
 
 ## Release objects
 
-- Private code repository: `vbaulin/geometry-encoded-orientational-memory`
-- Zenodo staging tree: `release/zenodo_geometry_encoded_orientational_memory/`
+- Public code repository: `vbaulin/geometry-encoded-orientational-memory`
+- Published data release: `https://doi.org/10.5281/zenodo.22174752`
+- Local Zenodo build tree: `release/zenodo_geometry_encoded_orientational_memory/`
 - Data builder: `../../scripts/build_rotating_colloids_release.py`
 - Resumable Zenodo uploader: `../../scripts/upload_rotating_colloids_zenodo.py`
 
@@ -217,9 +219,8 @@ the numbers quoted in the Letter and the frozen expectations in
 Keep a copy of the current `activated_memory_figure_report.json` before the
 rerun so the comparison is meaningful.
 
-Once the raw activated-memory shards and disorder-protocol directories exist,
-the audit's provenance block reports complete raw support and the deposit can
-be completed:
+The published data release can be reconstructed from the archived raw sources
+with:
 
     python -B scripts/build_rotating_colloids_release.py \
       --root "$PWD" \

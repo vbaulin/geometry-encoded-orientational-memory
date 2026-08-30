@@ -281,9 +281,9 @@ parameter/graph record per line.
 
 ## Licenses
 
-Data are prepared for release under CC BY 4.0. Code is released separately
-under the MIT License. A Zenodo DOI must be inserted in the manuscript before
-submission.
+Data are released under CC BY 4.0 at
+https://doi.org/10.5281/zenodo.22174752. Code is released separately under the
+MIT License.
 """
 
 

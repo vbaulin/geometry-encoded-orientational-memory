@@ -13,6 +13,9 @@ figures, or compiled manuscripts. arXiv is the authoritative manuscript and
 Supplemental Material archive. TeX sources retained here serve only the
 software audit and reproducible figure workflow.
 
+The numerical data release is available at
+[doi:10.5281/zenodo.22174752](https://doi.org/10.5281/zenodo.22174752).
+
 ## Evidence represented here
 
 The publication-scale results distinguish preparation-dependent dynamical
@@ -47,8 +50,9 @@ not replace it with the CPU wheel for production runs.
 
 ## Install the data deposit
 
-Download and extract the Zenodo archive, then map it into the directory
-layout expected by the scripts:
+Download and extract the
+[Zenodo data archive](https://doi.org/10.5281/zenodo.22174752), then map it
+into the directory layout expected by the scripts:
 
 ```bash
 python scripts/install_zenodo_data.py /path/to/zenodo_geometry_encoded_orientational_memory
@@ -184,12 +188,14 @@ They are not the archival manuscript release.
 
 ## Data release
 
-The Zenodo DOI is pending. `scripts/build_rotating_colloids_release.py`
-assembles the data-only deposit, computes SHA-256 hashes, and refuses a
-complete build when required raw trajectories are absent. The matched-release
-crossover archive is mandatory because its result is reported in the
-Supplemental Material. Source code, generated figures, TeX files, and compiled
-PDFs are excluded from the Zenodo archive.
+The data-only release is archived at
+[doi:10.5281/zenodo.22174752](https://doi.org/10.5281/zenodo.22174752).
+`scripts/build_rotating_colloids_release.py` reconstructs the deposit,
+computes SHA-256 hashes, and refuses a complete build when required raw
+trajectories are absent. The matched-release crossover archive is mandatory
+because its result is reported in the Supplemental Material. Source code,
+generated figures, TeX files, and compiled PDFs are excluded from the Zenodo
+archive.
 
 ## License
 
