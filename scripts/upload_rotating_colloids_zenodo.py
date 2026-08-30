@@ -242,6 +242,14 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser.add_argument("--create", action="store_true")
     parser.add_argument("--publish", action="store_true")
     parser.add_argument("--rebuild-archive", action="store_true")
+    parser.add_argument(
+        "--skip-metadata",
+        action="store_true",
+        help=(
+            "reuse metadata already stored in an existing Zenodo draft; "
+            "useful when only release files changed"
+        ),
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(list(argv) if argv is not None else None)
 
@@ -260,6 +268,8 @@ def main(argv: Iterable[str] | None = None) -> int:
         if args.state_file
         else release_dir.parent / f".{release_dir.name}.zenodo-state.json"
     )
+    if args.skip_metadata and not state_path.exists():
+        parser.error("--skip-metadata requires an existing Zenodo draft state file")
     build_archive(release_dir, archive, rebuild=args.rebuild_archive)
     assets = upload_assets(release_dir, archive)
     summary = {
@@ -293,7 +303,18 @@ def main(argv: Iterable[str] | None = None) -> int:
         session, args.api_url, state_path, create=args.create
     )
     metadata = read_json(release_dir / "zenodo_metadata.json")
-    deposition = update_metadata(session, deposition, metadata)
+    if args.skip_metadata:
+        print(
+            json.dumps(
+                {
+                    "event": "metadata_skip",
+                    "deposition_id": state["deposition_id"],
+                    "reason": "existing draft metadata retained",
+                }
+            )
+        )
+    else:
+        deposition = update_metadata(session, deposition, metadata)
     deposition = upload_files(session, deposition, assets)
     state.update(
         {
