@@ -29,6 +29,7 @@ def main() -> None:
     report = json.loads(args.input.read_text(encoding="utf-8"))
     n576 = report["n576"]
     n1024 = report["n1024"]
+    comparison = report["comparison"]
 
     plt.rcParams.update(
         {
@@ -105,10 +106,14 @@ def main() -> None:
         capsize=3,
         zorder=3,
     )
+    mean_difference = float(comparison["mean_difference_0p11_minus_0p16"])
+    paired_p = float(comparison["paired_p_two_sided"])
     ax.text(
         0.135,
         0.576,
-        r"$\Delta Q^{\rm conn}=0.0599$" + "\n" + r"paired $p=0.0046$",
+        rf"$\Delta Q^{{\rm conn}}={mean_difference:.4f}$"
+        + "\n"
+        + rf"paired $p={paired_p:.4f}$",
         ha="center",
         va="top",
         fontsize=7.6,
