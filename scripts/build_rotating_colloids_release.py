@@ -282,7 +282,7 @@ parameter/graph record per line.
 ## Licenses
 
 Data are released under CC BY 4.0 at
-https://doi.org/10.5281/zenodo.22174752. Code is released separately under the
+https://doi.org/10.5281/zenodo.22173160. Code is released separately under the
 MIT License.
 """
 

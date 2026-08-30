@@ -2,7 +2,7 @@
 
 No numerical results are committed to this software repository. Raw
 trajectories, derived reports, manifests, and checksums are distributed through
-the companion [Zenodo data deposit](https://doi.org/10.5281/zenodo.22174752).
+the companion [Zenodo data deposit](https://doi.org/10.5281/zenodo.22173160).
 After extracting it, run:
 
 ```bash

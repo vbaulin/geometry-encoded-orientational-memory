@@ -96,7 +96,7 @@ the merged reports.
 
 The 33 raw write--release cells behind the positional-disorder result are
 included in the published data release,
-[doi:10.5281/zenodo.22174752](https://doi.org/10.5281/zenodo.22174752). The
+[doi:10.5281/zenodo.22173160](https://doi.org/10.5281/zenodo.22173160). The
 four-GPU driver reproduces the production schedule used by the quoted
 (D_rt=624.5) endpoints. It validates and skips complete cells, so a restart
 reruns only an interrupted graph:
@@ -138,7 +138,7 @@ true.
 ## Release objects
 
 - Public code repository: `vbaulin/geometry-encoded-orientational-memory`
-- Published data release: `https://doi.org/10.5281/zenodo.22174752`
+- Published data release: `https://doi.org/10.5281/zenodo.22173160`
 - Local Zenodo build tree: `release/zenodo_geometry_encoded_orientational_memory/`
 - Data builder: `../../scripts/build_rotating_colloids_release.py`
 - Resumable Zenodo uploader: `../../scripts/upload_rotating_colloids_zenodo.py`

@@ -14,7 +14,7 @@ Supplemental Material archive. TeX sources retained here serve only the
 software audit and reproducible figure workflow.
 
 The numerical data release is available at
-[doi:10.5281/zenodo.22174752](https://doi.org/10.5281/zenodo.22174752).
+[doi:10.5281/zenodo.22173160](https://doi.org/10.5281/zenodo.22173160).
 
 ## Evidence represented here
 
@@ -51,7 +51,7 @@ not replace it with the CPU wheel for production runs.
 ## Install the data deposit
 
 Download and extract the
-[Zenodo data archive](https://doi.org/10.5281/zenodo.22174752), then map it
+[Zenodo data archive](https://doi.org/10.5281/zenodo.22173160), then map it
 into the directory layout expected by the scripts:
 
 ```bash
@@ -189,7 +189,7 @@ They are not the archival manuscript release.
 ## Data release
 
 The data-only release is archived at
-[doi:10.5281/zenodo.22174752](https://doi.org/10.5281/zenodo.22174752).
+[doi:10.5281/zenodo.22173160](https://doi.org/10.5281/zenodo.22173160).
 `scripts/build_rotating_colloids_release.py` reconstructs the deposit,
 computes SHA-256 hashes, and refuses a complete build when required raw
 trajectories are absent. The matched-release crossover archive is mandatory
