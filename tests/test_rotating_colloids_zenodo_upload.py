@@ -8,6 +8,7 @@ import pytest
 
 from scripts.upload_rotating_colloids_zenodo import (
     build_archive,
+    create_new_version,
     remote_matches,
     upload_assets,
     verify_release,
@@ -84,3 +85,57 @@ def test_remote_match_requires_size_and_md5(tmp_path: Path) -> None:
         path,
         {"filesize": path.stat().st_size + 1, "checksum": f"md5:{checksum}"},
     )
+
+
+def test_create_new_version_follows_latest_draft_and_rewrites_state(
+    tmp_path: Path,
+) -> None:
+    class Response:
+        ok = True
+        status_code = 201
+        text = ""
+
+        def __init__(self, payload: dict) -> None:
+            self.payload = payload
+
+        def json(self) -> dict:
+            return self.payload
+
+    class Session:
+        def post(self, url: str, timeout: tuple[int, int]) -> Response:
+            assert url.endswith("/22173161/actions/newversion")
+            return Response(
+                {"links": {"latest_draft": "https://zenodo.test/deposit/22180000"}}
+            )
+
+        def get(self, url: str, timeout: tuple[int, int]) -> Response:
+            assert url == "https://zenodo.test/deposit/22180000"
+            return Response(
+                {
+                    "id": 22180000,
+                    "conceptrecid": "22170000",
+                    "links": {
+                        "self": url,
+                        "html": "https://zenodo.test/deposit/22180000",
+                    },
+                }
+            )
+
+    state_path = tmp_path / "state.json"
+    state, draft = create_new_version(
+        Session(),
+        "https://zenodo.org/api",
+        state_path,
+        {"deposition_id": 22173161, "concept_record_id": "22170000"},
+        {
+            "id": 22173161,
+            "record_id": 22173161,
+            "doi": "10.5281/zenodo.22173161",
+            "links": {},
+        },
+    )
+    assert draft["id"] == 22180000
+    assert state["deposition_id"] == 22180000
+    assert state["previous_record_id"] == 22173161
+    assert state["previous_doi"] == "10.5281/zenodo.22173161"
+    assert json.loads(state_path.read_text(encoding="utf-8")) == state

@@ -185,6 +185,50 @@ def create_or_resume(
     return state, deposition
 
 
+def create_new_version(
+    session: Any,
+    api_url: str,
+    state_path: Path,
+    state: dict[str, Any],
+    deposition: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Create a modifiable draft descended from the current published record."""
+
+    deposition_id = int(deposition.get("id", state["deposition_id"]))
+    action = deposition.get("links", {}).get("newversion") or (
+        f"{api_url.rstrip('/')}/deposit/depositions/{deposition_id}/actions/newversion"
+    )
+    response = session.post(action, timeout=(30, 300))
+    original = request_json(response, "create new version")
+    latest_draft = original.get("links", {}).get("latest_draft")
+    if not latest_draft:
+        raise RuntimeError("Zenodo new-version response has no latest_draft link")
+    draft = request_json(
+        session.get(latest_draft, timeout=(30, 180)), "read new-version draft"
+    )
+    new_state = {
+        "api_url": api_url.rstrip("/"),
+        "deposition_id": draft["id"],
+        "concept_record_id": draft.get("conceptrecid", state.get("concept_record_id")),
+        "links": draft["links"],
+        "published": False,
+        "previous_record_id": deposition.get("record_id", deposition_id),
+        "previous_doi": deposition.get("doi"),
+    }
+    write_json(state_path, new_state)
+    print(
+        json.dumps(
+            {
+                "event": "new_version_draft",
+                "previous_record_id": new_state["previous_record_id"],
+                "deposition_id": new_state["deposition_id"],
+                "url": draft.get("links", {}).get("html"),
+            }
+        )
+    )
+    return new_state, draft
+
+
 def update_metadata(session: Any, deposition: dict[str, Any], metadata: dict[str, Any]) -> dict[str, Any]:
     response = session.put(
         deposition["links"]["self"],
@@ -240,6 +284,11 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser.add_argument("--state-file", type=Path)
     parser.add_argument("--archive", type=Path)
     parser.add_argument("--create", action="store_true")
+    parser.add_argument(
+        "--new-version",
+        action="store_true",
+        help="create a new draft version of the published record in the saved state",
+    )
     parser.add_argument("--publish", action="store_true")
     parser.add_argument("--rebuild-archive", action="store_true")
     parser.add_argument(
@@ -252,6 +301,9 @@ def main(argv: Iterable[str] | None = None) -> int:
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(list(argv) if argv is not None else None)
+
+    if args.create and args.new_version:
+        parser.error("--create and --new-version are mutually exclusive")
 
     release_dir = args.release_dir.resolve()
     try:
@@ -302,6 +354,10 @@ def main(argv: Iterable[str] | None = None) -> int:
     state, deposition = create_or_resume(
         session, args.api_url, state_path, create=args.create
     )
+    if args.new_version:
+        state, deposition = create_new_version(
+            session, args.api_url, state_path, state, deposition
+        )
     metadata = read_json(release_dir / "zenodo_metadata.json")
     if args.skip_metadata:
         print(
