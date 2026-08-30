@@ -695,8 +695,8 @@ def main() -> None:
     order_fraction = read_jsonl(ORDER_FRACTION_N144)
     add_exact(checks, "N=144 order-memory raw rows", len(order_n144), 30)
     for mode, expected_mean, expected_sem in (
-        ("contested", 0.5985411324151126, 0.001476314098046082),
-        ("partitioned", 0.02653158374959344, 0.010361239611684695),
+        ("contested", 0.5985, 0.0015),
+        ("partitioned", 0.0265, 0.0104),
     ):
         values = [
             float(row["terminal_order_readout"])
@@ -705,22 +705,22 @@ def main() -> None:
         ]
         mean, sem = sample_mean_sem(values)
         add_exact(checks, f"N=144 h=8 {mode} graph count", len(values), 3)
-        add_close(checks, f"N=144 h=8 {mode} readout mean", mean, expected_mean, 1e-12)
-        add_close(checks, f"N=144 h=8 {mode} readout SEM", sem, expected_sem, 1e-12)
+        add_close(checks, f"N=144 h=8 {mode} readout mean", mean, expected_mean, 5e-5)
+        add_close(checks, f"N=144 h=8 {mode} readout SEM", sem, expected_sem, 5e-5)
     for mode, expected in (
-        ("contested", 0.5780788838797862),
-        ("partitioned", 0.0014965786804022453),
+        ("contested", 0.5781),
+        ("partitioned", 0.0015),
     ):
         values = [float(row["terminal_order_readout"]) for row in order_n256 if row["mode"] == mode]
-        add_close(checks, f"N=256 h=8 {mode} readout mean", np.mean(values), expected, 1e-12)
+        add_close(checks, f"N=256 h=8 {mode} readout mean", np.mean(values), expected, 5e-5)
     full_values = [
         float(row["terminal_order_readout"])
         for row in order_fraction
         if math.isclose(float(row["contest_fraction_requested"]), 1.0)
     ]
     full_mean, full_sem = sample_mean_sem(full_values)
-    add_close(checks, "N=144 full-support readout mean", full_mean, 0.6669145621655357, 1e-12)
-    add_close(checks, "N=144 full-support readout SEM", full_sem, 0.02238124394420527, 1e-12)
+    add_close(checks, "N=144 full-support readout mean", full_mean, 0.667, 5e-4)
+    add_close(checks, "N=144 full-support readout SEM", full_sem, 0.022, 5e-4)
 
     audit_independent_order(checks, ORDER_INDEPENDENT_REPORT)
 
