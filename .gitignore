@@ -11,3 +11,6 @@ __pycache__/
 .venv/
 discoveries/
 release/
+data/derived/
+data/raw/
+build/

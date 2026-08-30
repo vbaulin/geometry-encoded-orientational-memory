@@ -1,11 +1,12 @@
 # Data
 
-Large raw records are not committed to this repository. Obtain the companion
-Zenodo deposit and run:
+No numerical results are committed to this software repository. Raw
+trajectories, derived reports, manifests, and checksums are distributed only
+through the companion Zenodo data deposit. After extracting it, run:
 
 ```bash
 python scripts/install_zenodo_data.py /path/to/extracted/deposit
 ```
 
-`data/derived/` contains small, frozen reports for inspection. They are not a
-substitute for the raw JSONL files when reproducing figures or provenance.
+The installer validates the deposit manifest and maps the archived files into
+the paths expected by the simulation, plotting, and audit programs.

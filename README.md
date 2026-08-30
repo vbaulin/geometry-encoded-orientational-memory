@@ -1,15 +1,17 @@
 # Geometry-Encoded Hidden Orientational Memory
 
-This repository contains the Brownian-rotor simulation, analysis, plotting,
-and audit code for the manuscript *Geometry-Encoded Hidden Orientational
-Memory*. The model combines short-range relative-angle alignment with a
-bond-frame quadrupolar interaction on a quenched disordered neighbour graph.
+This public repository contains the Brownian-rotor simulation, analysis,
+plotting, audit code, and unit tests associated with *Geometry-Encoded Hidden
+Orientational Memory*. The model combines short-range relative-angle
+alignment with a bond-frame quadrupolar interaction on a quenched disordered
+neighbour graph.
 
-The repository is private during manuscript preparation. Raw publication
-records are kept outside GitHub in a Zenodo data deposit. The repository
-contains manuscript sources, small derived reports, and unit tests; it
-deliberately excludes generated figures, compiled PDFs, and large JSONL scans.
-Figures are rebuilt from the separately archived data.
+The release is deliberately separated by artifact type. GitHub is the
+software repository. Zenodo is the numerical data archive and contains raw
+trajectories, derived reports, manifests, and checksums, but no source code,
+figures, or compiled manuscripts. arXiv is the authoritative manuscript and
+Supplemental Material archive. TeX sources retained here serve only the
+software audit and reproducible figure workflow.
 
 ## Evidence represented here
 
@@ -19,10 +21,10 @@ regime, global nematic order and independently equilibrated replica overlap
 decrease approximately as `N^-1/2`, while local pair correlations and
 finite-window persistence remain finite. Split descendants of one prepared
 state retain overlap to the longest simulated time. These statements are
-checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 129
+checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 126
 frozen numerical expectations.
 
-The audit separates numerical checks from provenance. A `129/129` numerical
+The audit separates numerical checks from provenance. A `126/126` numerical
 result does not make the release complete unless both the raw
 `activated_memory_scan.jsonl` shards used for Fig. 4 and the positional-
 disorder write--release trajectories are installed from the data deposit. The
@@ -62,7 +64,7 @@ MPLCONFIGDIR=/tmp/orientational-memory-mpl \
 python -B scripts/audit_rotating_colloids_capillary_prl.py
 ```
 
-Expected result: `129/129` quantitative checks, all language gates passed, and
+Expected result: `126/126` quantitative checks, all language gates passed, and
 all raw-provenance gates true after data installation.
 
 ## Rebuild figures
@@ -97,7 +99,7 @@ The positional-disorder summary figure is rebuilt with:
 
 ```bash
 python -B scripts/plot_rotating_colloids_disorder_retention.py \
-  --input data/derived/disorder/rotating_colloids_disorder_retention_summary.json \
+  --input discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_disorder_retention_summary.json \
   --output build/disorder_retention
 ```
 
@@ -173,27 +175,21 @@ nohup bash scripts/run_holonomy_matched_release_crossover_4gpu.sh \
   > holonomy_matched_release_crossover.log 2>&1 < /dev/null &
 ```
 
-## Manuscript length
-
-`scripts/count_prl_length.py tex/rotating_colloids/rotating_colloids_prl_capillary.tex`
-reports the APS core word-equivalent count against the 3750-word PRL limit.
-The current manuscript is estimated at 3749 word equivalents. It retains all
-four main figures and is below the PRL limit without an editorial waiver.
-
 ## Manuscript
 
-The Letter and Supplemental Material are in `tex/rotating_colloids/`. Compile
-from that directory with `latexmk -pdf` or an equivalent RevTeX-capable TeX
-Live installation.
+The citable manuscript and Supplemental Material will be distributed through
+arXiv. The TeX sources under `tex/rotating_colloids/` are retained here only
+so the audit can verify figure numbering, language gates, and reported values.
+They are not the archival manuscript release.
 
 ## Data release
 
 The Zenodo DOI is pending. `scripts/build_rotating_colloids_release.py`
-assembles the data folder, computes SHA-256 hashes, and refuses a complete
-build when either the activated-memory raw shard set or the disorder-retention
-protocol trajectories are absent. The matched-release crossover archive is
-also mandatory because its result is reported in the Supplemental Material.
-Generated figures and compiled PDFs are excluded from the data archive.
+assembles the data-only deposit, computes SHA-256 hashes, and refuses a
+complete build when required raw trajectories are absent. The matched-release
+crossover archive is mandatory because its result is reported in the
+Supplemental Material. Source code, generated figures, TeX files, and compiled
+PDFs are excluded from the Zenodo archive.
 
 ## License
 
