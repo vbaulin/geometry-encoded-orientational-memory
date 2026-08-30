@@ -16,43 +16,49 @@
 \date{}
 
 \begin{abstract}
-Memory in disordered soft matter usually requires structural rearrangement or
-a persistent external template. Whether a material can instead retain a
-microscopic pattern in mobile internal coordinates remains unresolved. Here
-we study elongated Brownian colloids whose centres are caged at a liquid
-interface while their axes rotate. Capillary quadrupoles register each pair
-against its bond direction. On a disordered neighbour graph, these local
-conditions compete and prevent a common director. Simulations show that two
-replicas descended from one prepared configuration retain an angular overlap
-of $0.462\pm0.010$ after 625 rotational-diffusion times. A transiently
-written state retains $0.441\pm0.021$ after the field is removed. A matched
-system without the capillary channel loses both records within a few
+Materials can retain traces of past forcing through structural rearrangements,
+hysteretic switching, persistent templates, or slow collective modes. Here we
+ask whether a material can remember a spatial arrangement of particle
+orientations when the particle centres do not rearrange, the axes continue to
+rotate by Brownian motion, and the field that prepared the arrangement has
+been removed. We study elongated colloids whose centres are caged at a liquid
+interface. Quadrupolar capillary deformations couple the orientations of each
+pair to the line joining their centres. In a disordered layer, different bonds
+favour incompatible orientations. This competition prevents a common director
+and produces many angular compromise states. Simulations show that two copies
+prepared in the same state retain an angular overlap of $0.462\pm0.010$ after
+625 rotational-diffusion times. A pattern prepared by a temporary field retains
+an overlap of $0.441\pm0.021$ after that field is removed. A matched system
+without the capillary interaction forgets both arrangements within a few
 rotational times. Spatial correlations end within two particle spacings, and
 finite-size tests find no equilibrium spin-glass crossing over the sizes
 examined. Retention is largest near the disorder at which global nematic order
-collapses. The result identifies a template-free route by which fixed bond
-geometry can encode long-lived orientational memory.
+collapses. Fixed bond geometry can therefore preserve a particle-by-particle
+orientation pattern even though the particles continue to rotate and no local
+alignment field remains.
 \end{abstract}
 
 \maketitle
 
-A material memory links a present response to a past perturbation. In soft
-matter, rearranged particles, hysteretic elements, defects, or fixed alignment
-fields commonly carry that link \cite{keim2019}. Cyclically sheared
-suspensions reorganize until their trajectories encode the training amplitude
-\cite{keim2011,paulsen2014}. Quenched-disorder nematics instead retain local
-easy axes \cite{rotunno2005}. Both mechanisms place the record outside a
-freely evolving orientation. Colloidal ellipsoids provide a different
-contrast: their orientations can arrest while their positions remain fluid
-\cite{zheng2011,roller2021}. Slow rotation alone, however, does not identify
-which microscopic pattern was prepared.
+Materials often retain traces of how they were driven. A cyclically sheared
+suspension rearranges until its particle trajectories reflect the training
+amplitude \cite{keim2011,paulsen2014}. A hysteretic element remains on one of
+several metastable branches after the load is removed. Defects or quenched
+local fields can preserve a preferred state, while glassy modes can carry a
+slowly fading history \cite{keim2019,rotunno2005}. These mechanisms store the
+trace in different physical objects: a new particle arrangement, a selected
+energy minimum, a permanent local preference, or a slow collective mode.
 
-The unresolved question is whether an unchanged network of pair interactions
-can retain a specified angular pattern after its writing field disappears.
-Here we test that possibility in caged interfacial ellipsoids. A stored pattern
-must remain identifiable after release and must outlive a matched realization
-without the proposed storage interaction. These two conditions distinguish
-memory from a nonzero autocorrelation measured over one finite window.
+Caged colloidal ellipsoids pose a different problem. Their centres can remain
+fixed while their long axes continue to rotate by Brownian motion
+\cite{zheng2011,roller2021}. The particle arrangement then provides a stable
+network of neighbours without itself recording the orientation of every
+particle. Can interactions on that network preserve a particular angular
+arrangement prepared by a temporary field? We test this possibility in a
+disordered layer of interfacial ellipsoids. After the field is removed, the
+prepared arrangement must remain recognizable and must persist longer than in
+a matched system without the proposed capillary interaction. This comparison
+separates memory of the preparation from rotational motion that is merely slow.
 
 Bond-frame coupling supplies the required mechanism. Nematic alignment favors
 \(\theta_i-\theta_j=0\). A capillary bond instead favors a value of
