@@ -219,7 +219,25 @@ def copy_disorder_protocols(files: list[Path], destination: Path) -> list[dict[s
 
 def build_readme(complete: bool, missing: list[str]) -> str:
     status = "complete" if complete else "staging: one or more required sources are missing"
-    missing_text = "None." if not missing else "\n".join(f"- `{item}`" for item in missing)
+    if missing:
+        missing_text = "\n".join(f"- `{item}`" for item in missing)
+        completeness_section = f"""## Missing required sources
+
+{missing_text}
+
+This staging archive must not be published while this list is nonempty. Run
+the builder on the GPU cluster with `--activated-input` pointing to the
+activated-memory result directory and `--disorder-retention-input` pointing
+to the parent of the disorder protocol runs, or install both sources in the
+project discovery tree and rebuild without `--allow-incomplete`.
+"""
+    else:
+        completeness_section = """## Completeness
+
+All raw and derived sources required by the release manifest are present.
+File-level sizes and SHA-256 digests are recorded in `manifest.json` and
+`SHA256SUMS`.
+"""
     return f"""# Geometry-Encoded Hidden Orientational Memory: data deposit
 
 Archive status: **{status}**
@@ -251,16 +269,7 @@ https://github.com/vbaulin/{REPOSITORY_NAME}.
   numerical audit.
 - `manifest.json` and `SHA256SUMS`: file-level provenance and integrity checks.
 
-## Missing required sources
-
-{missing_text}
-
-The archive must not be uploaded as the final Zenodo record while this list is
-nonempty. Run the builder on the GPU cluster with `--activated-input` pointing
-to the activated-memory result directory and `--disorder-retention-input`
-pointing to the parent of the disorder protocol runs. Alternatively, install
-both sources in the project discovery tree and rerun without
-`--allow-incomplete`.
+{completeness_section}
 
 ## Units and conventions
 
