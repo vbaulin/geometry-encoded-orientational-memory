@@ -121,7 +121,11 @@ $PYTHON_BIN scripts/analyze_rotating_colloids_disorder_protocols.py \
   --input-dir "$BASE" --node-count 576 --output-dir "$BASE/analysis_N576"
 $PYTHON_BIN scripts/analyze_rotating_colloids_disorder_protocols.py \
   --input-dir "$BASE" --node-count 1024 --output-dir "$BASE/analysis_N1024"
+$PYTHON_BIN scripts/build_rotating_colloids_disorder_retention_summary.py \
+  --input-dir "$BASE" \
+  --output discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_disorder_retention_summary.json
 
 echo "Disorder-retention trajectories complete: $BASE"
+echo "Publication summary rebuilt: discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_disorder_retention_summary.json"
 echo "Rebuild the data deposit with:"
 echo "  python -B scripts/build_rotating_colloids_release.py --disorder-retention-input '$BASE' --clean"
