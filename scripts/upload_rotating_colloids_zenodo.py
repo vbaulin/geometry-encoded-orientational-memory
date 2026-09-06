@@ -95,17 +95,26 @@ def verify_release(release_dir: Path) -> dict[str, Any]:
     ]
     if missing_files:
         raise FileNotFoundError(f"manifest files absent from release: {missing_files}")
+    mismatches = []
+    for item in manifest.get("files", []):
+        source = release_dir / str(item["path"])
+        if (source.stat().st_size != item.get("bytes")
+                or not item.get("sha256")
+                or file_digest(source, "sha256") != item["sha256"]):
+            mismatches.append(item["path"])
+    if mismatches:
+        raise ValueError(f"release checksum or size mismatch: {mismatches}")
     return manifest
 
 
-def build_archive(release_dir: Path, archive: Path, *, rebuild: bool) -> Path:
+def build_archive(release_dir: Path, archive: Path, *, rebuild: bool, compression_level: int = 6) -> Path:
     if archive.exists() and not rebuild:
         return archive
     archive.parent.mkdir(parents=True, exist_ok=True)
     temporary = archive.with_suffix(archive.suffix + ".partial")
     if temporary.exists():
         temporary.unlink()
-    with tarfile.open(temporary, "w:gz", compresslevel=6) as handle:
+    with tarfile.open(temporary, "w:gz", compresslevel=compression_level) as handle:
         handle.add(release_dir, arcname=release_dir.name, recursive=True)
     temporary.replace(archive)
     return archive
@@ -291,6 +300,8 @@ def main(argv: Iterable[str] | None = None) -> int:
     )
     parser.add_argument("--publish", action="store_true")
     parser.add_argument("--rebuild-archive", action="store_true")
+    parser.add_argument("--compression-level", type=int, choices=range(10), default=6,
+                        help="gzip level; use 0 to store already-compressed NPZ trajectories without recompression")
     parser.add_argument(
         "--skip-metadata",
         action="store_true",
@@ -322,7 +333,8 @@ def main(argv: Iterable[str] | None = None) -> int:
     )
     if args.skip_metadata and not state_path.exists():
         parser.error("--skip-metadata requires an existing Zenodo draft state file")
-    build_archive(release_dir, archive, rebuild=args.rebuild_archive)
+    build_archive(release_dir, archive, rebuild=args.rebuild_archive,
+                  compression_level=args.compression_level)
     assets = upload_assets(release_dir, archive)
     summary = {
         "release_complete": True,

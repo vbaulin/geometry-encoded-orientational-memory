@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite this repository, the companion Zenodo data deposit, and the associated arXiv manuscript."
+message: "If you use this software, please cite this repository, the companion data deposit doi:10.5281/zenodo.22544787, and the associated manuscript when available."
 title: "Geometry-Encoded Hidden Orientational Memory"
 type: software
 authors:
@@ -9,5 +9,5 @@ authors:
     email: vbaulin@synthetix.institute
 repository-code: "https://github.com/vbaulin/geometry-encoded-orientational-memory"
 license: MIT
-version: 1.0.0
-date-released: 2026-08-30
+version: 1.1.0
+date-released: 2026-09-06

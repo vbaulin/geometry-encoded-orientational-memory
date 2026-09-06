@@ -63,14 +63,14 @@ def main() -> None:
     )
     ax.annotate(
         "director-suppression\ncrossover",
-        xy=(0.095, 0.405),
-        ha="center",
+        xy=(0.073, 0.37),
+        ha="left",
         va="bottom",
         color="#5C626A",
         fontsize=7.2,
     )
     ax.annotate(
-        "retention maximum",
+        "largest sampled diagnostic",
         xy=(0.11, 0.559),
         xytext=(0.155, 0.585),
         arrowprops={"arrowstyle": "-", "color": INK, "lw": 0.8},
@@ -80,7 +80,7 @@ def main() -> None:
     )
     ax.set(
         xlabel=r"positional disorder $\sigma/a$",
-        ylabel=r"connected written overlap $Q_{\rm target}^{\rm conn}$",
+        ylabel=r"director-subtracted overlap $\widetilde{Q}$",
         title=r"full disorder scan ($N=576$)",
         xlim=(0.065, 0.295),
         ylim=(0.34, 0.61),
@@ -111,7 +111,7 @@ def main() -> None:
     ax.text(
         0.135,
         0.576,
-        rf"$\Delta Q^{{\rm conn}}={mean_difference:.4f}$"
+        rf"$\Delta\widetilde{{Q}}={mean_difference:.4f}$"
         + "\n"
         + rf"paired $p={paired_p:.4f}$",
         ha="center",

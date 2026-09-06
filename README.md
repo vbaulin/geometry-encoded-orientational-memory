@@ -9,12 +9,16 @@ neighbour graph.
 The release is deliberately separated by artifact type. GitHub is the
 software repository. Zenodo is the numerical data archive and contains raw
 trajectories, derived reports, manifests, and checksums, but no source code,
-figures, or compiled manuscripts. arXiv is the authoritative manuscript and
-Supplemental Material archive. TeX sources retained here serve only the
-software audit and reproducible figure workflow.
+figures, or compiled manuscripts. The manuscript and Supplemental Material,
+including their TeX sources, will be submitted separately to arXiv. They are
+not included in this repository.
 
-The numerical data release is available at
-[doi:10.5281/zenodo.22173160](https://doi.org/10.5281/zenodo.22173160).
+The current numerical data release is
+[doi:10.5281/zenodo.22544787](https://doi.org/10.5281/zenodo.22544787),
+published on 6 September 2026. It includes the full N=1024 matched-preparation
+comparison: 405 checksum-listed files in a 4.14 GB archive. The
+[all-versions DOI](https://doi.org/10.5281/zenodo.22173160) follows subsequent
+data releases; use the version-specific DOI to reproduce these results.
 
 ## Evidence represented here
 
@@ -24,15 +28,45 @@ regime, global nematic order and independently equilibrated replica overlap
 decrease approximately as `N^-1/2`, while local pair correlations and
 finite-window persistence remain finite. Split descendants of one prepared
 state retain overlap to the longest simulated time. These statements are
-checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 126
+checked by `scripts/audit_rotating_colloids_capillary_prl.py` against 129
 frozen numerical expectations.
 
-The audit separates numerical checks from provenance. A `126/126` numerical
+The audit separates numerical checks from provenance. A `129/129` numerical
 result does not make the release complete unless both the raw
 `activated_memory_scan.jsonl` shards used for Fig. 4 and the positional-
 disorder write--release trajectories are installed from the data deposit. The
 identical-start loop-flattening scan cited in the Supplemental Material is a
 third required raw source.
+
+## Retention from the same prepared pattern
+
+The completed N=1024 comparison starts three field-free systems from exactly
+the same angles. The capillary model retains the local angular pattern,
+whereas removing the capillary interaction or replacing it with additional
+relative-angle alignment loses the pattern. All three use the same positional
+graph and target. The equal-weight control preserves the sum of positive
+pair coefficients, not the target energy, torque, or local curvature.
+
+At `D_r t = 625`, the unrotated target gives:
+
+| Positional disorder `sigma/a` | Capillary connected overlap | No capillary term | Equal-weight relative alignment |
+| --- | --- | --- | --- |
+| 0.11 | 0.5022 +/- 0.0326 | 0.0003 +/- 0.0013 | 0.0021 +/- 0.0015 |
+| 0.16 | 0.4729 +/- 0.0129 | -0.0036 +/- 0.0046 | -0.0002 +/- 0.0006 |
+
+Errors are SEM across five graphs, after averaging 48 thermal replicas per
+graph. Global nematic order in the capillary model is approximately 0.075.
+Connected overlap subtracts the product of the instantaneous and target
+complex directors for each replica; it is not the older `Q - mean(S)^2`
+diagnostic. Allowing a rigid rotation does not recover the lost control
+patterns. The second target is a global quarter-turn of the first, testing a
+symmetry-related pattern rather than an independent family of stored images.
+
+The simulator saves angular trajectories and random-number states and can
+resume an interrupted stage. The independent figure script reconstructs
+endpoint observables from the saved angles. See the
+[run and analysis instructions](docs/ROTATING_COLLOIDS_MATCHED_PREPARATION_RUN.md)
+for the complete protocol and Supplemental Fig. S10 and Table SVII.
 
 ## Installation
 
@@ -51,15 +85,19 @@ not replace it with the CPU wheel for production runs.
 ## Install the data deposit
 
 Download and extract the
-[Zenodo data archive](https://doi.org/10.5281/zenodo.22173160), then map it
+[Zenodo data archive](https://doi.org/10.5281/zenodo.22544787), then map it
 into the directory layout expected by the scripts:
 
 ```bash
 python scripts/install_zenodo_data.py /path/to/zenodo_geometry_encoded_orientational_memory
 ```
 
-The installer rejects an incomplete archive. It uses relative symbolic links
-by default; pass `--mode copy` when links are unsuitable.
+The installer verifies every manifest file's size and SHA256 before making
+changes and checks all required paths together. It uses relative symbolic
+links for raw data by default; pass `--mode copy` when links are unsuitable.
+Derived reports are always copied so rebuilding them cannot change the
+deposited originals. Existing
+destinations are preserved unless `--force` is explicitly supplied.
 
 ## Reproduce the numerical audit
 
@@ -68,10 +106,16 @@ MPLCONFIGDIR=/tmp/orientational-memory-mpl \
 python -B scripts/audit_rotating_colloids_capillary_prl.py
 ```
 
-Expected result: `126/126` quantitative checks, all language gates passed, and
-all raw-provenance gates true after data installation.
+Expected result: `129/129` quantitative checks and all raw-provenance gates
+true after data installation. No manuscript files are required. Optional
+language and figure-reference checks can be requested with
+`--manuscript-dir /path/to/separate/arxiv/sources`.
 
 ## Rebuild figures
+
+Figures and reports are generated locally, not tracked in Git. The scripts
+retain their original output directory names under `tex/`; those directories
+contain no manuscript sources in this repository.
 
 ```bash
 python -B scripts/classify_rotating_colloids_capillary_regimes.py \
@@ -83,6 +127,10 @@ python -B scripts/plot_rotating_colloids_capillary_prl.py
 python -B scripts/plot_rotating_colloids_activated_memory_prl.py \
   --input-dir discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_activated_memory_prl_gpu \
   --output-dir tex/rotating_colloids/capillary_prl_figures
+
+python -B scripts/plot_rotating_colloids_matched_preparation.py \
+  --input-dir discoveries/theory_experiment_interface/rotating_colloids_hyperion/rotating_colloids_matched_preparation_prl \
+  --output tex/rotating_colloids/capillary_prl_figures/figS_matched_preparation
 ```
 
 The Fig. 4(b) ordinate is the endpoint retained overlap `Q(T_obs)` at the
@@ -92,12 +140,17 @@ whose mean is statistically zero. The auxiliary finite-window area remains in
 the raw record but is not the plotted statistic.
 
 The Fig. 4 builder writes `activated_memory_figure_report.json` next to the
-figure, including the panel (a) retention surface and the panel (c)
-observation-window statistics. When a previous report is present it also
+figure, including the panel (a) retention surface, panel (c) half-overlap
+crossing times, and the supplementary observation-window statistics. When a previous report is present it also
 writes `activated_memory_report_delta.json`. A nonzero `max_relative_change`
 there means the numbers quoted in the Letter and the frozen expectations in
 `scripts/audit_rotating_colloids_capillary_prl.py` have to be updated
 together. Keep a copy of the previous report before rebuilding.
+
+Panel (c) distinguishes observed half-overlap crossings from trajectories
+that have not crossed by the final recorded time. The supplementary
+`figS_persistence_windows` plot shows the observation-window dependence of
+the finite-window persistence statistic.
 
 The positional-disorder summary figure is rebuilt with:
 
@@ -120,6 +173,7 @@ The production shell drivers are:
 - `scripts/run_rotating_colloids_disorder_retention_4gpu.sh`
 - `scripts/run_rotating_colloids_order_memory_publication.sh`
 - `scripts/run_holonomy_matched_release_crossover_4gpu.sh`
+- `scripts/run_rotating_colloids_matched_preparation_4gpu.sh`
 
 Each simulation output is append-only and resumes completed parameter points.
 The shell scripts document the exact replica counts, graph seeds, step counts,
@@ -179,23 +233,41 @@ nohup bash scripts/run_holonomy_matched_release_crossover_4gpu.sh \
   > holonomy_matched_release_crossover.log 2>&1 < /dev/null &
 ```
 
+The separate N=1024 matched-preparation run uses five graphs, two positional
+disorders, two symmetry-related targets, and five release conditions with
+independent thermal noise. Its publication defaults are frozen in the driver:
+
+```bash
+GPUS=0,1,2,3 nohup bash scripts/run_rotating_colloids_matched_preparation_4gpu.sh \
+  > matched_preparation.log 2>&1 < /dev/null &
+```
+
+Do not mix this comparison with the loop-flattening scan: the Hamiltonians,
+target preparations, and noise pairing differ. Neither intervention holds
+target energy, torque, and local curvature fixed while changing only topology.
+
 ## Manuscript
 
-The citable manuscript and Supplemental Material will be distributed through
-arXiv. The TeX sources under `tex/rotating_colloids/` are retained here only
-so the audit can verify figure numbering, language gates, and reported values.
-They are not the archival manuscript release.
+The manuscript and Supplemental Material will be distributed separately
+through arXiv. Neither TeX sources nor manuscript PDFs are included here.
 
 ## Data release
 
 The data-only release is archived at
-[doi:10.5281/zenodo.22173160](https://doi.org/10.5281/zenodo.22173160).
+[doi:10.5281/zenodo.22544787](https://doi.org/10.5281/zenodo.22544787).
 `scripts/build_rotating_colloids_release.py` reconstructs the deposit,
 computes SHA-256 hashes, and refuses a complete build when required raw
 trajectories are absent. The matched-release crossover archive is mandatory
 because its result is reported in the Supplemental Material. Source code,
 generated figures, TeX files, and compiled PDFs are excluded from the Zenodo
 archive.
+
+The full matched-preparation trajectories and per-case provenance manifests
+are also required by the current release builder. Old disorder trajectories
+without stored complex directors can reproduce only the explicitly labelled
+legacy subtraction, using `--legacy-director-subtraction` with
+`scripts/analyze_rotating_colloids_disorder_protocols.py`. They cannot be
+retrofitted into exact connected overlaps from `Q` and `S` alone.
 
 ## License
 

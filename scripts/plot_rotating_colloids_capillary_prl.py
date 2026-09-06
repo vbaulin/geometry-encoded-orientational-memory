@@ -139,7 +139,7 @@ def draw_capillary_schematic(ax: plt.Axes) -> None:
     ax.text(0.0, -0.61, "repulsion maintains separation", ha="center", va="top", fontsize=7.1, color="#40545e")
     ax.add_patch(Arc(tuple(centers[0]), 0.85, 0.85, theta1=0, theta2=math.degrees(theta[0]), lw=0.8))
     ax.text(-0.82, 0.23, r"$\theta_i$", ha="center")
-    ax.text(0.0, 1.20, r"residual capillary torque: $-g(R/r_{ij})^4\cos2(\theta_i+\theta_j-2\phi_{ij})$", ha="center", fontsize=7.4)
+    ax.text(0.0, 1.20, r"capillary pair energy: $-A_4(r_{ij})\cos2(\theta_i+\theta_j-2\phi_{ij})$", ha="center", fontsize=7.4)
     ax.set_xlim(-2.45, 2.45)
     ax.set_ylim(-1.05, 1.55)
     ax.axis("off")
@@ -222,9 +222,9 @@ def figure1() -> None:
         borderaxespad=0.45,
     )
     ax.set_title("Brownian coupling window")
-    ax.text(5.88, 8.0, "strong aggregation", ha="right", va="bottom", fontsize=6.8, color="#9f2f24")
+    ax.text(5.88, 8.0, "strong capillary coupling", ha="right", va="bottom", fontsize=6.8, color="#9f2f24")
     ax.text(5.88, 3.4, "target coupling", ha="right", va="center", fontsize=6.8, color="#496b34")
-    ax.text(5.88, 0.72, "thermal rotation", ha="right", va="top", fontsize=6.8, color="0.35")
+    ax.text(2.3, 0.72, r"$k_{\rm B}T$", ha="left", va="top", fontsize=6.8, color="0.35")
     panel_label(ax, "c")
     save(fig, "fig1_capillary_realization")
 
@@ -362,7 +362,7 @@ def figure3() -> None:
         keep = t <= common_lag_max + 1e-9
         ax.plot(t[keep], mean[keep], lw=1.5, color=color, label=rf"$D_rt_w={curves[0]['waiting_time']:.0f}$")
         ax.fill_between(t[keep], (mean - std)[keep], (mean + std)[keep], color=color, alpha=0.12, lw=0)
-    ax.set(xlabel=r"lag $D_r\Delta t$", ylabel=r"$C_2(t_w+\Delta t,t_w)$", xlim=(0, common_lag_max), ylim=(0.42, 1.02), title="waiting-time aging")
+    ax.set(xlabel=r"lag $D_r\Delta t$", ylabel=r"$C_{\rm age}(t_w+\Delta t,t_w)$", xlim=(0, common_lag_max), ylim=(0.42, 1.02), title="waiting-time aging")
     ax.axvline(30, color="0.55", lw=0.65, ls=":")
     ax.annotate("older states retain more", xy=(30, 0.70), xytext=(70, 0.75), arrowprops={"arrowstyle": "->", "lw": 0.7, "color": "0.35"}, fontsize=6.8)
     ax.legend(frameon=False)
@@ -380,7 +380,7 @@ def figure3() -> None:
     ax.axvline(0.0, color="0.35", lw=0.85, ls=":", zorder=5)
     ax.axhline(0.5, color="0.55", lw=0.65, ls=":")
     ax.set_xscale("symlog", linthresh=1.0, linscale=0.8)
-    ax.set(xlabel=r"time after field removal $D_r(t-t_{\rm off})$", ylabel="written-state overlap", xlim=(0, 520), ylim=(-0.12, 1.03), title="field-free written memory")
+    ax.set(xlabel=r"time after field removal $D_r(t-t_{\rm off})$", ylabel="written-state overlap", xlim=(0, 650), ylim=(-0.12, 1.03), title="field-free written memory")
     ax.text(0.97, 0.70, r"$>300\times$ slower", transform=ax.transAxes, ha="right", va="bottom", fontsize=7.0, color="#1b9e77")
     ax.legend(frameon=False, loc="center", bbox_to_anchor=(0.72, 0.35))
     panel_label(ax, "b")

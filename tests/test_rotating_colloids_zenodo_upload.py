@@ -33,7 +33,8 @@ def make_release(root: Path, *, complete: bool = True) -> Path:
         "complete": complete,
         "file_count": 1,
         "missing_required_sources": [] if complete else ["raw/test"],
-        "files": [{"path": "raw/value.jsonl", "bytes": data.stat().st_size}],
+        "files": [{"path": "raw/value.jsonl", "bytes": data.stat().st_size,
+                   "sha256": hashlib.sha256(data.read_bytes()).hexdigest()}],
     }
     (release / "manifest.json").write_text(
         json.dumps(manifest) + "\n", encoding="utf-8"
@@ -85,6 +86,23 @@ def test_remote_match_requires_size_and_md5(tmp_path: Path) -> None:
         path,
         {"filesize": path.stat().st_size + 1, "checksum": f"md5:{checksum}"},
     )
+
+
+def test_store_only_gzip_preserves_data(tmp_path: Path) -> None:
+    import tarfile
+
+    release = make_release(tmp_path)
+    archive = build_archive(release, tmp_path / "stored.tar.gz", rebuild=True, compression_level=0)
+    with tarfile.open(archive, "r:gz") as tar:
+        assert tar.extractfile("release/raw/value.jsonl").read() == b'{"value": 1}\n'
+
+
+def test_local_manifest_detects_same_size_data_change(tmp_path: Path) -> None:
+    release = make_release(tmp_path)
+    path = release / "raw/value.jsonl"
+    path.write_text(path.read_text().replace("1", "2"))
+    with pytest.raises(ValueError, match="checksum or size mismatch"):
+        verify_release(release)
 
 
 def test_create_new_version_follows_latest_draft_and_rewrites_state(

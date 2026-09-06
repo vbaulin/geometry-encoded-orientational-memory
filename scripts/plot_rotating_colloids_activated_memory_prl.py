@@ -144,6 +144,21 @@ def compare_reports(previous: dict, current: dict) -> dict:
     return {"max_relative_change": worst, "per_series": deltas}
 
 
+def first_crossing_time(time, values, threshold=0.5):
+    """First downward crossing; None denotes right censoring, not an endpoint fit."""
+    time, values = np.asarray(time, float), np.asarray(values, float)
+    if time.size != values.size or time.size == 0 or np.any(np.diff(time) <= 0):
+        raise ValueError("Crossing requires nonempty, strictly ordered paired samples")
+    below = np.flatnonzero(values <= threshold)
+    if not below.size:
+        return None
+    index = int(below[0])
+    if index == 0:
+        return float(time[0])
+    fraction = (threshold - values[index - 1]) / (values[index] - values[index - 1])
+    return float(time[index - 1] + fraction * (time[index] - time[index - 1]))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", required=True)
@@ -223,39 +238,75 @@ def main() -> None:
     ax.set(
         xlabel=r"coupling scale $\lambda$",
         ylabel=r"retained overlap $Q(T_{\rm obs})$",
-        title="coupling sets retained overlap",
+        title="retained overlap",
     )
     ax.axhline(0.0, color="0.6", lw=0.6, zorder=0)
     ax.legend(
         frameon=False,
         ncol=1,
         loc="upper left",
-        bbox_to_anchor=(0.10, 0.97),
+        bbox_to_anchor=(0.10, 0.98),
+        fontsize=6.4,
         borderaxespad=0.0,
         columnspacing=0.8,
         handlelength=1.4,
         handletextpad=0.4,
     )
 
-    # (c) Observation-window dependence of the finite-window statistic.
+    # Keep the window dependence as a separate supplementary figure.
     windows_by_lambda = window_statistics(groups, lambdas)
-    ax = axes[2]
+    window_fig, window_ax = plt.subplots(figsize=(3.4, 2.5), constrained_layout=True)
     selected = [lambdas[0], lambdas[len(lambdas) // 2], lambdas[-1]]
     colors = ("#4575b4", "#7b3294", "#d73027")
     for lam, color in zip(selected, colors):
         block = windows_by_lambda[f"{lam:g}"]
-        ax.errorbar(
+        window_ax.errorbar(
             block["window"], block["q_EA_mean"], yerr=block["q_EA_sem"],
             color=color, marker="o", ms=3.0, lw=1.2, capsize=1.5, label=rf"$\lambda={lam:g}$",
         )
-    ax.set(
+    window_ax.set(
         xlabel=r"observation window $D_rT_{\rm obs}$",
         ylabel=r"finite-window $q_{\rm EA}$",
-        title=r"finite-window $q_{\rm EA}$ is window dependent",
+        title="finite-window persistence",
         xscale="log",
         ylim=(0, 1.02),
     )
-    ax.legend(frameon=False)
+    window_ax.legend(frameon=False)
+    window_fig.savefig(out / "figS_persistence_windows.pdf", bbox_inches="tight")
+    window_fig.savefig(out / "figS_persistence_windows.png", bbox_inches="tight", dpi=300)
+    plt.close(window_fig)
+
+    ax = axes[2]
+    passage = {}
+    for arm, color, label, offset in (
+        ("physical", "#2166ac", "capillary", -0.008),
+        ("no_capillary", "#b2182b", r"$g=0$", 0.008),
+    ):
+        arm_passage, med_x, med_y = {}, [], []
+        for lam in lambdas:
+            times, ends = [], []
+            for row in groups[lam]:
+                curve = row["protocols"][arm]["split"]
+                crossing = first_crossing_time(curve["time"], curve["overlap_mean"])
+                times.append(crossing)
+                ends.append(float(curve["time"][-1]))
+            for index, (crossing, end) in enumerate(zip(times, ends)):
+                x = lam + offset + (index - (len(times) - 1) / 2) * 0.004
+                ax.plot(x, end if crossing is None else crossing,
+                        marker="^" if crossing is None else "o", ms=3.0,
+                        color=color, alpha=0.70, lw=0)
+            if all(value is not None for value in times):
+                med_x.append(lam + offset)
+                med_y.append(float(np.median(times)))
+            arm_passage[f"{lam:g}"] = {"graph_crossings": times, "last_times": ends,
+                                       "right_censored": sum(value is None for value in times)}
+        ax.plot(med_x, med_y, lw=1.0, color=color, label=label)
+        passage[arm] = arm_passage
+    ax.plot([], [], "^", color="0.35", ms=3.5, label="not crossed")
+    ax.set(xlabel=r"coupling scale $\lambda$", ylabel=r"time to $Q_{\rm split}=0.5$",
+           title="retention time", yscale="log", ylim=(0.08, 1300))
+    ax.legend(frameon=False, loc="center right", bbox_to_anchor=(0.99, 0.49), fontsize=6.3,
+              handlelength=1.2, labelspacing=0.25)
 
     for label, ax in zip("abc", axes):
         ax.text(0.02, 0.97, f"{label}", transform=ax.transAxes, va="top", ha="left", fontweight="bold", fontsize=9.5, bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.75, "pad": 0.8})
@@ -312,6 +363,10 @@ def main() -> None:
             ),
         },
         "endpoint_overlap": summary,
+        "first_passage_half_overlap": {
+            "definition": "First crossing of the graph's thermal-mean Q_split below 0.5; no extrapolation.",
+            "per_arm": passage,
+        },
         "retention_surface": {
             "description": "Panel (a): graph-averaged Q_split at reference rotational times.",
             "reference_times": reference_times,
@@ -319,7 +374,7 @@ def main() -> None:
             "observed_time_span": tmax,
         },
         "window_statistics": {
-            "description": "Panel (c): graph-averaged finite-window q_EA against read window.",
+            "description": "Supplement: graph-averaged finite-window q_EA against read window.",
             "per_lambda": windows_by_lambda,
             "longest_window": longest_window,
         },

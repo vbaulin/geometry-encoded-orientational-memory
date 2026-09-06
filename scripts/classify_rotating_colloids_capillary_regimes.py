@@ -32,6 +32,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import ListedColormap
+from matplotlib.collections import LineCollection
 from sklearn.decomposition import PCA
 from scipy.spatial import ConvexHull
 from sklearn.cluster import KMeans
@@ -258,6 +259,17 @@ def save(fig: plt.Figure, output_dir: Path, stem: str) -> None:
     plt.close(fig)
 
 
+def regime_boundary_segments(js, gs, labels):
+    """Categorical cell boundaries, without interpolating numerical class IDs."""
+    xe, ye = cell_edges(js), cell_edges(gs)
+    segments = []
+    for row, col in np.argwhere(labels[:, 1:] != labels[:, :-1]):
+        segments.append([(xe[col + 1], ye[row]), (xe[col + 1], ye[row + 1])])
+    for row, col in np.argwhere(labels[1:, :] != labels[:-1, :]):
+        segments.append([(xe[col], ye[row + 1]), (xe[col + 1], ye[row + 1])])
+    return segments
+
+
 def plot_regime_diagram(
     cells: Sequence[Dict[str, object]],
     regime_names: Sequence[str],
@@ -269,14 +281,15 @@ def plot_regime_diagram(
     numeric = [index[name] for name in regime_names]
     colors = [REGIME_COLORS.get(name.split(" 2")[0], "#66c2a5") for name in order]
     js, gs, regime_grid = grid(cells, numeric)
-    _, _, confidence_grid = grid(cells, confidence)
+    _, _, order_grid = grid(cells, [float(cell["S_mean"]) for cell in cells])
 
     fig, axes = plt.subplots(1, 3, figsize=(7.25, 2.25), constrained_layout=True)
     ax = axes[0]
     cmap = ListedColormap(colors)
     ax.pcolormesh(cell_edges(js), cell_edges(gs), regime_grid, cmap=cmap, vmin=-0.5, vmax=len(order) - 0.5, shading="flat")
     if len(order) > 1:
-        ax.contour(js, gs, regime_grid, levels=np.arange(0.5, len(order) - 0.5, 1.0), colors="white", linewidths=0.9)
+        ax.add_collection(LineCollection(regime_boundary_segments(js, gs, regime_grid),
+                                         colors="white", linewidths=0.9))
     ax.plot(4.0, 5.0, marker="*", ms=9, color="white", mec="black", mew=0.7)
     ax.annotate(
         "dynamical test\n$(J,g)=(4,5)$",
@@ -287,12 +300,12 @@ def plot_regime_diagram(
         arrowprops={"arrowstyle": "->", "lw": 0.65, "color": "0.25"},
         bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 1.0},
     )
-    ax.set(xlabel=r"alignment $J/k_{\rm B}T$", ylabel=r"capillary coupling $g/k_{\rm B}T$", title="finite-size dynamical regime map")
+    ax.set(xlabel=r"alignment $J/k_{\rm B}T$", ylabel=r"capillary coupling $g/k_{\rm B}T$", title="orientational regimes")
     direct_labels = {
         "Brownian crossover": (0.78, 2.20, "Brownian\ncrossover"),
         "relative-aligned state": (3.75, 0.56, "relative-aligned\nstate"),
-        "capillary-frame memory": (0.82, 6.35, "capillary-frame\nmemory"),
-        "hidden mixed memory": (4.10, 3.15, "hidden mixed\nmemory"),
+        "capillary-frame memory": (0.82, 6.35, "bond-frame\norder"),
+        "hidden mixed memory": (4.10, 3.15, "mixed local\norder"),
     }
     for name in order:
         if name not in direct_labels:
@@ -321,16 +334,17 @@ def plot_regime_diagram(
     im = ax.pcolormesh(
         cell_edges(js),
         cell_edges(gs),
-        confidence_grid,
+        order_grid,
         cmap="cividis",
         vmin=0.0,
-        vmax=1.0,
+        vmax=min(1.0, max(0.1, math.ceil(float(np.nanmax(order_grid)) * 10) / 10)),
         shading="flat",
     )
-    ax.contour(js, gs, regime_grid, levels=np.arange(0.5, len(order) - 0.5, 1.0), colors="white", linewidths=0.75)
-    ax.set(xlabel=r"alignment $J/k_{\rm B}T$", title="classification confidence")
+    ax.add_collection(LineCollection(regime_boundary_segments(js, gs, regime_grid),
+                                     colors="white", linewidths=0.75))
+    ax.set(xlabel=r"alignment $J/k_{\rm B}T$", title="global nematic order")
     ax.set_yticklabels([])
-    fig.colorbar(im, ax=ax, pad=0.02, fraction=0.055, label="centroid margin")
+    fig.colorbar(im, ax=ax, pad=0.02, fraction=0.055, label=r"$S$")
     ax.text(0.02, 0.03, "b", transform=ax.transAxes, fontweight="bold", fontsize=9.5, color="white")
 
     ax = axes[2]

@@ -2,8 +2,9 @@
 """Audit the frozen quantitative claims in the capillary-rotor PRL package.
 
 The numerical checks use only publication-scale artifacts. Provenance and
-language gates are reported separately because a numerical match cannot prove
+optional language gates are reported separately because a numerical match cannot prove
 that every raw file needed to reproduce a derived figure has been archived.
+Manuscript sources are distributed separately through arXiv, not this repository.
 """
 
 from __future__ import annotations
@@ -36,8 +37,6 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "discoveries/theory_experiment_interface/rotating_colloids_hyperion"
 GPU = DATA / "rotating_colloids_capillary_pair_prl_gpu"
 OUT = DATA / "rotating_colloids_capillary_pair_prl_claim_audit"
-MAIN_TEX = ROOT / "tex/rotating_colloids/rotating_colloids_prl_capillary.tex"
-SUPPLEMENT_TEX = ROOT / "tex/rotating_colloids/rotating_colloids_prl_capillary_supplement.tex"
 FIGURES = ROOT / "tex/rotating_colloids/capillary_prl_figures"
 
 DENSE = GPU / "dense_map_n20/capillary_pair_scan.jsonl"
@@ -315,6 +314,36 @@ def supplemental_figure_map(supplement: Path, letter_text: str) -> dict[str, Any
     }
 
 
+def manuscript_status(directory: Path | None) -> dict[str, Any]:
+    """Check separately supplied arXiv sources only when explicitly requested."""
+
+    if directory is None:
+        return {
+            "manuscript_check_status": "not_requested",
+            "language_gates": {},
+            "all_language_gates_passed": None,
+            "supplemental_figure_references": None,
+        }
+    letter = directory / "rotating_colloids_prl_capillary.tex"
+    supplement = directory / "rotating_colloids_prl_capillary_supplement.tex"
+    missing = [str(path) for path in (letter, supplement) if not path.is_file()]
+    if missing:
+        raise FileNotFoundError("Missing external manuscript sources: " + ", ".join(missing))
+    text = letter.read_text(encoding="utf-8")
+    language_gates = {
+        "no_permanent_memory_claim": "permanent memory" not in text.lower(),
+        "no_equilibrium_glass_claim": "we establish an equilibrium glass" not in text.lower(),
+        "constructed_graph_not_called_emergent": "grey neighbour network is an emergent cage" not in text.lower(),
+        "finite_window_metric_not_called_lifetime": "integral retention time" not in text.lower(),
+    }
+    return {
+        "manuscript_check_status": "checked",
+        "language_gates": language_gates,
+        "all_language_gates_passed": all(language_gates.values()),
+        "supplemental_figure_references": supplemental_figure_map(supplement, text),
+    }
+
+
 def angular_localization_bits(resultant: float) -> float:
     """Minimum angular localization relative to uniform, in bits.
 
@@ -474,7 +503,15 @@ def power_exponent(grouped: dict[int, list[dict[str, Any]]], name: str) -> float
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", default=str(OUT))
+    parser.add_argument(
+        "--manuscript-dir", type=Path,
+        help="Optional directory of separately supplied arXiv TeX sources.",
+    )
     args = parser.parse_args()
+    try:
+        manuscript = manuscript_status(args.manuscript_dir)
+    except FileNotFoundError as exc:
+        parser.error(str(exc))
     output_dir = Path(args.output_dir)
     checks: list[dict[str, Any]] = []
 
@@ -738,22 +775,13 @@ def main() -> None:
         ORDER_FRACTION_N144, RELAXED_EXCHANGE, ORDER_INDEPENDENT,
         ORDER_INDEPENDENT_REPORT, *SIZE_PATHS.values(), *DYNAMICS_PATHS,
     ]
-    text = MAIN_TEX.read_text(encoding="utf-8")
-    language_gates = {
-        "no_permanent_memory_claim": "permanent memory" not in text.lower(),
-        "no_equilibrium_glass_claim": "we establish an equilibrium glass" not in text.lower(),
-        "constructed_graph_not_called_emergent": "grey neighbour network is an emergent cage" not in text.lower(),
-        "finite_window_metric_not_called_lifetime": "integral retention time" not in text.lower(),
-    }
     disorder_raw = validate_disorder_retention_raw(DISORDER_RETENTION_RAW)
     provenance = {
         "required_local_artifacts_present": all(path.exists() for path in required),
         "missing_required_local_artifacts": [str(path) for path in required if not path.exists()],
         "activated_memory_raw_jsonl_present": bool(activated_raw),
         "activated_memory_raw_jsonl": [str(path) for path in activated_raw],
-        "language_gates": language_gates,
-        "all_language_gates_passed": all(language_gates.values()),
-        "supplemental_figure_references": supplemental_figure_map(SUPPLEMENT_TEX, text),
+        **manuscript,
         "disorder_retention_raw": disorder_raw,
         "disorder_retention_raw_n1024_available": disorder_raw["complete"],
         "disorder_retention_provenance_note": disorder.get("provenance", {}).get("description"),
@@ -765,8 +793,8 @@ def main() -> None:
             "raw_reproduces_derived_report": False,
             "reason": "raw activated_memory_scan.jsonl shards are absent on this host",
         }
-    # Fig. 4(c) is quoted in the Letter but was not recorded by earlier report
-    # versions. Check it whenever the extended report is available.
+    # Window statistics now appear in the Supplement; retain the numerical
+    # contract with the earlier extended figure reports.
     windows = activated.get("window_statistics", {}).get("longest_window")
     if windows:
         provenance["activated_memory_window_statistics"] = {
@@ -777,7 +805,7 @@ def main() -> None:
     else:
         provenance["activated_memory_window_statistics"] = {
             "recorded_for_all_lambdas": False,
-            "reason": "report predates the panel (c) window statistics; rebuild Fig. 4 to record them",
+            "reason": "report predates the window statistics; rebuild Fig. 4 to record them",
         }
 
     validation_manifest_path = SUBMISSION_VALIDATIONS / "validation_manifest.json"
@@ -844,9 +872,10 @@ def main() -> None:
         f"- Activated-memory raw JSONL present locally: `{provenance['activated_memory_raw_jsonl_present']}`",
         f"- Raw activated-memory shards reproduce the derived report: "
         f"`{provenance['activated_memory_reproduction']['raw_reproduces_derived_report']}`",
-        f"- Fig. 4(c) window statistics recorded: "
+        f"- Supplementary window statistics recorded: "
         f"`{provenance['activated_memory_window_statistics']['recorded_for_all_lambdas']}`",
         f"- Language gates passed: `{provenance['all_language_gates_passed']}`",
+        f"- External manuscript checks: `{provenance['manuscript_check_status']}`",
         "",
         "The numerical contract covers the publication-scale regime map, matched controls, five-size scaling, long dynamics, spatial correlations, equilibrium-replica discriminant, coupling-dependent endpoint overlap, the disorder-retention maximum, the matched loop intervention, and both common- and independent-noise AB/BA release readouts.",
         "",
@@ -872,6 +901,7 @@ def main() -> None:
         json.dumps(
             {
                 "output_dir": str(output_dir),
+                "manuscript_check_status": provenance["manuscript_check_status"],
                 "quantitative_checks": f"{passed}/{len(checks)}",
                 "all_checks_passed": report["all_checks_passed"],
                 "activated_raw_present": provenance["activated_memory_raw_jsonl_present"],

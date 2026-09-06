@@ -9,6 +9,11 @@ import os
 import shutil
 from pathlib import Path
 
+try:
+    from .upload_rotating_colloids_zenodo import verify_release
+except ImportError:
+    from upload_rotating_colloids_zenodo import verify_release
+
 
 DATA_ROOT = Path("discoveries/theory_experiment_interface/rotating_colloids_hyperion")
 DIRECTORIES = {
@@ -17,6 +22,13 @@ DIRECTORIES = {
     "raw/equilibrium_replica_discriminant": DATA_ROOT / "rotating_colloids_spin_glass_prl_gpu",
     "raw/activated_memory": DATA_ROOT / "rotating_colloids_activated_memory_prl_gpu",
     "raw/disorder_retention": DATA_ROOT / "rotating_colloids_disorder_retention_protocols",
+    "raw/order_of_operations/N144": DATA_ROOT / "rotating_colloids_operation_order_memory_n12",
+    "raw/order_of_operations/N256": DATA_ROOT / "rotating_colloids_operation_order_memory_n16",
+    "raw/order_of_operations/support_fraction_N144": DATA_ROOT
+    / "rotating_colloids_operation_order_memory_fraction_n12",
+    "raw/submission_validations": DATA_ROOT / "rotating_colloids_submission_validations",
+    "raw/holonomy_matched_release_crossover": DATA_ROOT / "holonomy_matched_release_crossover",
+    "raw/matched_preparation_N1024": DATA_ROOT / "rotating_colloids_matched_preparation_prl",
     "raw/grooved/uniform_scan_n16": DATA_ROOT / "rotating_colloids_grooved_uniform_scan_n16",
     "raw/grooved/uniform_memory_zoom_n16": DATA_ROOT / "rotating_colloids_grooved_uniform_memory_zoom_n16",
     "raw/grooved/uniform_finite_size": DATA_ROOT / "rotating_colloids_grooved_uniform_finite_size",
@@ -28,6 +40,9 @@ DIRECTORIES = {
     "derived/quantitative_claim_audit": DATA_ROOT / "rotating_colloids_capillary_pair_prl_claim_audit",
 }
 FILES = {
+    "derived/figures/matched_preparation_report.json": (
+        Path("tex/rotating_colloids/capillary_prl_figures/figS_matched_preparation.json")
+    ),
     "derived/figures/capillary_regime_report.json": (
         Path("tex/rotating_colloids/capillary_prl_figures/capillary_regime_report.json")
     ),
@@ -52,6 +67,9 @@ FILES = {
     "derived/holonomy/holonomy_memory_intervention_beta1_replication.json": (
         DATA_ROOT / "holonomy_memory_intervention/holonomy_memory_intervention_beta1_replication.json"
     ),
+    "derived/order_of_operations/relaxed_exchange_order_minimal.json": (
+        DATA_ROOT / "relaxed_exchange_order_minimal.json"
+    ),
 }
 
 
@@ -73,6 +91,34 @@ def install(source: Path, destination: Path, mode: str, force: bool) -> None:
         destination.symlink_to(os.path.relpath(source, destination.parent), target_is_directory=source.is_dir())
 
 
+def install_archive(archive: Path, repository: Path, mode: str, force: bool) -> list[str]:
+    archive, repository = archive.resolve(), repository.resolve()
+    verify_release(archive)
+    mappings = {**DIRECTORIES, **FILES}
+    missing = [name for name in DIRECTORIES if not (archive / name).is_dir()]
+    missing.extend(name for name in FILES if not (archive / name).is_file())
+    if missing:
+        raise FileNotFoundError("archive sources are missing: " + ", ".join(missing))
+    destinations = [repository / name for name in mappings.values()]
+    # Check the complete plan before creating links or replacing user-selected data.
+    conflicts = [str(path) for path in destinations if path.exists() or path.is_symlink()]
+    if conflicts and not force:
+        raise FileExistsError("destinations exist: " + ", ".join(conflicts))
+    for source_name, destination_name in mappings.items():
+        source = archive / source_name
+        destination = repository / destination_name
+        if not destination.is_symlink() and source.resolve().is_relative_to(destination.resolve()):
+            raise ValueError(f"installation would replace its own archive source: {source}")
+    installed = []
+    for source_name, destination_name in mappings.items():
+        destination = repository / destination_name
+        # Analysis rewrites derived reports; keep the deposited originals intact.
+        effective_mode = "copy" if source_name.startswith("derived/") else mode
+        install(archive / source_name, destination, effective_mode, force)
+        installed.append(str(destination.relative_to(repository)))
+    return installed
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("archive", type=Path, help="Extracted Zenodo data directory")
@@ -81,26 +127,10 @@ def main() -> None:
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
-    archive = args.archive.resolve()
-    repository = args.repo_root.resolve()
-    manifest_path = archive / "manifest.json"
-    if not manifest_path.exists():
-        raise SystemExit(f"missing archive manifest: {manifest_path}")
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if not manifest.get("complete"):
-        raise SystemExit(
-            "archive manifest is incomplete: "
-            + ", ".join(manifest.get("missing_required_sources", []))
-        )
-
-    installed = []
-    for source_name, destination_name in {**DIRECTORIES, **FILES}.items():
-        source = archive / source_name
-        if not source.exists():
-            raise SystemExit(f"archive source is missing: {source}")
-        destination = repository / destination_name
-        install(source, destination, args.mode, args.force)
-        installed.append(str(destination.relative_to(repository)))
+    try:
+        installed = install_archive(args.archive, args.repo_root, args.mode, args.force)
+    except (OSError, ValueError) as exc:
+        raise SystemExit(str(exc)) from exc
     print(json.dumps({"mode": args.mode, "installed": installed}, indent=2))
 
 

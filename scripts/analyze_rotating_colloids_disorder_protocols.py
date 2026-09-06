@@ -60,20 +60,27 @@ def tail_mean(values, fraction: float) -> float:
     return float(array[-count:].mean())
 
 
-def summarize(run: dict[str, Any], fraction: float) -> dict[str, float]:
+def summarize(run: dict[str, Any], fraction: float, *, legacy_director_subtraction: bool = False) -> dict[str, float]:
     release_time = np.asarray(run["write_release"]["release_time"], dtype=float)
-    # Two replicas drawn from the same one-body angular distribution already
-    # overlap by S^2 through the common director. The connected part is what
-    # the director does not explain, and is the quantity the hidden-memory
-    # claim rests on. release_S is recorded on the same release trajectory as
-    # release_overlap, so the subtraction is matched for the written state.
     final_S = tail_mean(run["write_release"]["release_S"], fraction)
     write_end = tail_mean(run["write_release"]["release_overlap"], fraction)
     split_end = tail_mean(run["split_replica"]["overlap_mean"], fraction)
+    if legacy_director_subtraction:
+        connected_write, connected_split = write_end - final_S**2, split_end - final_S**2
+    else:
+        try:
+            connected_write = tail_mean(run["write_release"]["release_connected_overlap"], fraction)
+            connected_split = tail_mean(run["split_replica"]["overlap_connected_mean"], fraction)
+        except KeyError as exc:
+            raise ValueError(
+                "Exact connected overlap requires the target and replica complex directors. "
+                "This legacy archive cannot reconstruct it from Q and S alone. "
+                "Use --legacy-director-subtraction only to reproduce the explicitly labelled "
+                "Q - mean(S)^2 diagnostic, or rerun with the updated simulator."
+            ) from exc
     return {
-        "connected_write_end": write_end - final_S**2,
-        # The split protocol does not record S; final_S is used as a proxy.
-        "connected_split_end": split_end - final_S**2,
+        "connected_write_end": connected_write,
+        "connected_split_end": connected_split,
         "split_end": split_end,
         "split_time": float(run["split_replica"]["time"][-1]),
         "write_on": float(run["write_release"]["write_overlap"][-1]),
@@ -109,6 +116,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
+    parser.add_argument("--legacy-director-subtraction", action="store_true",
+                        help="Reproduce the archived Q-mean(S)^2 diagnostic, not an exact connected overlap.")
     parser.add_argument(
         "--tail-fraction",
         type=float,
@@ -145,7 +154,8 @@ def main() -> None:
         if args.node_count is not None and size != args.node_count:
             continue
         amplitude = float(graph["disorder"])
-        groups.setdefault(amplitude, []).append(summarize(run, args.tail_fraction))
+        groups.setdefault(amplitude, []).append(summarize(
+            run, args.tail_fraction, legacy_director_subtraction=args.legacy_director_subtraction))
         seeds.setdefault(amplitude, []).append(int(graph["seed"]))
         node_counts.setdefault(amplitude, []).append(size)
 
@@ -156,8 +166,7 @@ def main() -> None:
     present = sorted({size for values in node_counts.values() for size in values})
     if len(present) > 1:
         raise SystemExit(
-            f"input mixes rotor counts {present}; the connected overlap subtracts a "
-            "size-dependent S^2, so the runs are not comparable.\n"
+            f"input mixes rotor counts {present}; compare disorder at fixed system size.\n"
             f"Re-run with --node-count {present[0]} to select one."
         )
 
@@ -183,6 +192,11 @@ def main() -> None:
             ("angular_localization_bits_per_rotor", "write_end"),
             ("connected_angular_localization_bits_per_rotor", "connected_write_end"),
         ):
+            # A connected covariance is not an angular-error resultant. Keep the
+            # old transform solely for explicit archival reproduction.
+            if field == "connected_write_end" and not args.legacy_director_subtraction:
+                entry[label] = {"mean": None, "graph_sd": None, "sem": None}
+                continue
             bits = [angular_localization_bits(max(item[field], 0.0)) for item in block]
             mean, sd = mean_sd(bits)
             entry[label] = {"mean": mean, "graph_sd": sd, "sem": sd / math.sqrt(len(block)) if len(block) > 1 else float("nan")}
@@ -214,6 +228,10 @@ def main() -> None:
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     report = {
+        "overlap_definition": ("legacy_Q_minus_mean_S_squared_NOT_connected"
+                               if args.legacy_director_subtraction else "Re(mean(z*conj(target))-mean(z)*conj(mean(target)))"),
+        "legacy_connected_keys": "Names retained for schema compatibility; consult overlap_definition.",
+        "connected_localization_is_information": False,
         "tail_fraction": args.tail_fraction,
         "amplitudes": amplitudes,
         "table": table,
@@ -238,7 +256,7 @@ def main() -> None:
             "connected_angular_localization_gain": (
                 high["connected_angular_localization_bits_per_rotor"]["mean"]
                 / max(low["connected_angular_localization_bits_per_rotor"]["mean"], 1e-12)
-            ),
+            ) if args.legacy_director_subtraction else None,
         }
     (args.output_dir / "disorder_protocol_report.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"
@@ -246,14 +264,18 @@ def main() -> None:
 
     def cell(entry: dict[str, Any], field: str) -> str:
         block = entry[field]
+        if block["mean"] is None:
+            return "not applicable"
         if math.isnan(block["graph_sd"]):
             return f"{block['mean']:.4f}"
         return f"{block['mean']:.4f}+-{block['graph_sd']:.4f}"
 
+    overlap_name = "Q-mean(S)^2" if args.legacy_director_subtraction else "Q_connected"
+    print("Overlap definition:", report["overlap_definition"])
     header = (
         f"{'sigma/a':>8} {'n':>2} {'S_end':>16} {'Q_write':>16} {'Q-S^2':>16} "
         f"{'Qs-S^2':>16} {'loc. bits conn':>16}"
-    )
+    ).replace("Q-S^2", overlap_name).replace("Qs-S^2", "split diagnostic")
     print(header)
     print("-" * len(header))
     for entry in table:
@@ -278,7 +300,7 @@ def main() -> None:
         field = "connected_write_end"
         peak = max(comparable, key=lambda item: item[field]["mean"])
         print(
-            f"  connected written overlap peaks at sigma/a = {peak['disorder']:g}, "
+            f"  largest sampled {overlap_name} at sigma/a = {peak['disorder']:g}, "
             f"{peak[field]['mean']:.4f} +- {standard_error(peak[field], peak['graphs']):.4f} (SEM)"
         )
         # Compare every pair, not just the endpoints: a series with an interior
@@ -310,16 +332,18 @@ def main() -> None:
     ]
     matched = [(amplitude, values) for amplitude, values in matched if values]
     if len(matched) >= 2:
-        print(f"  Restricted to graphs with S < {args.matched_s:g} (rules out a trend that merely tracks S):")
+        print(f"  Restricted to graphs with S < {args.matched_s:g}:")
         for amplitude, values in matched:
             print(
                 f"    sigma/a = {amplitude:<5g} n={len(values)}  "
-                f"connected written overlap {np.mean(values):.4f}"
+                f"{overlap_name} {np.mean(values):.4f}"
             )
     print()
     print(
-        "Q-S^2 subtracts the overlap two replicas share through a common director; "
-        "it is the hidden component."
+        "Legacy Q-mean(S)^2 is a diagnostic, not an exact connected covariance. "
+        "Its localization transform has no demonstrated information interpretation."
+        if args.legacy_director_subtraction else
+        "Exact connected overlaps subtract each replica's complex director product before averaging."
     )
     print(
         f"Values average the last {args.tail_fraction:.0%} of each trajectory; "

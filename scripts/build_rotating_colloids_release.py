@@ -41,10 +41,14 @@ DATASETS = {
     "raw/submission_validations": DATA_ROOT / "rotating_colloids_submission_validations",
     "raw/holonomy_matched_release_crossover": DATA_ROOT
     / "holonomy_matched_release_crossover",
+    "raw/matched_preparation_N1024": DATA_ROOT / "rotating_colloids_matched_preparation_prl",
     "derived/quantitative_claim_audit": DATA_ROOT / "rotating_colloids_capillary_pair_prl_claim_audit",
 }
 
 DERIVED_FILES = {
+    "derived/figures/matched_preparation_report.json": Path(
+        "tex/rotating_colloids/capillary_prl_figures/figS_matched_preparation.json"
+    ),
     "derived/figures/capillary_regime_report.json": Path(
         "tex/rotating_colloids/capillary_prl_figures/capillary_regime_report.json"
     ),
@@ -71,7 +75,8 @@ DERIVED_FILES = {
 }
 
 EXCLUDED_ARCHIVE_PATTERNS = (
-    "__pycache__", "*.pyc", ".DS_Store", "*.pdf", "*.png", "*.jpg", "*.jpeg", "*.svg"
+    "__pycache__", "*.pyc", ".DS_Store", ".run.lock", "*.partial*", "*.tmp",
+    "*.pdf", "*.png", "*.jpg", "*.jpeg", "*.svg", "*.tex", "*.py", "*.sh"
 )
 
 def sha256(path: Path) -> str:
@@ -80,6 +85,16 @@ def sha256(path: Path) -> str:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def release_file_entries(output: Path) -> list[dict[str, Any]]:
+    entries = []
+    for path in sorted(item for item in output.rglob("*") if item.is_file()):
+        if path.parent == output and path.name in {"manifest.json", "SHA256SUMS"}:
+            continue
+        entries.append({"path": str(path.relative_to(output)),
+                        "bytes": path.stat().st_size, "sha256": sha256(path)})
+    return entries
 
 
 def copy_source(source: Path, destination: Path) -> None:
@@ -242,7 +257,7 @@ File-level sizes and SHA-256 digests are recorded in `manifest.json` and
 
 Archive status: **{status}**
 
-This deposit contains the raw JSON/JSONL simulation records, run manifests,
+This deposit contains raw JSON/JSONL records and NPZ angular trajectories, run manifests,
 publication-scale controls, and derived numerical reports used for the
 manuscript *Geometry-Encoded Hidden Orientational Memory*. Source code is
 maintained separately at
@@ -265,6 +280,11 @@ https://github.com/vbaulin/{REPOSITORY_NAME}.
   tests supporting the convergence and sequence-decoding claims.
 - `raw/holonomy_matched_release_crossover/`: identical-start, paired-noise
   comparison of the original and loop-flattened networks across coupling.
+- `raw/matched_preparation_N1024/`: 20 graph/disorder/target cases, each with
+  five release conditions and 48 thermal replicas. Three conditions start
+  from identical written angles; two controls are written separately. Every
+  field-free release lasts `D_r t = 625`. Targets, angular trajectories,
+  observables, and random-number checkpoints are preserved.
 - `derived/`: figure summaries, loop-intervention reports, and the exact
   numerical audit.
 - `manifest.json` and `SHA256SUMS`: file-level provenance and integrity checks.
@@ -318,6 +338,31 @@ def build_dictionary() -> str:
 Exact command-line parameters, sample counts, time steps, and cutoffs are
 stored in each `run_manifest.json` or run summary. The manuscript and
 Supplement define all reported observables mathematically.
+
+## Matched-preparation arrays
+
+Each case under `raw/matched_preparation_N1024/graphs_*/` contains:
+
+- `manifest.json`: complete simulation settings, ordered release conditions,
+  and SHA-256 identifiers of the simulation and torque implementations.
+- `preparation.npz`: target and unrelated-target angles, identical initial
+  configurations for the three matched conditions, positions, bonds and weights.
+- `target_relaxation.npz`, `write.npz`, `release.npz`: sampled angles, reduced
+  time, exact terminal angles and random-number state. The release `theta`
+  array is ordered as time, condition, replica, particle; angles are radians.
+- `observables.npz`: time, condition, replica arrays. `Q_connected` is
+  `Re(mean(z*conj(z_target)) - mean(z)*conj(mean(z_target)))`, with
+  `z=exp(2i*theta)`. It does not substitute `S^2` for the director product.
+  `Q_rotation_aligned` is the modulus of the unconnected complex overlap.
+- `spatial_final.npz`: connected all-pair spatial correlations for the
+  physical condition, stored per replica with radial bins and pair counts.
+- `summary.json`: endpoint statistics and individual replica values.
+
+The root `matched_preparation_report.json` averages thermal replicas within
+each graph, then reports the mean and SEM across five graphs. Quarter-turn
+targets are symmetry partners of the relaxed targets, not independent target
+families. The comparison changes interaction form and does not separately
+match target energy, torque or local curvature.
 """
 
 
@@ -351,6 +396,16 @@ def main() -> None:
             "disorder-retention protocol trajectories: "
             + json.dumps(disorder_validation["missing_cells"], sort_keys=True)
         )
+    matched = root / DATASETS["raw/matched_preparation_N1024"]
+    if matched.is_dir():
+        try:
+            from plot_rotating_colloids_matched_preparation import load_cases
+        except ImportError:
+            from scripts.plot_rotating_colloids_matched_preparation import load_cases
+        try:
+            load_cases(matched)
+        except (ValueError, KeyError, OSError, AssertionError) as exc:
+            missing.append("matched-preparation publication sources: " + str(exc))
     if missing and not args.allow_incomplete:
         raise SystemExit("release is incomplete:\n" + "\n".join(f"- {item}" for item in missing))
 
@@ -408,7 +463,10 @@ def main() -> None:
         "description": (
             "Raw Brownian-rotor simulation records and derived numerical reports for a study of "
             "preparation-dependent orientational retention generated by short-range alignment and "
-            "bond-frame quadrupolar interactions on quenched disordered graphs."
+            "bond-frame quadrupolar interactions on quenched disordered graphs. "
+            "This version adds complete N=1024 matched-preparation angular trajectories: "
+            "20 graph/disorder/target cases, five release conditions, 48 thermal replicas per "
+            "condition and graph, and a field-free observation interval D_r t=625."
         ),
         "keywords": [
             "colloids",
@@ -428,17 +486,7 @@ def main() -> None:
     }
     (output / "zenodo_metadata.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
 
-    files = []
-    for path in sorted(item for item in output.rglob("*") if item.is_file()):
-        if path.name in {"manifest.json", "SHA256SUMS"}:
-            continue
-        files.append(
-            {
-                "path": str(path.relative_to(output)),
-                "bytes": path.stat().st_size,
-                "sha256": sha256(path),
-            }
-        )
+    files = release_file_entries(output)
     forbidden_media = [
         item["path"] for item in files
         if Path(item["path"]).suffix.lower() in {".pdf", ".png", ".jpg", ".jpeg", ".svg"}

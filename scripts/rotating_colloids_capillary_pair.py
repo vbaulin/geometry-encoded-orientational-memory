@@ -15,7 +15,7 @@ and write-release-read retention.
 All energies are measured in k_B T and time in D_r^-1.  Consequently the
 dimensionless overdamped dynamics is
 
-    d theta_i = -partial_(theta_i) U dt + sqrt(2 dt) dW_i.
+    d theta_i = -partial_(theta_i) U dt + sqrt(2) dW_i, E[dW_i^2] = dt.
 """
 
 from __future__ import annotations
@@ -426,15 +426,24 @@ def split_replica_protocol(
     )
     snap = np.asarray(split["snapshots"], dtype=float)
     overlap = []
+    connected = []
+    aligned = []
     for sample in snap:
         first = sample[0::2]
         second = sample[1::2]
         overlap.append(np.mean(np.cos(2.0 * (first - second)), axis=1))
+        za, zb = np.exp(2j * first), np.exp(2j * second)
+        q = np.mean(za * zb.conjugate(), axis=1)
+        connected.append((q - za.mean(axis=1) * zb.mean(axis=1).conjugate()).real)
+        aligned.append(np.abs(q))
     overlap_a = np.asarray(overlap)
     return {
         "time": np.asarray(split["metrics"]["time"], dtype=float).tolist(),
         "overlap_mean": overlap_a.mean(axis=1).tolist(),
         "overlap_std": overlap_a.std(axis=1).tolist(),
+        "overlap_connected_mean": np.asarray(connected).mean(axis=1).tolist(),
+        "overlap_rotation_aligned_mean": np.asarray(aligned).mean(axis=1).tolist(),
+        "parent_theta": parent.tolist(),
         "parents": int(parents),
     }
 
@@ -539,6 +548,11 @@ def write_release_protocol(
     release_snap = np.asarray(release["snapshots"], dtype=float)
     write_overlap = np.mean(np.cos(2.0 * (write_snap - target[None, None, :])), axis=(1, 2))
     release_overlap = np.mean(np.cos(2.0 * (release_snap - target[None, None, :])), axis=(1, 2))
+    z_release = np.exp(2j * release_snap)
+    z_target = np.exp(2j * target)
+    complex_q = np.mean(z_release * z_target.conjugate(), axis=2)
+    complex_m = z_release.mean(axis=2)
+    connected_q = complex_q - complex_m * z_target.mean().conjugate()
     write_time = np.asarray(write["metrics"]["time"], dtype=float)
     release_time = np.asarray(release["metrics"]["time"], dtype=float)
     offset = float(write_time[-1] + dt * stride) if write_time.size else 0.0
@@ -547,6 +561,13 @@ def write_release_protocol(
         "write_overlap": write_overlap.tolist(),
         "release_time": (release_time + offset).tolist(),
         "release_overlap": release_overlap.tolist(),
+        "release_connected_overlap": connected_q.real.mean(axis=1).tolist(),
+        "release_rotation_aligned_overlap": np.abs(complex_q).mean(axis=1).tolist(),
+        "release_director_real": complex_m.real.tolist(),
+        "release_director_imag": complex_m.imag.tolist(),
+        "target_theta": target.tolist(),
+        "target_source": "finite_time_relaxation_under_this_arm",
+        "release_initial_theta": np.asarray(write["final_theta"]).tolist(),
         "release_S": np.asarray(release["metrics"]["S"], dtype=float).mean(axis=1).tolist(),
         "release_G2": np.asarray(release["metrics"]["G2"], dtype=float).mean(axis=1).tolist(),
         "write_field": float(write_field),
